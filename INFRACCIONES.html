@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buscador de Infracciones de Tráfico - GAD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .infraction-item {
+      transition: all 0.3s ease;
+    }
+    .infraction-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .highlight {
+      background-color: #bbf7d0;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+    .keyword-highlight {
+      background-color: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+    .regulation-code {
+      font-weight: bold;
+      color: #1e40af;
+      font-size: 1.25rem; /* Aumentado para mayor visibilidad */
+    }
+    .article-info {
+      font-weight: bold;
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+    .article-part {
+      color: #dc2626;
+      font-weight: 800;
+    }
+    .section-part {
+      color: #059669;
+      font-weight: 800;
+    }
+    .option-part {
+      color: #7c3aed;
+      font-weight: 800;
+    }
+    .keywords-display {
+      color: #000; /* Fuente negra */
+      font-weight: normal; /* Sin negrita */
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-edit {
+      background-color: #3b82f6;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-delete {
+      background-color: #ef4444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-edit:hover {
+      background-color: #2563eb;
+    }
+    .btn-delete:hover {
+      background-color: #dc2626;
+    }
+    .suggestions-container {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: calc(100% - 32px);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .suggestion-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    .suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
+    .suggestion-regulation {
+      font-weight: bold;
+      color: #1e40af;
+      font-size: 0.9rem;
+    }
+    .suggestion-keywords {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .search-container {
+      position: relative;
+    }
+    .clear-button {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0 8px;
+      transition: color 0.2s ease;
+    }
+    .clear-button:hover {
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col pb-16">
+
+  <header class="bg-blue-600 w-full flex justify-center items-center py-2">
+    <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg">
+      <img
+        src="logogad.png"
+        alt="Logo GAD"
+        class="w-full h-full object-cover block"
+      >
+    </div>
+  </header>
+
+  <h1 class="text-black text-center mt-6 text-xl font-bold px-4">
+    CODIFICADO INFRACCIONES HABITUALES GAD
+  </h1>
+
+  <div class="w-11/12 max-w-md mx-auto mt-4 bg-white p-4 rounded-lg shadow-md">
+    <div class="search-container">
+      <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Introduce palabra clave para buscar..." 
+          class="flex-grow px-4 py-2 focus:outline-none"
+        >
+        <button id="clearButton" class="clear-button hidden">
+          <i class="fas fa-times-circle"></i>
+        </button>
+        <button id="searchButton" class="bg-blue-600 text-white px-4 py-2 hover:bg-blue-700 transition">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      <div id="suggestionsBox" class="suggestions-container hidden"></div>
+    </div>
+    
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por normativa:</label>
+      <select id="regulationFilter" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="todas">Todas las normativas</option>
+        <option value="Ley de Seguridad Vial">Ley de Seguridad Vial</option>
+        <option value="Reglamento General de Conductores">Reglamento General de Conductores</option>
+        <option value="Reglamento General de Vehículos">Reglamento General de Vehículos</option>
+        <option value="Reglamento General de Circulación">Reglamento General de Circulación</option>
+        <option value="Real Decreto 8/2004 del SOA">Real Decreto 8/2004 del SOA</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="searchResults" class="w-11/12 max-w-md mx-auto mt-4 bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-lg font-semibold mb-3">Listado de Infracciones</h2>
+    <div id="resultsContainer" class="space-y-3 max-h-96 overflow-y-auto">
+      <div class="loading-spinner"></div>
+      <p class="text-center text-gray-500 py-4">Cargando infracciones...</p>
+    </div>
+    <p id="noResults" class="hidden text-center text-gray-500 py-4">No se encontraron infracciones.</p>
+  </div>
+
+  <div class="mt-8 flex flex-col items-center space-y-4">
+    <button onclick="window.location.href='index.html'"
+            class="w-11/12 max-w-md p-4 bg-yellow-400 text-black font-bold rounded-lg shadow-md transition hover:bg-yellow-200">
+        MENÚ PRINCIPAL
+    </button>
+    
+    <button id="addInfractionBtn"
+            class="w-11/12 max-w-md p-4 bg-green-600 text-white font-bold rounded-lg shadow-md transition hover:bg-green-500">
+        <i class="fas fa-plus-circle mr-2"></i> INTRODUCIR NUEVA INFRACCIÓN
+    </button>
+  </div>
+
+  <div id="addInfractionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-md max-h-screen overflow-y-auto">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-blue-800">Nueva Infracción</h2>
+      </div>
+      
+      <form id="infractionForm" class="p-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Normativa *</label>
+          <select name="regulation" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione una normativa</option>
+            <option value="Ley de Seguridad Vial">Ley de Seguridad Vial</option>
+            <option value="Reglamento General de Conductores">Reglamento General de Conductores</option>
+            <option value="Reglamento General de Vehículos">Reglamento General de Vehículos</option>
+            <option value="Reglamento General de Circulación">Reglamento General de Circulación</option>
+            <option value="Real Decreto 8/2004 del SOA">Real Decreto 8/2004 del SOA</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Artículo *</label>
+          <input type="text" name="article" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apartado</label>
+          <input type="text" name="section" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Opción</label>
+          <input type="text" name="option" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 5A, 2B, etc.">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción de la infracción *</label>
+          <textarea name="description" required rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Importe total (€) *</label>
+          <input type="number" name="totalAmount" step="0.01" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Importe reducido (€)</label>
+          <input type="number" name="reducedAmount" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de infracción *</label>
+          <select name="type" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione un tipo</option>
+            <option value="leve">Leve</option>
+            <option value="grave">Grave</option>
+            <option value="muy grave">Muy grave</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Palabras clave (separadas por comas) *</label>
+          <input type="text" name="keywords" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ej: velocidad, stop, alcohol...">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Puntos</label>
+          <input type="number" name="puntos" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </form>
+      
+      <div class="p-4 border-t flex justify-end space-x-2">
+        <button id="cancelInfraction" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
+        <button id="saveInfraction" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editInfractionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-md max-h-screen overflow-y-auto">
+      <div class="p-4 border-b">
+        <h2 class="text-xl font-bold text-blue-800">Editar Infracción</h2>
+      </div>
+      
+      <form id="editInfractionForm" class="p-4 space-y-4">
+        <input type="hidden" id="editKey" name="key">
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Normativa *</label>
+          <select id="editRegulation" name="regulation" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione una normativa</option>
+            <option value="Ley de Seguridad Vial">Ley de Seguridad Vial</option>
+            <option value="Reglamento General de Conductores">Reglamento General de Conductores</option>
+            <option value="Reglamento General de Vehículos">Reglamento General de Vehículos</option>
+            <option value="Reglamento General de Circulación">Reglamento General de Circulación</option>
+            <option value="Real Decreto 8/2004 del SOA">Real Decreto 8/2004 del SOA</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Artículo *</label>
+          <input type="text" id="editArticle" name="article" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apartado</label>
+          <input type="text" id="editSection" name="section" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Opción</label>
+          <input type="text" id="editOption" name="option" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 5A, 2B, etc.">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción de la infracción *</label>
+          <textarea id="editDescription" name="description" required rows="3" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Importe total (€) *</label>
+          <input type="number" id="editTotalAmount" name="totalAmount" step="0.01" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Importe reducido (€)</label>
+          <input type="number" id="editReducedAmount" name="reducedAmount" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de infracción *</label>
+          <select id="editType" name="type" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Seleccione un tipo</option>
+            <option value="leve">Leve</option>
+            <option value="grave">Grave</option>
+            <option value="muy grave">Muy grave</option>
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Palabras clave (separadas por comas) *</label>
+          <input type="text" id="editKeywords" name="keywords" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ej: velocidad, stop, alcohol...">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Puntos</label>
+          <input type="number" id="editPuntos" name="puntos" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </form>
+      
+      <div class="p-4 border-t flex justify-end space-x-2">
+        <button id="cancelEditInfraction" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
+        <button id="updateInfraction" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Actualizar</button>
+      </div>
+    </div>
+  </div>
+
+ <footer class="mt-auto text-center py-6 bg-gray-200">
+    <hr class="border-t border-gray-400 w-11/12 max-w-md mx-auto mb-4">
+    <p class="font-bold">GRUPO DE ANÁLISIS DOCUMENTAL</p>
+    <p class="font-bold">POLICÍA LOCAL DE ALICANTE</p>
+    <p>&copy; GAD - Todos los derechos reservados</p>
+  </footer>
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+apiKey: "AIzaSyCY8V_P7m8lZUvGbMVlGaa-GVhbmyikmag",
+  authDomain: "gad-alicante-v4.firebaseapp.com",
+  databaseURL: "https://gad-alicante-v4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "gad-alicante-v4",
+  storageBucket: "gad-alicante-v4.firebasestorage.app",
+  messagingSenderId: "119727545224",
+  appId: "1:119727545224:web:36880c50d196c456cdb83d"
+};
+
+    // Inicializa Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const infraccionesRef = database.ref('infracciones');
+    
+    // Array para almacenar las infracciones
+    let infractions = [];
+    let allKeywordsByRegulation = {};
+
+    // Elementos DOM
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const clearButton = document.getElementById('clearButton');
+    const regulationFilter = document.getElementById('regulationFilter');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const noResults = document.getElementById('noResults');
+    const addInfractionBtn = document.getElementById('addInfractionBtn');
+    const addInfractionModal = document.getElementById('addInfractionModal');
+    const cancelInfraction = document.getElementById('cancelInfraction');
+    const saveInfraction = document.getElementById('saveInfraction');
+    const infractionForm = document.getElementById('infractionForm');
+    const editInfractionModal = document.getElementById('editInfractionModal');
+    const cancelEditInfraction = document.getElementById('cancelEditInfraction');
+    const updateInfraction = document.getElementById('updateInfraction');
+    const editInfractionForm = document.getElementById('editInfractionForm');
+    const suggestionsBox = document.getElementById('suggestionsBox');
+
+    // Mapeo de normativas para normalizar los nombres
+    const normalizeRegulationName = (name) => {
+      if (!name) return '';
+      
+      const lowerName = name.toLowerCase().trim();
+      
+      if (lowerName.includes('ley') && lowerName.includes('seguridad') && lowerName.includes('vial')) {
+        return 'Ley de Seguridad Vial';
+      }
+      
+      if ((lowerName.includes('reglamento') || lowerName.includes('rg')) && 
+          (lowerName.includes('conductores') || lowerName.includes('conductor'))) {
+        return 'Reglamento General de Conductores';
+      }
+      
+      if ((lowerName.includes('reglamento') || lowerName.includes('rg')) && 
+          (lowerName.includes('vehículos') || lowerName.includes('vehiculos') || lowerName.includes('vehículo'))) {
+        return 'Reglamento General de Vehículos';
+      }
+      
+      if ((lowerName.includes('reglamento') || lowerName.includes('rg')) && 
+          (lowerName.includes('circulación') || lowerName.includes('circulacion'))) {
+        return 'Reglamento General de Circulación';
+      }
+      
+      if (lowerName.includes('real decreto') || lowerName.includes('rd') && 
+          (lowerName.includes('8/2004') || lowerName.includes('soa') || 
+           lowerName.includes('seguro') || lowerName.includes('obligatorio'))) {
+        return 'Real Decreto 8/2004 del SOA';
+      }
+      
+      if (lowerName.includes('rdl') && lowerName.includes('6/2015')) return 'Ley de Seguridad Vial';
+      if (lowerName.includes('rd') && lowerName.includes('818/2009')) return 'Reglamento General de Conductores';
+      if (lowerName.includes('rd') && lowerName.includes('2822/1998')) return 'Reglamento General de Vehículos';
+      if (lowerName.includes('rd') && lowerName.includes('1428/2003')) return 'Reglamento General de Circulación';
+      if (lowerName.includes('rdl') && lowerName.includes('8/2004')) return 'Real Decreto 8/2004 del SOA';
+      
+      return name;
+    };
+
+    // Función para extraer números de un artículo para ordenamiento
+    function extractArticleNumber(article) {
+      if (!article) return 0;
+      
+      // Extraer números del artículo (puede ser "30", "105", "5A", etc.)
+      const matches = article.match(/\d+/);
+      return matches ? parseInt(matches[0]) : 0;
+    }
+
+    // Función para ordenar infracciones por artículo, apartado y opción
+    function sortInfractions(infractionsArray) {
+      return infractionsArray.sort((a, b) => {
+        // Primero, ordenar por el número del artículo
+        const aNum = extractArticleNumber(a.article);
+        const bNum = extractArticleNumber(b.article);
+        if (aNum !== bNum) {
+          return aNum - bNum;
+        }
+
+        // Si los artículos son iguales, ordenar por apartado
+        const aSection = a.section || '';
+        const bSection = b.section || '';
+        const sectionCompare = aSection.localeCompare(bSection);
+        if (sectionCompare !== 0) {
+          return sectionCompare;
+        }
+        
+        // Si los apartados son iguales, ordenar por la opción
+        const aOption = a.option || '';
+        const bOption = b.option || '';
+        
+        // Lógica de ordenación para la opción (números antes que letras)
+        const aOptionNum = parseInt(aOption.match(/\d+/)) || 0;
+        const bOptionNum = parseInt(bOption.match(/\d+/)) || 0;
+        
+        if (aOptionNum !== bOptionNum) {
+          return aOptionNum - bOptionNum;
+        }
+        
+        const aOptionLetter = aOption.match(/[a-zA-Z]/)?.[0] || '';
+        const bOptionLetter = bOption.match(/[a-zA-Z]/)?.[0] || '';
+        
+        return aOptionLetter.localeCompare(bOptionLetter);
+      });
+    }
+
+    // Cargar infracciones desde Firebase
+    function loadInfractionsFromFirebase() {
+      resultsContainer.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p class="text-center text-gray-500 py-4">Cargando infracciones...</p>
+      `;
+      noResults.classList.add('hidden');
+      
+      infraccionesRef.on('value', (snapshot) => {
+        infractions = [];
+        allKeywordsByRegulation = {};
+        
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          for (const key in data) {
+            const infraccion = data[key];
+            
+            // Normalizar el nombre de la normativa
+            const normalizedRegulation = normalizeRegulationName(infraccion.norma);
+            
+            // Adaptar la estructura de datos
+            const adaptedInfraction = {
+              key: key,
+              regulation: normalizedRegulation,
+              originalRegulation: infraccion.norma || '',
+              article: infraccion.articulo || '',
+              section: infraccion.apartado || '',
+              option: infraccion.opcion || '',
+              description: infraccion.textoInfraccion || '',
+              totalAmount: infraccion.importeTotal || 0,
+              reducedAmount: infraccion.importeReducido || null,
+              type: (infraccion.tipoFalta || '').toLowerCase(),
+              keywords: infraccion.keywords || '',
+              puntos: infraccion.puntos || 0
+            };
+            
+            infractions.push(adaptedInfraction);
+            
+            // Agrupar palabras clave por normativa para las sugerencias
+            if (infraccion.keywords) {
+              if (!allKeywordsByRegulation[normalizedRegulation]) {
+                allKeywordsByRegulation[normalizedRegulation] = new Set();
+              }
+              
+              // Añadir cada palabra clave individual al conjunto
+              infraccion.keywords.split(',').forEach(keyword => {
+                const trimmedKeyword = keyword.trim();
+                if (trimmedKeyword) {
+                  allKeywordsByRegulation[normalizedRegulation].add(trimmedKeyword);
+                }
+              });
+            }
+          }
+          
+          // Ordenar las infracciones después de cargarlas
+          infractions = sortInfractions(infractions);
+          
+          console.log('Infracciones cargadas y ordenadas:', infractions.length);
+          displayResults(infractions, '');
+        } else {
+          console.log('No hay infracciones en la base de datos');
+          resultsContainer.innerHTML = '';
+          noResults.textContent = 'No se encontraron infracciones.';
+          noResults.classList.remove('hidden');
+        }
+      }, (error) => {
+        console.error('Error al cargar infracciones:', error);
+        resultsContainer.innerHTML = '';
+        noResults.textContent = 'Error al cargar las infracciones. Intente nuevamente.';
+        noResults.classList.remove('hidden');
+      });
+    }
+    
+    // Función para convertir a "Sentence case" (primera letra mayúscula y después de cada punto)
+    function toSentenceCase(text) {
+      if (!text) {
+        return '';
+      }
+      let result = text.toLowerCase();
+      
+      // Capitalizar la primera letra
+      result = result.charAt(0).toUpperCase() + result.slice(1);
+      
+      // Capitalizar la primera letra después de cada punto y espacio
+      result = result.replace(/\. (\w)/g, (match, letter) => `. ${letter.toUpperCase()}`);
+      
+      return result;
+    }
+
+    // Función para normalizar texto (eliminar acentos)
+    function normalizeText(text) {
+      if (!text) return '';
+      return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    // Mostrar sugerencias de búsqueda
+    function showSuggestions() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const normalizedSearchTerm = normalizeText(searchTerm);
+      
+      // Limpiar sugerencias previas
+      suggestionsBox.innerHTML = '';
+      suggestionsBox.classList.add('hidden');
+      
+      // La lógica de la sugerencia se activa si el campo está vacío o si se está escribiendo
+      if (searchTerm.length === 0) {
+        // Mostrar todas las palabras clave agrupadas al hacer clic
+        let hasSuggestions = false;
+        
+        for (const [regulation, keywordsSet] of Object.entries(allKeywordsByRegulation)) {
+            const sortedKeywords = Array.from(keywordsSet).sort();
+            
+            if (sortedKeywords.length > 0) {
+              hasSuggestions = true;
+              
+              const regulationHeader = document.createElement('div');
+              regulationHeader.className = 'suggestion-regulation p-2 bg-gray-100';
+              regulationHeader.textContent = regulation;
+              suggestionsBox.appendChild(regulationHeader);
+              
+              sortedKeywords.forEach(keyword => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.textContent = keyword;
+                
+                suggestionItem.addEventListener('click', () => {
+                  searchInput.value = keyword;
+                  suggestionsBox.classList.add('hidden');
+                  searchInfractions();
+                });
+                
+                suggestionsBox.appendChild(suggestionItem);
+              });
+            }
+        }
+        
+        if (hasSuggestions) {
+          suggestionsBox.classList.remove('hidden');
+        }
+        
+        return;
+      }
+      
+      // Lógica para reemplazar sugerencias para 105 y 106
+      if (normalizedSearchTerm.includes('105') || normalizedSearchTerm.includes('106')) {
+        // COMENTARIO: Añade aquí tus palabras clave personalizadas para 105 y 106
+        const customKeywords = 'Alquiler, Vehículos, Mercancías, Autorización, Transporte, Susceptible, Retirada, V8, V16';
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'suggestion-item';
+        suggestionItem.innerHTML = `<span class="suggestion-regulation">Sugerencias personalizadas</span><br><span class="suggestion-keywords">Palabras clave: ${customKeywords}</span>`;
+        suggestionItem.onclick = () => {
+          searchInput.value = customKeywords.split(',')[0].trim();
+          suggestionsBox.classList.add('hidden');
+          searchInfractions();
+        };
+        suggestionsBox.appendChild(suggestionItem);
+        suggestionsBox.classList.remove('hidden');
+        return;
+      }
+      
+      let hasSuggestions = false;
+      
+      // Mostrar sugerencias agrupadas por normativa
+      for (const [regulation, keywordsSet] of Object.entries(allKeywordsByRegulation)) {
+        const matchingKeywords = Array.from(keywordsSet).filter(keyword => 
+          normalizeText(keyword.toLowerCase()).includes(normalizedSearchTerm)
+        ).sort();
+        
+        if (matchingKeywords.length > 0) {
+          hasSuggestions = true;
+          
+          const regulationHeader = document.createElement('div');
+          regulationHeader.className = 'suggestion-regulation p-2 bg-gray-100';
+          regulationHeader.textContent = regulation;
+          suggestionsBox.appendChild(regulationHeader);
+          
+          matchingKeywords.forEach(keyword => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.textContent = keyword;
+            
+            suggestionItem.addEventListener('click', () => {
+              searchInput.value = keyword;
+              suggestionsBox.classList.add('hidden');
+              searchInfractions();
+            });
+            
+            suggestionsBox.appendChild(suggestionItem);
+          });
+        }
+      }
+      
+      if (hasSuggestions) {
+        suggestionsBox.classList.remove('hidden');
+      }
+    }
+
+    // Función para resaltar texto en los resultados de manera insensible a acentos
+    function highlightText(text, searchTerm) {
+      if (!searchTerm || !text) return text;
+      
+      const normalizedSearchTerm = normalizeText(searchTerm);
+      const escapedTerm = normalizedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      let regexPattern = '';
+      for (const char of escapedTerm.toLowerCase()) {
+        switch (char) {
+          case 'a': regexPattern += '[aáàäâ]'; break;
+          case 'e': regexPattern += '[eéèëê]'; break;
+          case 'i': regexPattern += '[iíìïî]'; break;
+          case 'o': regexPattern += '[oóòöô]'; break;
+          case 'u': regexPattern += '[uúùüû]'; break;
+          case 'n': regexPattern += '[nñ]'; break;
+          case 'c': regexPattern += '[cç]'; break;
+          default: regexPattern += char;
+        }
+      }
+
+      const regex = new RegExp(`(${regexPattern})`, 'gi');
+      
+      return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    // Función para resaltar palabras clave
+    function highlightKeywords(text, searchTerm) {
+      if (!searchTerm || !text) return text;
+      
+      const escapedTerm = normalizeText(searchTerm).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedTerm})`, 'gi');
+      return text.replace(regex, '<span class="keyword-highlight">$1</span>');
+    }
+
+    // Función para formatear artículo, apartado y opción con colores
+    function formatArticleInfo(article, section, option, searchTerm) {
+      let html = '';
+      
+      if (article) {
+        html += `<span class="article-part">Art. ${highlightText(article, searchTerm)}</span>`;
+      }
+      
+      if (section) {
+        html += `, <span class="section-part">ap. ${highlightText(section, searchTerm)}</span>`;
+      }
+      
+      if (option) {
+        html += `, <span class="option-part">op. ${highlightText(option, searchTerm)}</span>`;
+      }
+      
+      return html;
+    }
+
+    // Función para buscar infracciones
+    function searchInfractions() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const normalizedSearchTerm = normalizeText(searchTerm);
+      const regulation = regulationFilter.value;
+      
+      let filteredInfractions = infractions;
+      
+      // Filtrar por normativa si no es "todas"
+      if (regulation !== 'todas') {
+        filteredInfractions = infractions.filter(infraction => 
+          infraction.regulation === regulation
+        );
+      }
+      
+      // Filtrar por término de búsqueda si existe
+      if (searchTerm !== '') {
+        filteredInfractions = filteredInfractions.filter(infraction => {
+          const searchFields = [
+            infraction.description || '',
+            infraction.keywords || '',
+            infraction.article || '',
+            infraction.regulation || '',
+            infraction.originalRegulation || '',
+            infraction.section || '',
+            infraction.option || '',
+            infraction.type || ''
+          ];
+          
+          return searchFields.some(field => 
+            field && normalizeText(field.toLowerCase()).includes(normalizedSearchTerm)
+          );
+        });
+      }
+      
+      // Ordenar los resultados
+      filteredInfractions = sortInfractions(filteredInfractions);
+      
+      displayResults(filteredInfractions, searchTerm);
+      
+      // ELIMINADO: Esta línea se eliminó para que el texto permanezca en el campo de búsqueda.
+      // searchInput.value = '';
+    }
+
+    // Función para mostrar resultados
+    function displayResults(infractionsArray, searchTerm) {
+      resultsContainer.innerHTML = '';
+      
+      if (infractionsArray.length === 0) {
+        noResults.classList.remove('hidden');
+        return;
+      }
+      
+      noResults.classList.add('hidden');
+      
+      infractionsArray.forEach(infraction => {
+        const infractionElement = document.createElement('div');
+        infractionElement.className = 'infraction-item bg-blue-50 p-3 rounded-lg border border-blue-100';
+        
+        // Formatear artículo, apartado y opción con colores
+        const formattedArticleInfo = formatArticleInfo(
+          infraction.article, 
+          infraction.section, 
+          infraction.option, 
+          searchTerm
+        );
+        
+        // Convertir la descripción a "sentence case" antes de resaltarla
+        const sentenceCaseDescription = toSentenceCase(infraction.description);
+        const highlightedDescription = highlightText(sentenceCaseDescription, searchTerm);
+        const highlightedRegulation = highlightText(infraction.regulation, searchTerm);
+        const highlightedKeywords = highlightKeywords(infraction.keywords, searchTerm);
+        
+        infractionElement.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div class="w-full">
+              ${infraction.keywords ? `<div class="keywords-display">Palabras clave: ${highlightedKeywords}</div>` : ''}
+              <div class="regulation-code">${highlightedRegulation}</div>
+              <div class="article-info">${formattedArticleInfo}</div>
+              <p class="text-sm mt-2">${highlightedDescription}</p>
+              <div class="flex flex-wrap gap-2 mt-2">
+                <span class="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">${infraction.type.toUpperCase()}</span>
+                <span class="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">Total: ${infraction.totalAmount}€</span>
+                ${infraction.reducedAmount ? `<span class="text-sm px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">Reducido: ${infraction.reducedAmount}€</span>` : ''}
+                ${infraction.puntos ? `<span class="text-sm px-2 py-1 bg-red-100 text-red-800 rounded-full">Puntos: ${infraction.puntos}</span>` : ''}
+              </div>
+              <div class="action-buttons">
+                <button class="btn-edit" data-key="${infraction.key}">
+                  <i class="fas fa-edit"></i> Editar
+                </button>
+                <button class="btn-delete" data-key="${infraction.key}">
+                  <i class="fas fa-trash"></i> Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        resultsContainer.appendChild(infractionElement);
+      });
+      
+      // Añadir event listeners a los botones de editar y eliminar
+      document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const key = e.currentTarget.getAttribute('data-key');
+          editInfraction(key);
+        });
+      });
+      
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const key = e.currentTarget.getAttribute('data-key');
+          deleteInfraction(key);
+        });
+      });
+    }
+
+    // Función para editar una infracción
+    function editInfraction(key) {
+      const infraction = infractions.find(i => i.key === key);
+      if (!infraction) return;
+      
+      // Llenar el formulario de edición con los datos actuales
+      document.getElementById('editKey').value = infraction.key;
+      document.getElementById('editRegulation').value = infraction.regulation;
+      document.getElementById('editArticle').value = infraction.article;
+      document.getElementById('editSection').value = infraction.section;
+      document.getElementById('editOption').value = infraction.option;
+      document.getElementById('editDescription').value = infraction.description;
+      document.getElementById('editTotalAmount').value = infraction.totalAmount;
+      document.getElementById('editReducedAmount').value = infraction.reducedAmount || '';
+      document.getElementById('editType').value = infraction.type;
+      document.getElementById('editKeywords').value = infraction.keywords;
+      document.getElementById('editPuntos').value = infraction.puntos;
+      
+      // Mostrar el modal de edición
+      editInfractionModal.classList.remove('hidden');
+    }
+
+    // Función para eliminar una infracción
+    function deleteInfraction(key) {
+      if (confirm('¿Está seguro de que desea eliminar esta infracción?')) {
+        infraccionesRef.child(key).remove()
+          .then(() => {
+            alert('Infracción eliminada correctamente');
+            loadInfractionsFromFirebase(); // Recargar la lista
+          })
+          .catch((error) => {
+            alert('Error al eliminar la infracción: ' + error.message);
+            console.error("Error al eliminar infracción:", error);
+          });
+      }
+    }
+
+    // Función para guardar una nueva infracción en Firebase
+    function saveNewInfraction(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(infractionForm);
+      
+      // Preparar datos para Firebase
+      const newInfraction = {
+        norma: formData.get('regulation'),
+        articulo: formData.get('article'),
+        apartado: formData.get('section'),
+        opcion: formData.get('option'),
+        textoInfraccion: formData.get('description'),
+        importeTotal: parseFloat(formData.get('totalAmount')),
+        importeReducido: formData.get('reducedAmount') ? parseFloat(formData.get('reducedAmount')) : null,
+        tipoFalta: formData.get('type'),
+        keywords: formData.get('keywords'),
+        puntos: formData.get('puntos') ? parseInt(formData.get('puntos')) : 0
+      };
+      
+      // Guardar en Firebase
+      infraccionesRef.push(newInfraction)
+        .then(() => {
+          // Cerrar modal y resetear formulario
+          addInfractionModal.classList.add('hidden');
+          infractionForm.reset();
+          
+          // Mostrar mensaje de éxito
+          alert('Infracción añadida correctamente a Firebase');
+        })
+        .catch((error) => {
+          alert('Error al guardar la infracción: ' + error.message);
+          console.error("Error al guardar infracción:", error);
+        });
+    }
+
+    // Función para actualizar una infracción en Firebase
+    function updateInfractionInFirebase(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(editInfractionForm);
+      const key = document.getElementById('editKey').value;
+      
+      // Preparar datos para Firebase
+      const updatedInfraction = {
+        norma: formData.get('regulation'),
+        articulo: formData.get('article'),
+        apartado: formData.get('section'),
+        opcion: formData.get('option'),
+        textoInfraccion: formData.get('description'),
+        importeTotal: parseFloat(formData.get('totalAmount')),
+        importeReducido: formData.get('reducedAmount') ? parseFloat(formData.get('reducedAmount')) : null,
+        tipoFalta: formData.get('type'),
+        keywords: formData.get('keywords'),
+        puntos: formData.get('puntos') ? parseInt(formData.get('puntos')) : 0
+      };
+      
+      // Actualizar en Firebase
+      infraccionesRef.child(key).update(updatedInfraction)
+        .then(() => {
+          // Cerrar modal
+          editInfractionModal.classList.add('hidden');
+          
+          // Mostrar mensaje de éxito
+          alert('Infracción actualizada correctamente');
+          loadInfractionsFromFirebase(); // Recargar la lista
+        })
+        .catch((error) => {
+          alert('Error al actualizar la infracción: ' + error.message);
+          console.error("Error al actualizar infracción:", error);
+        });
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      loadInfractionsFromFirebase();
+    });
+    
+    searchButton.addEventListener('click', searchInfractions);
+    
+    searchInput.addEventListener('keyup', (e) => {
+      // Mostrar u ocultar el botón de limpieza
+      if (searchInput.value.length > 0) {
+        clearButton.classList.remove('hidden');
+      } else {
+        clearButton.classList.add('hidden');
+      }
+      
+      if (e.key === 'Enter') {
+        suggestionsBox.classList.add('hidden');
+        searchInfractions();
+      } else {
+        showSuggestions();
+        searchInfractions();
+      }
+    });
+
+    // Limpiar el campo de búsqueda cuando se hace clic en el botón de limpieza
+    clearButton.addEventListener('click', () => {
+      searchInput.value = '';
+      clearButton.classList.add('hidden');
+      searchInfractions();
+      searchInput.focus();
+    });
+    
+    // Ocultar sugerencias al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target) && !clearButton.contains(e.target)) {
+        suggestionsBox.classList.add('hidden');
+      }
+    });
+    
+    regulationFilter.addEventListener('change', searchInfractions);
+    
+    addInfractionBtn.addEventListener('click', () => {
+      addInfractionModal.classList.remove('hidden');
+    });
+    
+    cancelInfraction.addEventListener('click', () => {
+      addInfractionModal.classList.add('hidden');
+      infractionForm.reset();
+    });
+    
+    saveInfraction.addEventListener('click', saveNewInfraction);
+    
+    cancelEditInfraction.addEventListener('click', () => {
+      editInfractionModal.classList.add('hidden');
+    });
+    
+    updateInfraction.addEventListener('click', updateInfractionInFirebase);
+  </script>
+</body>
+</html>

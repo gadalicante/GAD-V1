@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Enlaces por País</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .flag-button-spain {
+            background: linear-gradient(to top, #c60b1e 0%, #c60b1e 33%, #ffc400 33%, #ffc400 66%, #c60b1e 66%, #c60b1e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .form-container {
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .form-container.active {
+            max-height: 500px; /* Ajusta este valor si el formulario es más grande */
+            transition: max-height 0.5s ease-in;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col pb-16">
+
+    <header class="bg-blue-600 w-full flex justify-center items-center py-2">
+        <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg">
+            <img src="logogad.png" alt="Logo GAD" class="w-full h-full object-cover block">
+        </div>
+    </header>
+
+    <h1 class="text-black text-center mt-6 text-xl font-bold px-4">
+        Buscador de Enlaces por País
+    </h1>
+    <div id="countrySearchContainer" class="w-11/12 max-w-md mx-auto mt-4">
+        <p class="text-center mt-2 px-4 mb-2">
+            Introduce el nombre de un país para encontrar sus enlaces.
+        </p>
+        
+        <select id="paises" onchange="buscar(this.value)"
+                class="block mx-auto mt-4 p-2 text-base w-full border border-gray-300 rounded-lg">
+            <option value="">-- Seleccionar país --</option>
+        </select>
+    </div>
+    
+    <div id="linkList" class="mt-6 p-4 bg-white shadow rounded-lg w-11/12 max-w-md mx-auto text-left" style="display:none;">
+        <h2 class="text-xl font-bold mb-2 text-center" id="resultsTitle"></h2>
+        <div id="linksContainer"></div>
+        <button 
+            onclick="volverAtras()" 
+            class="block mx-auto mt-4 w-full bg-red-500 text-white font-bold py-3 rounded-md hover:bg-red-600 transition"
+        >
+            ← Volver
+        </button>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mt-4 text-center w-11/12 max-w-md mx-auto">
+        <h3 class="text-lg font-semibold mb-4">Añadir nuevos enlaces</h3>
+        <button onclick="toggleFormulario()" id="toggleFormBtn"
+                class="w-full bg-green-600 text-white py-2 rounded-md shadow hover:bg-green-700">
+            Introduzca nuevo enlace
+        </button>
+        <div id="formularioEnlace" class="mt-4 form-container">
+            <div class="mb-4 text-left">
+                <label for="nuevoPais" class="block text-sm font-bold text-gray-700 mb-1">País:</label>
+                <input type="text" id="nuevoPais" placeholder="Ej: ALEMANIA" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4 text-left">
+                <label for="nuevaDescripcion" class="block text-sm font-bold text-gray-700 mb-1">Descripción:</label>
+                <input type="text" id="nuevaDescripcion" placeholder="Ej: Verificación de ITV" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4 text-left">
+                <label for="nuevaUrl" class="block text-sm font-bold text-gray-700 mb-1">URL:</label>
+                <input type="url" id="nuevaUrl" placeholder="Ej: https://ejemplo.com" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="guardarNuevoEnlace()" class="w-full bg-blue-600 text-white py-2 rounded-md shadow hover:bg-blue-700">
+                Guardar
+            </button>
+        </div>
+    </div>
+    
+    <div class="mt-8 flex justify-center">
+    <button onclick="window.location.href='index.html'"
+            class="w-11/12 max-w-md p-4 bg-yellow-400 text-black font-bold rounded-lg shadow-md transition hover:bg-yellow-200">
+        MENÚ PRINCIPAL
+    </button>
+</div>
+
+
+ <footer class="mt-auto text-center py-6 bg-gray-200">
+    <hr class="border-t border-gray-400 w-11/12 max-w-md mx-auto mb-4">
+    <p class="font-bold">GRUPO DE ANÁLISIS DOCUMENTAL</p>
+    <p class="font-bold">POLICÍA LOCAL DE ALICANTE</p>
+    <p>&copy; GAD - Todos los derechos reservados</p>
+  </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    
+    <script>
+    const firebaseConfig = {
+apiKey: "AIzaSyCY8V_P7m8lZUvGbMVlGaa-GVhbmyikmag",
+  authDomain: "gad-alicante-v4.firebaseapp.com",
+  databaseURL: "https://gad-alicante-v4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "gad-alicante-v4",
+  storageBucket: "gad-alicante-v4.firebasestorage.app",
+  messagingSenderId: "119727545224",
+  appId: "1:119727545224:web:36880c50d196c456cdb83d"
+};
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const enlacesRef = database.ref('enlaces_osint');
+
+        const paisesSelect = document.getElementById('paises');
+        const linkList = document.getElementById('linkList');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const linksContainer = document.getElementById('linksContainer');
+        const defaultLinkStatus = 'activo';
+
+        let enlacesData = {};
+
+        enlacesRef.on('value', (snapshot) => {
+            enlacesData = snapshot.val() || {};
+            const paises = Object.keys(enlacesData).sort();
+            
+            const paisSeleccionadoAnterior = paisesSelect.value;
+            
+            paisesSelect.innerHTML = '<option value="">-- Seleccionar país --</option>';
+            paises.forEach(pais => {
+                const option = document.createElement('option');
+                option.value = pais;
+                option.textContent = pais;
+                paisesSelect.appendChild(option);
+            });
+            
+            if (paisSeleccionadoAnterior) {
+                paisesSelect.value = paisSeleccionadoAnterior;
+            }
+
+            if (paisesSelect.value) {
+                buscar(paisesSelect.value, true); 
+            }
+        });
+
+        window.buscar = function(pais, refreshing = false) {
+            linksContainer.innerHTML = '';
+            if (!pais) {
+                linkList.style.display = 'none';
+                return;
+            }
+
+            linkList.style.display = 'block';
+            let results = enlacesData[pais];
+            let title = `Enlaces de ${pais}`;
+            resultsTitle.textContent = title;
+
+            if (results) {
+                
+                let resultsClone = { ...results };
+                let entries = Object.entries(resultsClone);
+                
+                // Lógica de reparación (comprobar si faltan 'orden' o si hay duplicados)
+                const needsMigration = entries.some(([, link]) => link.orden === undefined);
+                const ordenValues = entries.map(([, link]) => link.orden).filter(o => o !== undefined);
+                const hasDuplicates = ordenValues.length > 0 && new Set(ordenValues).size !== ordenValues.length;
+
+                if (needsMigration || hasDuplicates) {
+                    
+                    if(hasDuplicates) {
+                        console.warn(`REPARANDO DATOS: Se encontraron valores de 'orden' duplicados en ${pais}.`);
+                    } else {
+                        console.log(`Migrando datos de orden para ${pais}.`);
+                    }
+
+                    const updates = {};
+                    const stableSorted = Object.entries(resultsClone).sort(([, a], [, b]) => {
+                        const nombreA = a.nombre || a.descripcion || '';
+                        const nombreB = b.nombre || b.descripcion || '';
+                        return nombreA.localeCompare(nombreB);
+                    });
+
+                    stableSorted.forEach(([key], index) => {
+                        updates[`${pais}/${key}/orden`] = index;
+                    });
+
+                    enlacesRef.update(updates).then(() => {
+                        if (!refreshing) {
+                            alert("¡Datos de orden reparados! La lista se ha reordenado alfabéticamente una vez. Ya puedes reordenar manualmente.");
+                        }
+                    });
+                    
+                    linksContainer.innerHTML = `<p class="text-center text-gray-500">Reparando ordenación de datos, por favor espere...</p>`;
+                    return; 
+                }
+
+                // Si llegamos aquí, los datos están limpios
+                const sortedLinks = Object.entries(resultsClone).sort(([, a], [, b]) => a.orden - b.orden);
+
+                sortedLinks.forEach(([key, link], index) => {
+                    const linkItem = document.createElement('div');
+                    linkItem.classList.add('bg-white', 'p-4', 'shadow-md', 'rounded-lg', 'mb-4', 'relative');
+                    
+                    const linkAnchor = document.createElement('a');
+                    linkAnchor.href = link.url;
+                    linkAnchor.target = "_blank";
+                    linkAnchor.rel = "noreferrer";
+                    linkAnchor.classList.add('block', 'mb-2');
+                    
+                    const linkTitle = document.createElement('h3');
+                    linkTitle.classList.add('font-bold');
+                    linkTitle.textContent = link.nombre;
+                    
+                    const linkDescription = document.createElement('p');
+                    linkDescription.classList.add('text-sm', 'text-gray-600');
+                    linkDescription.textContent = link.descripcion;
+
+                    linkAnchor.appendChild(linkTitle);
+                    linkAnchor.appendChild(linkDescription);
+
+                    if (link.status === 'caido') {
+                        linkAnchor.classList.add('text-red-600');
+                    } else {
+                        linkAnchor.classList.add('text-blue-600');
+                    }
+                    
+                    linkItem.appendChild(linkAnchor);
+                    
+                    // --- INICIO DE LA MODIFICACIÓN DE LAYOUT ---
+
+                    // Contenedor principal de estado y botones (con borde superior y espacio)
+                    const statusContainer = document.createElement('div');
+                    statusContainer.classList.add('mt-2', 'pt-2', 'border-t', 'space-y-3'); // espacio vertical de 3
+
+                    // --- Fila 1: Estado y Número de Orden ---
+                    const statusRow = document.createElement('div');
+                    statusRow.classList.add('flex', 'flex-row', 'items-center', 'justify-center', 'space-x-4');
+                    
+                    const statusSpan = document.createElement('span');
+                    statusSpan.classList.add('font-bold', 'text-center', 'text-sm');
+                    
+                    // --- NUEVO: Letrero para el número de orden ---
+                    const ordenLabel = document.createElement('span');
+                    ordenLabel.classList.add('font-bold', 'text-gray-700', 'text-sm');
+                    ordenLabel.textContent = `Orden: ${link.orden}`; // Usamos link.orden
+                    
+                    statusRow.appendChild(statusSpan);
+                    statusRow.appendChild(ordenLabel);
+                    statusContainer.appendChild(statusRow); // Añadir Fila 1
+
+                    // --- Fila 2: Todos los botones ---
+                    const buttonRow = document.createElement('div');
+                    // flex-wrap: si no caben en una línea, saltan abajo
+                    // gap-2: espacio uniforme entre todos los botones
+                    buttonRow.classList.add('flex', 'flex-row', 'flex-wrap', 'items-center', 'justify-center', 'gap-2'); 
+
+                    // --- Clases de estilo comunes para TODOS los botones (mismo tamaño) ---
+                    const buttonClasses = ['font-bold', 'py-1', 'px-2', 'rounded-md', 'transition', 'text-sm'];
+
+                    // --- Botón Subir ---
+                    const subirButton = document.createElement('button');
+                    subirButton.innerHTML = '↑ Subir';
+                    subirButton.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600', ...buttonClasses);
+                    subirButton.onclick = () => moverEnlace(pais, sortedLinks, index, 'arriba');
+
+                    // --- Botón Bajar ---
+                    const bajarButton = document.createElement('button');
+                    bajarButton.innerHTML = '↓ Bajar';
+                    bajarButton.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600', ...buttonClasses);
+                    bajarButton.onclick = () => moverEnlace(pais, sortedLinks, index, 'abajo');
+
+                    // Deshabilitar botones en los extremos
+                    if (index === 0) {
+                        subirButton.disabled = true;
+                        subirButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    if (index === sortedLinks.length - 1) {
+                        bajarButton.disabled = true;
+                        bajarButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                    
+                    // --- Botones Corregir y Eliminar ---
+                    const corregirButton = document.createElement('button'); // Nombre genérico
+                    corregirButton.classList.add(...buttonClasses, 'text-white');
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.classList.add('bg-yellow-400', 'text-red-600', ...buttonClasses);
+                    deleteButton.textContent = 'ELIMINAR';
+                    deleteButton.onclick = () => eliminarEnlace(pais, key);
+
+                    // --- Añadir botones a la Fila 2 (en orden) ---
+                    buttonRow.appendChild(subirButton);
+                    buttonRow.appendChild(bajarButton);
+
+                    if (link.status === 'caido') {
+                        statusSpan.textContent = 'Estado: Link Inactivo';
+                        statusSpan.classList.add('text-red-600');
+                        
+                        // Botón "Activar Link" (verde)
+                        corregirButton.textContent = 'Activar Link';
+                        corregirButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                        corregirButton.onclick = () => toggleLinkStatus(pais, key, 'activo');
+                        
+                        // Botón "Corregir Enlace" (gris)
+                        const corregirEnlaceBtn = document.createElement('button');
+                        corregirEnlaceBtn.textContent = 'Corregir Enlace';
+                        corregirEnlaceBtn.classList.add('bg-gray-500', 'hover:bg-gray-600', 'text-white', ...buttonClasses);
+                        corregirEnlaceBtn.onclick = () => toggleEditForm(linkItem, true);
+
+                        buttonRow.appendChild(corregirButton);
+                        buttonRow.appendChild(corregirEnlaceBtn);
+                        buttonRow.appendChild(deleteButton);
+                    } else {
+                        statusSpan.textContent = 'Estado: Activo';
+                        statusSpan.classList.add('text-green-600');
+                        
+                        // Botón "CORREGIR" (rojo, para marcar como caído)
+                        corregirButton.textContent = 'CORREGIR';
+                        corregirButton.classList.add('bg-red-500', 'hover:bg-red-600');
+                        corregirButton.onclick = () => toggleLinkStatus(pais, key, 'caido');
+                        
+                        buttonRow.appendChild(corregirButton);
+                        buttonRow.appendChild(deleteButton);
+                    }
+                    
+                    statusContainer.appendChild(buttonRow); // Añadir Fila 2
+                    linkItem.appendChild(statusContainer); // Añadir el contenedor principal al item
+
+                    // --- FIN DE LA MODIFICACIÓN DE LAYOUT ---
+
+
+                    // Formulario de edición (sin cambios)
+                    const editFormContainer = document.createElement('div');
+                    editFormContainer.classList.add('mt-4', 'form-container');
+                    
+                    editFormContainer.innerHTML = `
+                        <div class="mb-2 text-left">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Corregir Nombre:</label>
+                            <input type="text" value="${link.nombre}" class="edit-nombre w-full border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-2 text-left">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Corregir URL:</label>
+                            <input type="url" value="${link.url}" class="edit-url w-full border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="mb-2 text-left">
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Corregir Descripción:</label>
+                            <input type="text" value="${link.descripcion}" class="edit-descripcion w-full border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button onclick="saveEditedLink('${pais}', '${key}')" class="w-full bg-blue-600 text-white py-2 rounded-md shadow hover:bg-blue-700">
+                            Guardar Corrección
+                        </button>
+                    `;
+                    linkItem.appendChild(editFormContainer);
+                    linksContainer.appendChild(linkItem);
+                });
+            } else {
+                linksContainer.innerHTML = `<p class="text-center text-gray-500">No se encontraron enlaces para la búsqueda.</p>`;
+            }
+        };
+
+        window.moverEnlace = function(pais, sortedLinks, index, direccion) {
+            
+            const itemActual = sortedLinks[index];
+            const keyActual = itemActual[0];
+            const ordenActual = itemActual[1].orden; 
+
+            const indexOtro = (direccion === 'arriba') ? index - 1 : index + 1;
+            
+            if (indexOtro < 0 || indexOtro >= sortedLinks.length) {
+                console.error("No se puede mover más allá de los límites.");
+                return;
+            }
+
+            const itemOtro = sortedLinks[indexOtro];
+            const keyOtro = itemOtro[0];
+            const ordenOtro = itemOtro[1].orden;
+            
+            console.log(`Intercambiando: [${keyActual}] (orden ${ordenActual}) con [${keyOtro}] (orden ${ordenOtro})`);
+
+            const updates = {};
+            updates[`${pais}/${keyActual}/orden`] = ordenOtro;
+            updates[`${pais}/${keyOtro}/orden`] = ordenActual;
+
+            enlacesRef.update(updates)
+                .then(() => {
+                    console.log("Orden actualizado en Firebase con éxito.");
+                })
+                .catch(error => {
+                    console.error("Error al mover el enlace:", error);
+                    alert("Hubo un error al cambiar el orden.");
+                });
+        };
+
+        window.toggleLinkStatus = function(pais, key, status) {
+            enlacesRef.child(pais).child(key).update({ status: status })
+                .then(() => {
+                    console.log(`Estado de link actualizado a ${status} en Firebase.`);
+                })
+                .catch(error => {
+                    console.error("Error al actualizar el estado:", error);
+                });
+        };
+
+        window.eliminarEnlace = function(pais, key) {
+            if (confirm("¿Estás seguro de que quieres eliminar este enlace? Esta acción es permanente.")) {
+                enlacesRef.child(pais).child(key).remove()
+                    .then(() => {
+                        alert("Enlace eliminado con éxito.");
+                        console.log("Enlace eliminado de Firebase.");
+                    })
+                    .catch(error => {
+                        console.error("Error al eliminar el enlace:", error);
+                        alert("Hubo un error al eliminar el enlace.");
+                    });
+            }
+        };
+
+        window.toggleEditForm = function(linkItem, show) {
+            const formContainer = linkItem.querySelector('.form-container');
+            if (show) {
+                formContainer.style.display = 'block';
+                formContainer.classList.add('active');
+            } else {
+                formContainer.style.display = 'none';
+                formContainer.classList.remove('active');
+            }
+        };
+        
+        window.saveEditedLink = function(pais, key) {
+            const linkElement = document.querySelector(`[onclick="saveEditedLink('${pais}', '${key}')"]`).closest('.bg-white');
+            const nuevoNombre = linkElement.querySelector('.edit-nombre').value.trim();
+            const nuevaUrl = linkElement.querySelector('.edit-url').value.trim();
+            const nuevaDescripcion = linkElement.querySelector('.edit-descripcion').value.trim();
+            
+            if (!nuevoNombre || !nuevaUrl || !nuevaDescripcion) {
+                alert("Por favor, rellena todos los campos del formulario de corrección.");
+                return;
+            }
+
+            const currentLink = enlacesData[pais] ? enlacesData[pais][key] : null;
+            const currentOrden = currentLink ? (currentLink.orden !== undefined ? currentLink.orden : 0) : 0; 
+
+            const updatedLink = {
+                nombre: nuevoNombre,
+                url: nuevaUrl,
+                descripcion: nuevaDescripcion,
+                status: defaultLinkStatus,
+                orden: currentOrden 
+            };
+            
+            enlacesRef.child(pais).child(key).update(updatedLink)
+                .then(() => {
+                    console.log("Enlace corregido y guardado con éxito.");
+                })
+                .catch(error => {
+                    console.error("Error al guardar la corrección:", error);
+                });
+        };
+
+        window.volverAtras = function() {
+            linkList.style.display = 'none';
+            paisesSelect.value = '';
+        };
+
+        window.toggleFormulario = function() {
+            const formulario = document.getElementById('formularioEnlace');
+            const toggleBtn = document.getElementById('toggleFormBtn');
+            formulario.classList.toggle('active');
+            if (formulario.classList.contains('active')) {
+                formulario.style.display = 'block';
+                toggleBtn.textContent = 'Ocultar formulario';
+            } else {
+                formulario.style.display = 'none';
+                toggleBtn.textContent = 'Introduzca nuevo enlace';
+            }
+        };
+
+        window.guardarNuevoEnlace = function() {
+            const pais = document.getElementById('nuevoPais').value.trim().toUpperCase();
+            const descripcion = document.getElementById('nuevaDescripcion').value.trim();
+            const url = document.getElementById('nuevaUrl').value.trim();
+
+            if (!pais || !descripcion || !url) {
+                alert("Por favor, rellena todos los campos.");
+                return;
+            }
+
+            const paisLinks = enlacesData[pais] || {};
+            const ordenValues = Object.values(paisLinks)
+                                    .map(link => link.orden)
+                                    .filter(orden => orden !== undefined);
+                                    
+            const maxOrden = ordenValues.length > 0 ? Math.max(...ordenValues) : -1;
+
+            const nuevoEnlace = {
+                nombre: descripcion, 
+                url: url,
+                descripcion: descripcion,
+                status: defaultLinkStatus,
+                orden: maxOrden + 1 
+            };
+
+            const paisRef = enlacesRef.child(pais);
+            
+            paisRef.push(nuevoEnlace)
+                .then(() => {
+                    alert("¡Enlace guardado con éxito!");
+                    document.getElementById('nuevoPais').value = '';
+                    document.getElementById('nuevaDescripcion').value = '';
+                    document.getElementById('nuevaUrl').value = '';
+                    toggleFormulario();
+                })
+                .catch(error => {
+                    console.error("Error al guardar el enlace:", error);
+                    alert("Hubo un error al guardar el enlace.");
+                });
+        };
+    </script>
+</body>
+</html>
