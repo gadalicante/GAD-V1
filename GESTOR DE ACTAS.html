@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAD MANAGER V16 - TOP 10</title>
+    <title>GAD MANAGER V16.3 - RESET COUNTERS</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -58,7 +58,13 @@
         /* HEADER EDITABLE */
         .editable-mode .editable-header:hover {
             background: rgba(255,255,255,0.05);
-            cursor: text;
+            cursor: move; 
+        }
+
+        /* Drag Visuals */
+        .dragging-over {
+            border-top: 2px solid #22d3ee !important; 
+            opacity: 0.8;
         }
 
         /* NEON TEXT */
@@ -92,7 +98,7 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
         const DB_TEMPLATES_PATH = 'actas'; 
-        const DB_SETTINGS_PATH = 'gad_settings_v15'; // Mantenemos compatibilidad con V15
+        const DB_SETTINGS_PATH = 'gad_settings_v15'; 
 
         // --- ICONS ---
         const Icons = {
@@ -120,20 +126,17 @@
             const [isLoading, setIsLoading] = React.useState(true);
             const [isEditMode, setIsEditMode] = React.useState(false); 
 
-            // -- ESTADO LAYOUT --
             const [layout, setLayout] = React.useState([]);
             const [catTitles, setCatTitles] = React.useState({});
-            
-            // Edición de título en linea
             const [editingTitle, setEditingTitle] = React.useState(null); 
             const [tempTitle, setTempTitle] = React.useState("");
+            
+            const [dragOverCardId, setDragOverCardId] = React.useState(null);
 
-            // Modal
             const [showModal, setShowModal] = React.useState(false);
             const [editItem, setEditItem] = React.useState(null); 
-            const [formData, setFormData] = React.useState({ name: '', keyword: '', file: '', category: 'gestion', icon: 'doc' });
+            const [formData, setFormData] = React.useState({ name: '', keyword: '', file: '', category: 'gestion', icon: 'doc', usageCount: 0 });
 
-            // CONFIG DEFECTO
             const defaultCats = {
                 tributaria: "INFRACCIONES TRIBUTARIAS",
                 sala: "SALA DE CONTROL 092",
@@ -148,7 +151,6 @@
                 { id: 'col4', sections: ['gestion'] }
             ];
 
-            // --- CARGA DE DATOS ---
             React.useEffect(() => {
                 const loadData = async () => {
                     const snap = await db.ref(DB_TEMPLATES_PATH).once('value');
@@ -157,7 +159,7 @@
                     
                     if (snap.exists()) {
                         let data = Object.values(snap.val());
-                        setTemplates(data.map(t => ({ ...t, category: t.category || 'gestion' })));
+                        setTemplates(data.map((t, idx) => ({ ...t, category: t.category || 'gestion' })));
                     }
                     
                     if (settingsSnap.exists()) {
@@ -188,13 +190,13 @@
                 e.dataTransfer.setData("type", "SECTION");
                 e.dataTransfer.setData("catKey", catKey);
                 e.dataTransfer.setData("fromColId", fromColId);
+                e.stopPropagation();
             };
 
             const handleColumnDrop = (e, targetColId) => {
                 if(!isEditMode) return;
                 if (e.dataTransfer.getData("type") === "SECTION") {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault(); e.stopPropagation();
                     const catKey = e.dataTransfer.getData("catKey");
                     const fromColId = e.dataTransfer.getData("fromColId");
                     if (fromColId === targetColId) return;
@@ -202,8 +204,10 @@
                     let newLayout = JSON.parse(JSON.stringify(layout));
                     const sourceCol = newLayout.find(c => c.id === fromColId);
                     sourceCol.sections = sourceCol.sections.filter(s => s !== catKey);
+                    
                     const targetCol = newLayout.find(c => c.id === targetColId);
                     if (!targetCol.sections.includes(catKey)) targetCol.sections.push(catKey);
+                    
                     newLayout = newLayout.filter(c => c.sections.length > 0);
                     saveSettings(newLayout);
                 }
@@ -219,6 +223,7 @@
                     let newLayout = JSON.parse(JSON.stringify(layout));
                     const sourceCol = newLayout.find(c => c.id === fromColId);
                     sourceCol.sections = sourceCol.sections.filter(s => s !== catKey);
+                    
                     newLayout.push({ id: 'col-' + Date.now(), sections: [catKey] });
                     newLayout = newLayout.filter(c => c.sections.length > 0);
                     saveSettings(newLayout);
@@ -230,20 +235,67 @@
                 e.stopPropagation();
                 e.dataTransfer.setData("type", "ITEM");
                 e.dataTransfer.setData("id", id);
+                e.dataTransfer.effectAllowed = "move";
             };
 
-            const handleItemDrop = (e, targetCategory) => {
+            const handleCardDragOver = (e, cardId) => {
+                if(!isEditMode) return;
+                e.preventDefault(); 
+                e.stopPropagation();
+                setDragOverCardId(cardId); 
+            };
+
+            const handleCardDragLeave = (e) => {
+            };
+
+            const handleCardDrop = (e, targetCardId, targetCategory) => {
+                if(!isEditMode) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setDragOverCardId(null);
+
+                if (e.dataTransfer.getData("type") === "ITEM") {
+                    const draggedId = parseInt(e.dataTransfer.getData("id"));
+                    if(draggedId === targetCardId) return;
+
+                    const newTemplates = [...templates];
+                    const draggedIndex = newTemplates.findIndex(t => t.id === draggedId);
+                    const targetIndex = newTemplates.findIndex(t => t.id === targetCardId);
+
+                    if(draggedIndex === -1 || targetIndex === -1) return;
+
+                    const [draggedItem] = newTemplates.splice(draggedIndex, 1);
+                    draggedItem.category = targetCategory;
+
+                    const newTargetIndex = newTemplates.findIndex(t => t.id === targetCardId);
+                    newTemplates.splice(newTargetIndex, 0, draggedItem);
+
+                    setTemplates(newTemplates);
+                    db.ref(DB_TEMPLATES_PATH).set(newTemplates);
+                }
+            };
+
+            const handleContainerDrop = (e, targetCategory) => {
                 if(!isEditMode) return;
                 if (e.dataTransfer.getData("type") === "ITEM") {
                     e.preventDefault();
                     e.stopPropagation();
+                    setDragOverCardId(null);
+
                     const id = parseInt(e.dataTransfer.getData("id"));
-                    const newT = templates.map(t => t.id === id ? { ...t, category: targetCategory } : t);
-                    setTemplates(newT);
-                    db.ref(DB_TEMPLATES_PATH).set(newT);
+                    let newTemplates = [...templates];
+                    const idx = newTemplates.findIndex(t => t.id === id);
+                    if(idx > -1) {
+                        const [item] = newTemplates.splice(idx, 1);
+                        item.category = targetCategory;
+                        newTemplates.push(item);
+                        setTemplates(newTemplates);
+                        db.ref(DB_TEMPLATES_PATH).set(newTemplates);
+                    }
                 }
             };
 
+            // --- RESTO FUNCIONES ---
             const startEditTitle = (key, currentVal) => {
                 if(!isEditMode) return;
                 setEditingTitle(key);
@@ -263,6 +315,15 @@
                 setTemplates(newT);
                 db.ref(DB_TEMPLATES_PATH).set(newT);
                 window.open(file, '_blank');
+            };
+
+            // --- NUEVA FUNCIÓN PARA RESETEAR CONTADORES ---
+            const handleResetCounters = () => {
+                if(confirm("⚠️ ¿Estás seguro de que quieres poner TODOS los contadores a 0?\n\nLa lista Top 10 se reiniciará.")) {
+                    const newT = templates.map(t => ({ ...t, usageCount: 0 }));
+                    setTemplates(newT);
+                    db.ref(DB_TEMPLATES_PATH).set(newT);
+                }
             };
 
             const openModal = (item = null) => {
@@ -288,7 +349,6 @@
 
             if (isLoading) return <div className="h-screen flex items-center justify-center text-cyan-500">Cargando Sistema V16...</div>;
 
-            // --- AQUÍ ESTÁ EL CAMBIO A TOP 10 ---
             const topUsed = [...templates].sort((a,b) => (b.usageCount || 0) - (a.usageCount || 0)).slice(0, 10);
 
             return (
@@ -315,7 +375,19 @@
                             <button onClick={() => setIsEditMode(!isEditMode)} className={`px-4 py-2 rounded-lg font-black text-xs flex items-center gap-2 shadow-lg border transition-all ${isEditMode ? 'bg-red-500/20 text-red-400 border-red-500 animate-pulse' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}`}>
                                 <span>{isEditMode ? '🔓 MODO EDICIÓN' : '🔒 BLOQUEADO'}</span>
                             </button>
-                            {isEditMode && <button onClick={() => openModal()} className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg flex items-center gap-2"><span>+</span> NUEVA</button>}
+                            
+                            {/* BOTONES DE EDICIÓN */}
+                            {isEditMode && (
+                                <div className="flex gap-2">
+                                    <button onClick={handleResetCounters} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg flex items-center gap-2">
+                                        <span>♻️</span> RESET 0
+                                    </button>
+                                    <button onClick={() => openModal()} className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-lg flex items-center gap-2">
+                                        <span>+</span> NUEVA
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
                                 <button onClick={() => setViewMode('dashboard')} className={`px-4 py-2 rounded font-bold text-xs flex items-center gap-2 ${viewMode==='dashboard'?'bg-cyan-600 text-white shadow':'text-slate-400'}`}>🗂️ CLASIFICACIÓN</button>
                                 <button onClick={() => setViewMode('list')} className={`px-4 py-2 rounded font-bold text-xs flex items-center gap-2 ${viewMode==='list'?'bg-cyan-600 text-white shadow':'text-slate-400'}`}>📝 LISTADO</button>
@@ -324,7 +396,6 @@
                     </header>
 
                     <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
-                        {/* SIDEBAR TOP 10 */}
                         <aside className="w-full md:w-64 bg-slate-900/80 border-r border-slate-800 flex flex-col shrink-0 z-10">
                             <div className="p-4 border-b border-slate-800 bg-slate-900"><h2 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><span className="text-yellow-500 text-base">★</span> Top 10 Frecuentes</h2></div>
                             <div className="p-3 space-y-2 overflow-y-auto flex-1">
@@ -340,7 +411,6 @@
                             </div>
                         </aside>
 
-                        {/* MAIN DASHBOARD */}
                         <main className="flex-1 bg-slate-900 relative overflow-hidden" 
                              onDragOver={(e) => isEditMode && e.preventDefault()} 
                              onDrop={handleNewColumnDrop}>
@@ -359,7 +429,11 @@
                                                         {col.sections.map(sectionKey => {
                                                             const items = templates.filter(t => t.category === sectionKey);
                                                             return (
-                                                                <div key={sectionKey} className="flex flex-col bg-slate-800/40 border border-slate-600 rounded-xl overflow-hidden shrink-0">
+                                                                <div key={sectionKey} 
+                                                                     onDragOver={(e) => isEditMode && e.preventDefault()}
+                                                                     onDrop={(e) => handleContainerDrop(e, sectionKey)}
+                                                                     className="flex flex-col bg-slate-800/40 border border-slate-600 rounded-xl overflow-hidden shrink-0">
+                                                                    
                                                                     <div 
                                                                         draggable={isEditMode}
                                                                         onDragStart={(e) => handleSectionDragStart(e, sectionKey, col.id)}
@@ -379,12 +453,16 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div className={`p-2 space-y-2 min-h-[60px] ${isEditMode ? 'bg-slate-800/30' : ''}`}
-                                                                         onDragOver={(e) => isEditMode && e.preventDefault()}
-                                                                         onDrop={(e) => handleItemDrop(e, sectionKey)}>
+                                                                    <div className={`p-2 space-y-2 min-h-[60px] ${isEditMode ? 'bg-slate-800/30' : ''}`}>
                                                                         {items.map(t => (
-                                                                            <div key={t.id} draggable={isEditMode} onDragStart={(e) => handleItemDragStart(e, t.id)}
-                                                                                 className={`${t.name.includes("IA") ? "acta-card-ia" : "acta-card"} p-3 rounded-lg relative group select-none`}>
+                                                                            <div key={t.id} 
+                                                                                 draggable={isEditMode} 
+                                                                                 onDragStart={(e) => handleItemDragStart(e, t.id)}
+                                                                                 onDragOver={(e) => handleCardDragOver(e, t.id)}
+                                                                                 onDragLeave={handleCardDragLeave}
+                                                                                 onDrop={(e) => handleCardDrop(e, t.id, sectionKey)}
+                                                                                 className={`${t.name.includes("IA") ? "acta-card-ia" : "acta-card"} p-3 rounded-lg relative group select-none ${dragOverCardId === t.id ? 'dragging-over' : ''}`}>
+                                                                                
                                                                                 {isEditMode && <button onClick={(e) => {e.stopPropagation(); openModal(t);}} className="absolute top-2 right-2 text-slate-400 hover:text-white bg-slate-900 p-1 rounded z-20">✏️</button>}
                                                                                 <div className="flex items-start gap-3" onClick={() => updateUsage(t.id, t.file)}>
                                                                                     <div className="p-2 rounded bg-slate-900 text-cyan-500 shrink-0"><SVG i={t.icon} c="w-4 h-4" /></div>
