@@ -600,6 +600,16 @@
 
 // Funciones Login / Logout
 const loginWithGoogle = () => {
+    // Llama directamente a la función nativa de Median para el login de Google
+    // Esta función NO usa el código inestable de Firebase JS, usa el motor nativo de Android.
+    if (window.median) {
+        median.login.google();
+    } else {
+        // Si no es la app, usa el código normal de Firebase
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithRedirect(provider);
+    }
+};
 
     // Esto se pone FUERA de la función (justo debajo), para que se ejecute al cargar la página
     // y detecte si el usuario acaba de volver de loguearse en Google.
