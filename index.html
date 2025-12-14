@@ -597,28 +597,22 @@
         }
     }
 
-
-// Funciones Login / Logout
-const loginWithGoogle = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider); // USAR REDIRECT
-};
-
-// ... y el listener getRedirectResult() fuera.
-
-    // Esto se pone FUERA de la función (justo debajo), para que se ejecute al cargar la página
-    // y detecte si el usuario acaba de volver de loguearse en Google.
-    auth.getRedirectResult()
-        .then((result) => {
-            if (result.user) {
-                console.log("Login exitoso, usuario recuperado:", result.user);
-                // Aquí el usuario ya está dentro, el listener onAuthStateChanged hará el resto
-            }
-        })
-        .catch((error) => {
-            console.error("Error en redirect:", error);
-            // alert("Error de acceso: " + error.message); // Opcional
+    // Funciones Login / Logout
+    const loginWithGoogle = () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(error => {
+            console.error(error);
+            alert("Error al iniciar sesión: " + error.message);
         });
+    };
+
+    const logout = () => { 
+        if(isEditMode) toggleEditModeUI(); 
+        auth.signOut().then(() => location.reload()); 
+    };
+    
+    document.getElementById('btn-logout').onclick = logout;
+    document.getElementById('btn-logout-user').onclick = logout;
 
     // --- ADMIN: CONTADORES & GESTIÓN ---
     function renderAdminCounters(users) {
