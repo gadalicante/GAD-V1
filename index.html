@@ -600,17 +600,10 @@
 
 // Funciones Login / Logout
 const loginWithGoogle = () => {
-    // LLAMADA NATIVA: Si estamos en la App, usamos el método nativo de Median.
-    if (window.median) {
-        median.login.google(); 
-    } else {
-        // Opción de respaldo: Si se abre en un navegador normal, usa el código de Firebase.
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithRedirect(provider);
-    }
-};
-
-// ... (todo tu código onAuthStateChanged, etc. se mantiene igual, ya que el login nativo lo activa)
+const loginWithGoogle = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithRedirect(provider); // ¡SOLO REDIRECT!
+}; (todo tu código onAuthStateChanged, etc. se mantiene igual, ya que el login nativo lo activa)
 
     // Esto se pone FUERA de la función (justo debajo), para que se ejecute al cargar la página
     // y detecte si el usuario acaba de volver de loguearse en Google.
