@@ -599,12 +599,7 @@
 
 
 // Funciones Login / Logout
-    const loginWithGoogle = () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        
-        // USAMOS REDIRECT: Esto evita que se abran ventanas flotantes que se cuelgan
-        auth.signInWithRedirect(provider);
-    };
+const loginWithGoogle = () => {
 
     // Esto se pone FUERA de la función (justo debajo), para que se ejecute al cargar la página
     // y detecte si el usuario acaba de volver de loguearse en Google.
