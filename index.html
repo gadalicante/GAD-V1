@@ -600,10 +600,11 @@
 
 // Funciones Login / Logout
 const loginWithGoogle = () => {
-const loginWithGoogle = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider); // ¡SOLO REDIRECT!
-}; (todo tu código onAuthStateChanged, etc. se mantiene igual, ya que el login nativo lo activa)
+    auth.signInWithRedirect(provider); // USAR REDIRECT
+};
+
+// ... y el listener getRedirectResult() fuera.
 
     // Esto se pone FUERA de la función (justo debajo), para que se ejecute al cargar la página
     // y detecte si el usuario acaba de volver de loguearse en Google.
