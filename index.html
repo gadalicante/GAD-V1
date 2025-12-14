@@ -598,21 +598,21 @@
     }
 
     // Funciones Login / Logout
+// Funciones Login / Logout
     const loginWithGoogle = () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(error => {
-            console.error(error);
-            alert("Error al iniciar sesión: " + error.message);
-        });
+        
+        // USAMOS POPUP (Esto funcionará porque en Median hemos ocultado que es una App)
+        auth.signInWithPopup(provider)
+            .then((result) => {
+                // Login correcto
+                console.log("Usuario conectado:", result.user);
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Error al iniciar sesión: " + error.message);
+            });
     };
-
-    const logout = () => { 
-        if(isEditMode) toggleEditModeUI(); 
-        auth.signOut().then(() => location.reload()); 
-    };
-    
-    document.getElementById('btn-logout').onclick = logout;
-    document.getElementById('btn-logout-user').onclick = logout;
 
     // --- ADMIN: CONTADORES & GESTIÓN ---
     function renderAdminCounters(users) {
