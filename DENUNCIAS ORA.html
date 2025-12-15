@@ -109,6 +109,7 @@
             margin-bottom: 5px;
             display: inline-flex;
             align-items: center;
+            justify-content: center; /* Centrar contenido en botones */
             gap: 5px;
             color: white;
             font-size: 0.9em;
@@ -202,20 +203,21 @@
         #drop-zone {
             border: 2px dashed #3498db;
             border-radius: 10px;
-            padding: 30px; /* Reducido */
+            padding: 30px; 
             text-align: center;
             color: #555;
             background-color: #f8f9fa;
             transition: background-color 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             margin-bottom: 20px;
+            margin-top: 20px; /* Separación extra arriba */
         }
         #drop-zone.dragover {
             background-color: #e0f2f7;
             border-color: #0288d1;
         }
         #drop-zone i {
-            font-size: 2.5em; /* Reducido */
+            font-size: 2.5em; 
             color: #3498db;
             margin-bottom: 10px;
         }
@@ -397,7 +399,8 @@
         .modern-alert p { margin-bottom: 0; }
         .modern-alert-error { background-color: #fef2f2; border-color: #f44336; }
          
-        /* --- CSS Leyenda --- */
+        /* --- CSS Leyenda (OCULTO POR DEFECTO) --- */
+        #help-toggle-container { margin: 15px 0 5px 0; }
         #legend-panel {
             background-color: #f8f9fa;
             border: 1px solid #e0e0e0;
@@ -407,7 +410,17 @@
             font-size: 0.95em;
             color: #444;
             line-height: 1.5;
+            display: none; /* Oculto inicialmente */
         }
+        #legend-panel.visible {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         #legend-panel h4 {
             margin-top: 0;
             margin-bottom: 10px;
@@ -485,12 +498,29 @@
              .title-panel-blue .header-logo-container { width: 60px; height: 60px; }
              .title-panel-blue h1 { font-size: 1.4em; gap: 5px; }
              .controls-container { flex-direction: column; align-items: stretch; }
-             .search-controls { grid-template-columns: 1fr; max-width: 100%; }
-             .filter-controls { justify-content: center; }
+             
+             /* Buscador arriba en móvil */
+             .search-controls { 
+                 grid-template-columns: 1fr; 
+                 max-width: 100%; 
+             }
+             
+             /* Botones en 2 columnas */
+             .filter-controls { 
+                 display: grid;
+                 grid-template-columns: 1fr 1fr;
+                 gap: 8px;
+                 width: 100%;
+             }
+             .filter-controls button {
+                 width: 100%;
+                 margin: 0;
+                 justify-content: center;
+             }
              
              /* Reduce el tamaño del Drop Zone en móviles */
-             #drop-zone { padding: 10px 15px; }
-             #drop-zone i { font-size: 1.5em; margin-bottom: 5px; }
+             #drop-zone { padding: 15px; }
+             #drop-zone i { font-size: 1.8em; margin-bottom: 5px; }
              #drop-zone p { margin: 0; font-size: 0.85em; }
          }
          @media (max-width: 480px) {
@@ -498,7 +528,7 @@
              .title-panel-blue .header-logo-container { width: 50px; height: 50px; }
              .title-panel-blue h1 { font-size: 1.2em; }
              .panel { padding: 15px; }
-             button { font-size: 0.85em; padding: 8px 12px; }
+             button { font-size: 0.85em; padding: 10px; }
              h2 { font-size: 1.3em; }
              h3 { font-size: 1.1em; }
          }
@@ -521,17 +551,9 @@
                     <img src="logogad.png" alt="Logo GAD">
                 </div>
             </div>
+            
             <div class="panel">
-                <h2><i class="fas fa-upload"></i> Cargar Archivo Excel</h2>
-                <div id="drop-zone">
-                    <i class="fas fa-file-excel"></i>
-                    <p>Arrastra archivo o haz clic. <strong>AÑADE</strong> datos a los existentes.</p>
-                </div>
-                <input type="file" id="file-input" accept=".xls, .xlsx" style="display: none;">
-                
-                <div id="status-message"></div>
-
-                <h2 style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;"><i class="fas fa-search"></i> Buscar Denuncias</h2>
+                <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px;"><i class="fas fa-search"></i> Gestión de Denuncias</h2>
                 
                 <div class="controls-container">
                     <div class="search-controls">
@@ -548,34 +570,57 @@
                     </div>
                     
                     <div class="filter-controls">
-                        <button id="sort-matricula-btn" class="btn-primary"><i class="fas fa-sort-alpha-down"></i> Matrícula (A-Z)</button>
-                        <button id="sort-fecha-btn" class="btn-info"><i class="fas fa-calendar-alt"></i> Fecha (Reciente)</button>
-                        <button id="sort-estado-btn" class="btn-secondary"><i class="fas fa-filter"></i> Mostrar por Estado</button>
                         <button id="show-all-btn" class="btn-warning"><i class="fas fa-list"></i> Mostrar Todos</button>
+                        <button id="sort-matricula-btn" class="btn-primary"><i class="fas fa-sort-alpha-down"></i> Matrícula</button>
+                        <button id="sort-fecha-btn" class="btn-info"><i class="fas fa-calendar-alt"></i> Fecha</button>
+                        <button id="sort-estado-btn" class="btn-secondary"><i class="fas fa-filter"></i> Por Estado</button>
                         <button id="find-duplicates-btn" class="btn-danger"><i class="fas fa-copy"></i> Reincidentes</button>
-                        <button id="crear-alerta-btn" class="btn-info"><i class="fas fa-exclamation-triangle"></i> Crear Alerta Eurocop</button>
+                        <button id="crear-alerta-btn" class="btn-info"><i class="fas fa-exclamation-triangle"></i> Crear Alerta</button>
                         <button id="delete-all-btn" class="btn-delete"><i class="fas fa-trash-alt"></i> Borrar Todo</button>
                     </div>
-                    </div>
-                
-                <h3 style="margin-top: 30px;">Resultados <span id="results-count">(0)</span></h3>
-                
-                <div id="legend-panel">
-                  <h4><i class="fas fa-info-circle"></i> Guía de Uso del Estado de Expediente</h4>
-                  <p>Este sistema está diseñado para revisar matrículas una a una. Sigue este orden:</p>
-                  <ul>
-                    <li><strong>1. Revisado:</strong> Haz clic en la columna "REVISADO" para marcar que has empezado a comprobar esta matrícula. Se pondrá <span class="legend-blue">AZUL</span>.</li>
-                    <li><strong>2. Asigna un Estado (Desplegable):</strong>
-                        <ul>
-                            <li><span class="legend-yellow">Sin datos en Eurocop</span>: El vehículo no existe en la base policial.</li>
-                            <li><span class="legend-red">Alerta grabada en Eurocop</span>: Ya tiene una alerta previa (reincidente).</li>
-                            <li><span class="legend-green">Notificar a sanciones</span>: Si vas a enviar los datos. Al pulsarlo, copiará los datos al portapapeles y se pondrá VERDE (<span class="legend-green">Notificado</span>).</li>
-                        </ul>
-                    </li>
-                    <li><strong>3. Auto-Guardado:</strong> Al seleccionar cualquiera de las 3 opciones anteriores, la fila <strong>desaparecerá</strong> de la lista de pendientes automáticamente para que sigas con la siguiente, pero tú seguirás en esta pantalla.</li>
-                  </ul>
                 </div>
 
+                <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px;">
+                    <h3 style="font-size: 1em; color: #555; margin-bottom: 5px;"><i class="fas fa-upload"></i> Cargar Datos</h3>
+                    <div id="drop-zone">
+                        <i class="fas fa-file-excel"></i>
+                        <p>Arrastra archivo o haz clic. <strong>AÑADE</strong> datos.</p>
+                    </div>
+                    <input type="file" id="file-input" accept=".xls, .xlsx" style="display: none;">
+                    <div id="status-message"></div>
+                </div>
+
+                <div id="help-toggle-container">
+                    <button id="toggle-help-btn" class="btn-secondary" style="width: 100%; background: #e0e0e0; color: #333; justify-content: space-between;">
+                        <span><i class="fas fa-question-circle"></i> Ver Ayuda / Leyenda</span>
+                        <i class="fas fa-chevron-down" id="help-icon"></i>
+                    </button>
+                    
+                    <div id="legend-panel">
+                      <h4><i class="fas fa-info-circle"></i> Guía de Uso del Estado de Expediente</h4>
+                      <p>Este sistema está diseñado para revisar matrículas una a una. Sigue este orden:</p>
+                      <ul>
+                        <li><strong>1. Revisado:</strong> Haz clic en la columna "REVISADO". 
+                            <ul>
+                                <li>Se activará la fecha en <span class="legend-blue">AZUL</span>.</li>
+                                <li>El expediente pasará automáticamente a <span class="legend-yellow">Sin datos en Eurocop</span>.</li>
+                            </ul>
+                        </li>
+                        <li><strong>2. Asigna un Estado (Desplegable):</strong>
+                            <ul>
+                                <li><span class="legend-yellow">Sin datos en Eurocop</span>: El vehículo no existe en la base policial.</li>
+                                <li><span class="legend-red">Alerta grabada en Eurocop</span>: Ya tiene una alerta previa (reincidente).</li>
+                                <li><span class="legend-green">Notificar a sanciones</span>: Al pulsarlo, copiará los datos en el portapapeles y se pondrá VERDE (<span class="legend-green">Notificado</span>).</li>
+                            </ul>
+                        </li>
+                        <li><strong>3. Auto-Ocultar:</strong> Al finalizar (asignar estado), la fila desaparece de la lista de pendientes.</li>
+                        <li><strong>4. Botón "Crear Alerta":</strong> Copia al portapapeles el texto predeterminado para insertar en "Vehículos de Interés" en Eurocop.</li>
+                      </ul>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Resultados <span id="results-count">(0)</span></h3>
+                
                 <div class="results-container">
                     <div id="results-header" class="results-header" style="display: none;">
                         </div>
@@ -722,6 +767,21 @@
         let currentNotificadoDataObject = null;
         let previousSelectValue = ""; 
         let currentFechaSortOrder = 'desc'; 
+        
+        // --- LOGICA TOGGLE AYUDA ---
+        document.getElementById('toggle-help-btn').addEventListener('click', () => {
+            const panel = document.getElementById('legend-panel');
+            const icon = document.getElementById('help-icon');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                panel.classList.remove('visible');
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                panel.style.display = 'block';
+                panel.classList.add('visible');
+                icon.className = 'fas fa-chevron-up';
+            }
+        });
 
         function showStatus(message, type = 'loading') {
             statusMessage.textContent = message;
@@ -868,10 +928,7 @@
                     const intermediateData = sanitizedJsonData.filter(row => Object.keys(row).length > 0);
                     
                     // --- FILTRADO AVANZADO DE MATRÍCULAS ---
-                    // Regla 1: 4 números + 3 letras (1234BBC)
                     const modernSpanishRegex = /^\d{4}[A-Z]{3}$/i; 
-                    // Regla 2: Provincia (1-2 letras) + 4 números + Letras Finales (1-2 letras) (M1234TZ, B5678V)
-                    // Las que SOLO tienen números al final (M1234) NO coinciden con esta regex, por lo tanto se quedan.
                     const provincialSuffixRegex = /^[A-Z]{1,2}\d{4}[A-Z]{1,2}$/i;
 
                     let spanishPlatesCount = 0;
@@ -1479,7 +1536,7 @@
         }
         
         function crearAlertaEurocop() {
-            const alertText = 'INMOVILIZAR A DISPOSICIÓN DEL GAD POR REINCIDENCIA EN INFRACCIONES Art 87.5 LSV (CAUCIÓN).  Este vehículo es de interés para el negociado de sanciones del Ayuntamiento de Alicante. Se trata de un vehículo reincidente en infracciones de estacionamiento ORA. Realizar incidencia en Eurocop con seguimiento al GAD para su tramitación."';
+            const alertText = 'INMOVILIZAR A DISPOSICIÓN DEL GAD POR REINCIDENCIA EN INFRACCIONES Art 87.5 LSV (CAUCIÓN).  Este vehículo es de interés para el negociado de sanciones del Ayuntamiento de Alicante. Se trata de un vehículo reincidente en infracciones de estacionamiento ORA. Realizar incidencia en Eurocop con seguimiento al GAD para su tramitación.';
             copyToClipboard(alertText)
                 .then(() => alert("¡Texto de Alerta copiado!"))
                 .catch(err => alert('Error al copiar el texto: ' + err));
@@ -1500,6 +1557,7 @@
                     if (sourceDataObject.notificado !== undefined) item.notificado = sourceDataObject.notificado;
                     if (sourceDataObject.eurocop !== undefined) item.eurocop = sourceDataObject.eurocop; 
 
+                    // --- LOGICA AUTOMATICA DE COLORES EN SYNC ---
                     if (item.revisado && !item.alerta && !item.notificado && !item.eurocop) {
                         item.eurocop = true; 
                     } 
@@ -1690,12 +1748,18 @@
                 const dataIndex = parseInt(row.dataset.originalIndex, 10);
                 const dataObject = allDenuncias[dataIndex];
                 
+                // --- LOGICA CLICK CHECK REVISADO ---
                 if (target.classList.contains('check-revisado') || (target.classList.contains('revisado-cell') && target.dataset.state === 'check')) {
                     const today = new Date();
                     dataObject.revisado = today.toISOString();
                     
+                    // NUEVO: CAMBIAR AUTOMATICAMENTE A "SIN DATOS EUROCOP" (AMARILLO)
+                    dataObject.eurocop = true; 
+                    dataObject.alerta = false;
+                    dataObject.notificado = false;
+                    
                     syncDuplicatesState(dataObject.matricula, dataObject);
-                    checkAndAutoHideRow(row); // <--- TRIGGER AUTO HIDE
+                    checkAndAutoHideRow(row); 
 
                 }
                 else if (target.classList.contains('revisado-cell') && target.classList.contains('date-set')) {
@@ -1704,7 +1768,11 @@
                         const today = new Date();
                         dataObject.revisado = today.toISOString();
                     } else {
-                        dataObject.revisado = null; 
+                        dataObject.revisado = null;
+                        // Resetear estado si se quita el check
+                        dataObject.eurocop = false;
+                        dataObject.alerta = false;
+                        dataObject.notificado = false;
                     }
                     syncDuplicatesState(dataObject.matricula, dataObject);
                 }
