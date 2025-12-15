@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Listado de denuncias ORA - GAD</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -11,35 +11,43 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
+        /* --- CORRECCIÓN BOX-SIZING PARA MÓVIL (Evita que se corte la pantalla) --- */
+        * {
+            box-sizing: border-box;
+        }
+
         /* --- ESTILOS GENERALES --- */
         .title-panel-blue {
             background-color: #3b82f6;
-            display: grid; 
-            grid-template-columns: auto 1fr auto; 
+            /* CAMBIO: Flexbox para que se adapte en móvil sin cortar */
+            display: flex; 
+            flex-wrap: wrap;
+            justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             margin-bottom: 20px;
+            width: 100%;
         }
         .title-panel-blue h1 {
             color: white;
             margin: 0;
-            padding: 0;
-            font-size: 1.8em;
+            padding: 0 10px;
+            font-size: 1.5em; /* Reducido ligeramente para móvil */
             display: flex;
             align-items: center;
             gap: 10px;
             justify-content: center;
             text-align: center;
+            flex-grow: 1;
         }
         .title-panel-blue .header-logo-container {
-            width: 80px;
-            height: 80px;
+            width: 60px; /* Ajustado */
+            height: 60px;
             flex-shrink: 0;
         }
-        .title-panel-blue .header-logo-container:first-child { justify-self: start; }
-        .title-panel-blue .header-logo-container:last-child { justify-self: end; }
+        /* Mantenemos tus estilos de imagen */
         .title-panel-blue .header-logo-container img {
             width: 100%;
             height: 100%;
@@ -52,7 +60,6 @@
             padding: 20px;
             width: 100%;
             margin-top: auto;
-            box-sizing: border-box;
         }
         footer p { margin: 5px 0; font-size: 1em; color: #333; font-weight: bold; }
 
@@ -60,19 +67,20 @@
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
             margin: 0;
+            padding: 0; /* Quitamos margin default */
             color: #333;
             line-height: 1.6;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            overflow-x: hidden; /* Evita scroll lateral */
         }
         main {
             flex: 1;
-            padding: 15px;
+            padding: 10px; /* Menos padding en móvil */
             display: flex;
             justify-content: center;
             width: 100%;
-            box-sizing: border-box;
         }
         .app-container {
             max-width: 1300px;
@@ -84,10 +92,11 @@
         }
         .panel {
             background: #ffffff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             border: 1px solid #e0e0e0;
+            width: 100%;
         }
         h1, h2, h3 {
             color: #2c3e50;
@@ -95,26 +104,28 @@
             margin-top: 0;
             font-weight: 700;
         }
-        h2 { font-size: 1.5em; }
+        h2 { font-size: 1.4em; }
         h3 { font-size: 1.2em; }
 
         button {
             border: none;
-            padding: 10px 15px;
+            padding: 12px 15px; /* Botones más pulsables */
             border-radius: 5px;
             cursor: pointer;
             font-weight: 700;
             transition: all 0.2s ease-in-out;
-            margin-right: 8px;
-            margin-bottom: 5px;
+            margin-right: 5px;
+            margin-bottom: 8px;
             display: inline-flex;
             align-items: center;
-            justify-content: center; /* Centrar contenido en botones */
+            justify-content: center; /* Texto centrado */
             gap: 5px;
             color: white;
             font-size: 0.9em;
         }
         button i { font-size: 1em; }
+        
+        /* Mantenemos tus colores intactos */
         .btn-primary { background: linear-gradient(135deg, #3498db, #2980b9); }
         .btn-primary:hover { box-shadow: 0 4px 10px rgba(41, 128, 185, 0.4); }
         .btn-delete { background: linear-gradient(135deg, #e74c3c, #c0392b); }
@@ -130,137 +141,85 @@
         .btn-secondary { background: linear-gradient(135deg, #6c757d, #5a6268); }
         .btn-secondary:hover { box-shadow: 0 4px 10px rgba(92, 98, 104, 0.4); }
 
-        /* Icono papelera roja sin borde */
         .btn-icon-delete {
             background-color: transparent;
             color: #ef4444; 
-            padding: 5px;
-            margin: 0;
-            border: none; 
-            font-size: 1.3em; 
-            cursor: pointer;
-            transition: transform 0.2s;
+            padding: 5px; margin: 0; border: none; 
+            font-size: 1.3em; cursor: pointer; transition: transform 0.2s;
         }
-        .btn-icon-delete:hover {
-            transform: scale(1.1);
-            background-color: transparent;
-            box-shadow: none;
-        }
+        .btn-icon-delete:hover { transform: scale(1.1); background-color: transparent; box-shadow: none; }
         
-        /* Nuevo estilo para el botón de copiar matrícula */
         .btn-copy-matricula {
-            background-color: transparent;
-            color: #4CAF50; /* Un color de éxito intenso */
-            padding: 0;
-            margin-right: 5px; /* Ajuste para alinear a la izquierda */
-            border: none; 
-            font-size: 0.9em; 
-            cursor: pointer;
-            transition: color 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
+            background-color: transparent; color: #4CAF50; padding: 0; margin-right: 5px; border: none; 
+            font-size: 0.9em; cursor: pointer; transition: color 0.2s;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; flex-shrink: 0;
         }
-        .btn-copy-matricula:hover {
-            color: #388E3C; /* Verde más oscuro al pasar el ratón */
-            background-color: transparent;
-            box-shadow: none;
-        }
+        .btn-copy-matricula:hover { color: #388E3C; background-color: transparent; box-shadow: none; }
 
+        /* Inputs adaptados a ancho completo */
         input[type="text"], input[type="number"], input[type="url"], input[type="date"], select {
             border: 1px solid #ced4da;
             border-radius: 5px;
-            padding: 8px 12px;
+            padding: 10px 12px; /* Más padding para tocar con el dedo */
             transition: border-color 0.2s, box-shadow 0.2s;
             box-shadow: inset 0 1px 2px rgba(0,0,0,.075);
-            font-size: 0.95em;
+            font-size: 1em; /* Evita zoom en iPhone */
             width: 100%;
-            box-sizing: border-box;
         }
         
-        /* CORRECCIÓN SCROLL MODAL */
-        #sort-by-state-modal .modal-content {
-            display: block;
-            overflow-x: hidden; /* Elimina scroll horizontal */
-        }
-        #sort-by-state-modal .modal-content button {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-            text-align: left;
-            padding: 12px 15px;
-            justify-content: flex-start;
-            box-sizing: border-box; /* Asegura que el padding no desborde */
-        }
-        #sort-by-state-modal .modal-content button i {
-            width: 20px;
-            text-align: center;
-        }
-
+        /* Drop Zone Responsive */
         #drop-zone {
             border: 2px dashed #3498db;
             border-radius: 10px;
-            padding: 30px; 
+            padding: 20px 10px; /* Ajustado */
             text-align: center;
             color: #555;
             background-color: #f8f9fa;
             transition: background-color 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             margin-bottom: 20px;
-            margin-top: 20px; /* Separación extra arriba */
+            width: 100%;
         }
-        #drop-zone.dragover {
-            background-color: #e0f2f7;
-            border-color: #0288d1;
-        }
-        #drop-zone i {
-            font-size: 2.5em; 
-            color: #3498db;
-            margin-bottom: 10px;
-        }
+        #drop-zone.dragover { background-color: #e0f2f7; border-color: #0288d1; }
+        #drop-zone i { font-size: 2em; color: #3498db; margin-bottom: 10px; }
 
+        /* Layout de Controles */
         .controls-container {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column; /* Columna en móvil por defecto */
             gap: 20px;
-            justify-content: space-between;
-            align-items: flex-end;
             margin-bottom: 20px;
         }
         .search-controls {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr; /* Ajustado para dar espacio a los botones */
-            gap: 15px;
-            align-items: end;
-            flex-grow: 1;
-            max-width: 600px;
+            width: 100%;
         }
         .search-controls label {
-            font-size: 0.85em;
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 5px;
-            display: block;
+            font-size: 0.9em; font-weight: bold; color: #555; margin-bottom: 5px; display: block;
         }
         
-        /* Nuevo contenedor para los botones de búsqueda y deshacer */
         .search-buttons-group {
-            display: flex;
-            gap: 8px;
+            display: flex; gap: 8px; margin-top: 10px;
+        }
+        .search-buttons-group button {
+            flex: 1; /* Botones ocupan 50% cada uno */
         }
 
+        /* --- FILTROS EN REJILLA PARA MÓVIL --- */
         .filter-controls {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr; /* 1 columna por defecto */
             gap: 10px;
-            align-items: flex-end;
+            width: 100%;
+        }
+        .filter-controls button {
+            width: 100%;
+            margin: 0;
         }
 
+        /* Tabla Resultados */
         .results-container {
-            overflow-x: auto;
+            overflow-x: auto; /* Scroll horizontal SOLO en la tabla */
             padding-bottom: 10px;
             max-width: 100%;
             border: 1px solid #e0e0e0;
@@ -269,91 +228,50 @@
         }
         .results-header, .doc-row {
             display: grid;
-            gap: 15px;
-            padding: 10px 12px;
+            gap: 10px;
+            padding: 10px;
             border-bottom: 1px solid #f0f0f0;
-            min-width: 600px;
-            transition: background-color 0.3s ease, opacity 0.5s ease; /* Transición para desvanecer */
+            min-width: 700px; /* Forzamos ancho mínimo para que no se rompa la tabla, habrá scroll */
+            transition: background-color 0.3s ease, opacity 0.5s ease;
         }
         .results-header {
             font-weight: bold;
             background: #e9f2f7;
             border-bottom: 2px solid #3498db;
             border-radius: 8px 8px 0 0;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            color: #2c3e50;
+            position: sticky; top: 0; z-index: 10; color: #2c3e50;
         }
         .doc-row:nth-child(even) { background: #f9f9f9; }
         .doc-row:hover { background: #eef4f9; }
         .doc-row div {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            align-self: center;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center;
         }
         .doc-row .cell-matricula {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            overflow: visible; /* Permitir que el botón de copiar sea visible */
-        }
-        .doc-row .matricula-text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: flex; align-items: center; gap: 5px; overflow: visible;
         }
 
-        /* --- ESTILOS DE COLOR DE FILA INTENSOS (Modificados según prioridad) --- */
-        
-        /* 1. Base/Pendiente (Sin color) */
-        
-        /* 2. Azul (Revisado sin estado específico, menor prioridad) */
+        /* Estilos Colores Fila */
         .doc-row.highlight-blue { background-color: #bbdefb; } 
         .doc-row.highlight-blue:hover { background-color: #64b5f6; }
-        
-        /* 3. Amarillo (Sin datos en Eurocop) - SUAVIZADO */
         .doc-row.highlight-yellow { background-color: #fffde7; border-left: 5px solid #ffc107; } 
         .doc-row.highlight-yellow:hover { background-color: #fff9c4; }
-        
-        /* 4. Rojo (Alerta grabada en Eurocop) */
         .doc-row.highlight-red { background-color: #ef9a9a; border-left: 5px solid #d32f2f; } 
         .doc-row.highlight-red:hover { background-color: #e57373; }
-        
-        /* 5. Verde (Notificado a sanciones - Máxima prioridad visual) */
         .doc-row.highlight-green { background-color: #a5d6a7; border-left: 5px solid #388e3c; } 
         .doc-row.highlight-green:hover { background-color: #81c784; }
         
         .revisado-cell { text-align: center; align-self: center; }
-        .revisado-cell.date-set {
-            font-weight: bold;
-            color: #0d47a1;
-            cursor: pointer;
-            font-size: 0.95em;
-        }
+        .revisado-cell.date-set { font-weight: bold; color: #0d47a1; cursor: pointer; font-size: 0.95em; }
         
-        /* Estilos Select Estado - APLICAR COLOR DE FONDO INTENSO AL VALOR SELECCIONADO */
         .estado-select {
-            width: 100%;
-            padding: 5px;
-            font-size: 0.9em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: white; /* Base */
-            color: #333;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s, color 0.3s;
+            width: 100%; padding: 8px; font-size: 0.9em; border: 1px solid #ccc; border-radius: 4px;
+            background-color: white; color: #333; cursor: pointer; font-weight: bold;
         }
-        .estado-select:focus { border-color: #3498db; outline: none; }
-        
-        /* Colores para las opciones seleccionadas */
         .estado-select[value="eurocop"] { background-color: #ffeb3b; color: #000000; font-weight: 700; } 
-        .estado-select[value="alerta"] { background-color: #f44336; color: white; } /* Rojo */
-        .estado-select[value="notificado"] { background-color: #4CAF50; color: white; } /* Verde */
-        
-        /* Estilos Colores Matrícula */
+        .estado-select[value="alerta"] { background-color: #f44336; color: white; }
+        .estado-select[value="notificado"] { background-color: #4CAF50; color: white; }
+
+        /* Colores Matrícula (Mantenidos) */
         .doc-row .cell-matricula.group-color-1 { color: #D32F2F; font-weight: bold; }
         .doc-row .cell-matricula.group-color-2 { color: #1976D2; font-weight: bold; }
         .doc-row .cell-matricula.group-color-3 { color: #388E3C; font-weight: bold; }
@@ -362,176 +280,81 @@
         .doc-row .cell-matricula.group-color-6 { color: #5D4037; font-weight: bold; }
         
         #status-message {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-            font-weight: bold;
+            margin-top: 15px; padding: 10px; border-radius: 5px; display: none; font-weight: bold;
         }
         #status-message.success { background-color: #e8f5e9; color: #27ae60; border: 1px solid #c8e6c9; }
         #status-message.error { background-color: #fef2f2; color: #c0392b; border: 1px solid #f44336; }
         #status-message.loading { background-color: #e0f2f7; color: #0288d1; border: 1px solid #b3e5fc; }
-        #status-message.info { background-color: #e0f2f7; color: #0288d1; border: 1px solid #b3e5fc; }
         
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
+            border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 1s linear infinite; display: inline-block; margin-right: 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .modern-alert {
-            text-align: center;
-            padding: 15px; 
-            margin: 15px 0; 
-            border-radius: 8px;
-            background-color: #f0f4f7;
-            border: 1px solid #dcdcdc;
-            color: #555;
-            font-size: 0.9em; 
-        }
-        .modern-alert h4 { font-size: 1.1em; margin-top: 5px; margin-bottom: 5px; }
-        .modern-alert p { margin-bottom: 0; }
-        .modern-alert-error { background-color: #fef2f2; border-color: #f44336; }
-         
-        /* --- CSS Leyenda (OCULTO POR DEFECTO) --- */
-        #help-toggle-container { margin: 15px 0 5px 0; }
-        #legend-panel {
-            background-color: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-            font-size: 0.95em;
-            color: #444;
-            line-height: 1.5;
-            display: none; /* Oculto inicialmente */
-        }
-        #legend-panel.visible {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            text-align: center; padding: 15px; margin: 15px 0; border-radius: 8px;
+            background-color: #f0f4f7; border: 1px solid #dcdcdc; color: #555; font-size: 0.9em; 
         }
 
-        #legend-panel h4 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #2c3e50;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
+        /* --- LEYENDA OCULTA --- */
+        #help-toggle-container { margin: 10px 0; }
+        #legend-panel {
+            background-color: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px;
+            margin-top: 10px; font-size: 0.95em; color: #444; line-height: 1.5;
+            display: none; /* Oculto por defecto */
         }
-        #legend-panel p { margin: 5px 0; }
+        /* Clase para mostrarlo */
+        #legend-panel.visible { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #legend-panel h4 { margin-top: 0; margin-bottom: 10px; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
         #legend-panel ul { margin: 5px 0 5px 20px; padding: 0; }
-        #legend-panel li { margin-bottom: 4px; }
         
         .legend-blue { color: #0d47a1; font-weight: bold; }
         .legend-yellow { color: #f57f17; font-weight: bold; }
         .legend-green { color: #1b5e20; font-weight: bold; }
         .legend-red { color: #c62828; font-weight: bold; }
         
-        /* --- CSS Modal --- */
+        /* Modales */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1000;
         }
         .modal-container {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            z-index: 1001;
-            width: 90%;
-            max-width: 450px;
-            overflow: hidden;
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; border-radius: 8px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); z-index: 1001;
+            width: 90%; max-width: 450px; overflow: hidden;
         }
-        .modal-header {
-            background: #f1f1f1;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .modal-header h2 { margin: 0; color: #333; }
-        .modal-content {
-            padding: 20px;
-            display: grid;
-            gap: 15px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        .modal-content label {
-            font-weight: bold;
-            font-size: 0.9em;
-            color: #555;
-            margin-bottom: -10px;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            background: #f9f9f9;
-            padding: 15px 20px;
-            border-top: 1px solid #e0e0e0;
+        .modal-header { background: #f1f1f1; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; }
+        .modal-content { padding: 20px; display: grid; gap: 15px; max-height: 60vh; overflow-y: auto; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; background: #f9f9f9; padding: 15px 20px; border-top: 1px solid #e0e0e0; }
+        
+        /* CORRECCIÓN SCROLL MODAL */
+        #sort-by-state-modal .modal-content { display: block; overflow-x: hidden; }
+        #sort-by-state-modal .modal-content button {
+            display: block; width: 100%; margin-bottom: 10px; text-align: left; padding: 12px 15px; justify-content: flex-start;
         }
 
-         @media (max-width: 767px) {
-             .title-panel-blue {
-                grid-template-columns: auto 1fr auto;
-                padding: 15px;
-             }
-             .title-panel-blue .header-logo-container { width: 60px; height: 60px; }
-             .title-panel-blue h1 { font-size: 1.4em; gap: 5px; }
-             .controls-container { flex-direction: column; align-items: stretch; }
-             
-             /* Buscador arriba en móvil */
-             .search-controls { 
-                 grid-template-columns: 1fr; 
-                 max-width: 100%; 
-             }
-             
-             /* Botones en 2 columnas */
-             .filter-controls { 
-                 display: grid;
-                 grid-template-columns: 1fr 1fr;
-                 gap: 8px;
-                 width: 100%;
-             }
-             .filter-controls button {
-                 width: 100%;
-                 margin: 0;
-                 justify-content: center;
-             }
-             
-             /* Reduce el tamaño del Drop Zone en móviles */
-             #drop-zone { padding: 15px; }
-             #drop-zone i { font-size: 1.8em; margin-bottom: 5px; }
-             #drop-zone p { margin: 0; font-size: 0.85em; }
-         }
-         @media (max-width: 480px) {
-             .title-panel-blue { padding: 15px; }
-             .title-panel-blue .header-logo-container { width: 50px; height: 50px; }
-             .title-panel-blue h1 { font-size: 1.2em; }
-             .panel { padding: 15px; }
-             button { font-size: 0.85em; padding: 10px; }
-             h2 { font-size: 1.3em; }
-             h3 { font-size: 1.1em; }
-         }
+        /* --- MEDIA QUERIES PARA MÓVIL --- */
+        @media (min-width: 768px) {
+            /* En pantallas grandes, volvemos al flex horizontal */
+            .controls-container { flex-direction: row; }
+            .search-controls { max-width: 600px; }
+            .filter-controls { display: flex; }
+            .filter-controls button { width: auto; }
+            .title-panel-blue h1 { font-size: 1.8em; }
+        }
+        
+        /* En móvil aseguramos 2 columnas para filtros para ahorrar espacio */
+        @media (max-width: 767px) {
+            .filter-controls {
+                grid-template-columns: 1fr 1fr;
+            }
+            .search-buttons-group {
+                width: 100%;
+            }
+        }
+
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -546,14 +369,16 @@
                 <div class="header-logo-container">
                     <img src="logoora.png" alt="Logo ORA">
                 </div>
-                <h1><i class="fas fa-file-invoice-dollar"></i> Listado de denuncias ORA</h1>
+                <h1><i class="fas fa-file-invoice-dollar"></i> Listado denuncias ORA</h1>
                 <div class="header-logo-container">
                     <img src="logogad.png" alt="Logo GAD">
                 </div>
             </div>
             
             <div class="panel">
-                <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px;"><i class="fas fa-search"></i> Gestión de Denuncias</h2>
+                <h2 style="border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                    <i class="fas fa-search"></i> Gestión de Denuncias
+                </h2>
                 
                 <div class="controls-container">
                     <div class="search-controls">
@@ -564,30 +389,30 @@
                         <div class="align-bottom search-buttons-group">
                             <button id="search-btn" class="btn-success" style="width: 100%;"><i class="fas fa-search"></i> Buscar</button>
                             <button id="undo-btn" class="btn-delete" style="background: linear-gradient(135deg, #607d8b, #455a64); white-space: nowrap;">
-                                <i class="fas fa-undo"></i> Deshacer Última
+                                <i class="fas fa-undo"></i> Deshacer
                             </button>
                         </div>
                     </div>
                     
                     <div class="filter-controls">
-                        <button id="show-all-btn" class="btn-warning"><i class="fas fa-list"></i> Mostrar Todos</button>
                         <button id="sort-matricula-btn" class="btn-primary"><i class="fas fa-sort-alpha-down"></i> Matrícula</button>
                         <button id="sort-fecha-btn" class="btn-info"><i class="fas fa-calendar-alt"></i> Fecha</button>
-                        <button id="sort-estado-btn" class="btn-secondary"><i class="fas fa-filter"></i> Por Estado</button>
+                        <button id="sort-estado-btn" class="btn-secondary"><i class="fas fa-filter"></i> Estado</button>
+                        <button id="show-all-btn" class="btn-warning"><i class="fas fa-list"></i> Ver Todos</button>
                         <button id="find-duplicates-btn" class="btn-danger"><i class="fas fa-copy"></i> Reincidentes</button>
                         <button id="crear-alerta-btn" class="btn-info"><i class="fas fa-exclamation-triangle"></i> Crear Alerta</button>
                         <button id="delete-all-btn" class="btn-delete"><i class="fas fa-trash-alt"></i> Borrar Todo</button>
                     </div>
                 </div>
 
-                <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 10px;">
-                    <h3 style="font-size: 1em; color: #555; margin-bottom: 5px;"><i class="fas fa-upload"></i> Cargar Datos</h3>
-                    <div id="drop-zone">
+                <div style="border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px;">
+                     <h3 style="font-size: 1.1em; color: #555;"><i class="fas fa-upload"></i> Cargar Archivo</h3>
+                     <div id="drop-zone">
                         <i class="fas fa-file-excel"></i>
-                        <p>Arrastra archivo o haz clic. <strong>AÑADE</strong> datos.</p>
-                    </div>
-                    <input type="file" id="file-input" accept=".xls, .xlsx" style="display: none;">
-                    <div id="status-message"></div>
+                        <p>Arrastra archivo o toca aquí. <strong>AÑADE</strong> datos.</p>
+                     </div>
+                     <input type="file" id="file-input" accept=".xls, .xlsx" style="display: none;">
+                     <div id="status-message"></div>
                 </div>
 
                 <div id="help-toggle-container">
@@ -597,38 +422,37 @@
                     </button>
                     
                     <div id="legend-panel">
-                      <h4><i class="fas fa-info-circle"></i> Guía de Uso del Estado de Expediente</h4>
-                      <p>Este sistema está diseñado para revisar matrículas una a una. Sigue este orden:</p>
+                      <h4><i class="fas fa-info-circle"></i> Guía de Uso</h4>
+                      <p>Sistema para revisar matrículas una a una:</p>
                       <ul>
-                        <li><strong>1. Revisado:</strong> Haz clic en la columna "REVISADO". 
+                        <li><strong>1. Revisado:</strong> Haz clic en la casilla vacía de "REVISADO".
                             <ul>
-                                <li>Se activará la fecha en <span class="legend-blue">AZUL</span>.</li>
-                                <li>El expediente pasará automáticamente a <span class="legend-yellow">Sin datos en Eurocop</span>.</li>
+                                <li>Se pondrá la fecha en <span class="legend-blue">AZUL</span>.</li>
+                                <li>Automáticamente pasará a estado <span class="legend-yellow">Sin datos en Eurocop</span>.</li>
                             </ul>
                         </li>
-                        <li><strong>2. Asigna un Estado (Desplegable):</strong>
+                        <li><strong>2. Estados (Desplegable):</strong>
                             <ul>
-                                <li><span class="legend-yellow">Sin datos en Eurocop</span>: El vehículo no existe en la base policial.</li>
-                                <li><span class="legend-red">Alerta grabada en Eurocop</span>: Ya tiene una alerta previa (reincidente).</li>
-                                <li><span class="legend-green">Notificar a sanciones</span>: Al pulsarlo, copiará los datos en el portapapeles y se pondrá VERDE (<span class="legend-green">Notificado</span>).</li>
+                                <li><span class="legend-yellow">Sin datos Eurocop</span>: Vehículo no consta.</li>
+                                <li><span class="legend-red">Alerta grabada</span>: Ya tiene alerta previa.</li>
+                                <li><span class="legend-green">Notificar a sanciones</span>: Copia datos y cambia a VERDE.</li>
                             </ul>
                         </li>
-                        <li><strong>3. Auto-Ocultar:</strong> Al finalizar (asignar estado), la fila desaparece de la lista de pendientes.</li>
-                        <li><strong>4. Botón "Crear Alerta":</strong> Copia al portapapeles el texto predeterminado para insertar en "Vehículos de Interés" en Eurocop.</li>
+                        <li><strong>3. Auto-Ocultar:</strong> Al asignar estado final, la fila desaparece de pendientes.</li>
+                        <li><strong>4. Botón "Crear Alerta":</strong> Copia el texto para pegar en Eurocop (Vehículos de Interés).</li>
                       </ul>
                     </div>
                 </div>
 
-                <h3 style="margin-top: 20px;">Resultados <span id="results-count">(0)</span></h3>
-                
+                <h3 style="margin-top: 30px;">Resultados <span id="results-count">(0)</span></h3>
+
                 <div class="results-container">
-                    <div id="results-header" class="results-header" style="display: none;">
-                        </div>
+                    <div id="results-header" class="results-header" style="display: none;"></div>
                     <div id="search-results">
                         <div class="modern-alert">
                             <i class="fas fa-list-alt fa-2x"></i>
                             <h4 style="color: #3498db; margin-top: 10px;">Sin Datos</h4>
-                            <p>Carga un archivo Excel o pulsa "Mostrar Todos" para ver las denuncias.</p>
+                            <p>Carga un archivo Excel o pulsa "Ver Todos".</p>
                         </div>
                     </div>
                 </div>
@@ -701,7 +525,7 @@
 
 
     <script>
-        // --- CONFIGURACIÓN FIREBASE GAD-ALICANTE-V1 ---
+        // --- CONFIGURACIÓN FIREBASE GAD-ALICANTE-V1 (INTACTA) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
         authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -768,17 +592,18 @@
         let previousSelectValue = ""; 
         let currentFechaSortOrder = 'desc'; 
         
-        // --- LOGICA TOGGLE AYUDA ---
+        // --- LOGICA TOGGLE AYUDA (NUEVA) ---
         document.getElementById('toggle-help-btn').addEventListener('click', () => {
             const panel = document.getElementById('legend-panel');
             const icon = document.getElementById('help-icon');
-            if (panel.style.display === 'block') {
-                panel.style.display = 'none';
+            if (panel.classList.contains('visible')) {
                 panel.classList.remove('visible');
+                setTimeout(() => panel.style.display = 'none', 300); // Esperar animacion si la hubiera, o ocultar directo
                 icon.className = 'fas fa-chevron-down';
             } else {
                 panel.style.display = 'block';
-                panel.classList.add('visible');
+                // Pequeño timeout para permitir transición CSS si se desea
+                setTimeout(() => panel.classList.add('visible'), 10);
                 icon.className = 'fas fa-chevron-up';
             }
         });
@@ -928,7 +753,10 @@
                     const intermediateData = sanitizedJsonData.filter(row => Object.keys(row).length > 0);
                     
                     // --- FILTRADO AVANZADO DE MATRÍCULAS ---
+                    // Regla 1: 4 números + 3 letras (1234BBC)
                     const modernSpanishRegex = /^\d{4}[A-Z]{3}$/i; 
+                    // Regla 2: Provincia (1-2 letras) + 4 números + Letras Finales (1-2 letras) (M1234TZ, B5678V)
+                    // Las que SOLO tienen números al final (M1234) NO coinciden con esta regex, por lo tanto se quedan.
                     const provincialSuffixRegex = /^[A-Z]{1,2}\d{4}[A-Z]{1,2}$/i;
 
                     let spanishPlatesCount = 0;
@@ -1536,7 +1364,8 @@
         }
         
         function crearAlertaEurocop() {
-            const alertText = 'INMOVILIZAR A DISPOSICIÓN DEL GAD POR REINCIDENCIA EN INFRACCIONES Art 87.5 LSV (CAUCIÓN).  Este vehículo es de interés para el negociado de sanciones del Ayuntamiento de Alicante. Se trata de un vehículo reincidente en infracciones de estacionamiento ORA. Realizar incidencia en Eurocop con seguimiento al GAD para su tramitación.';
+            // CAMBIO: Texto actualizado
+            const alertText = 'INMOVILIZAR A DISPOSICIÓN DEL GAD POR REINCIDENCIA EN INFRACCIONES Art 87.5 LSV (CAUCIÓN). Este vehículo es de interés para el negociado de sanciones del Ayuntamiento de Alicante. Se trata de un vehículo reincidente en infracciones de estacionamiento ORA. Realizar incidencia en Eurocop con seguimiento al GAD para su tramitación.';
             copyToClipboard(alertText)
                 .then(() => alert("¡Texto de Alerta copiado!"))
                 .catch(err => alert('Error al copiar el texto: ' + err));
@@ -1557,7 +1386,6 @@
                     if (sourceDataObject.notificado !== undefined) item.notificado = sourceDataObject.notificado;
                     if (sourceDataObject.eurocop !== undefined) item.eurocop = sourceDataObject.eurocop; 
 
-                    // --- LOGICA AUTOMATICA DE COLORES EN SYNC ---
                     if (item.revisado && !item.alerta && !item.notificado && !item.eurocop) {
                         item.eurocop = true; 
                     } 
@@ -1748,13 +1576,13 @@
                 const dataIndex = parseInt(row.dataset.originalIndex, 10);
                 const dataObject = allDenuncias[dataIndex];
                 
-                // --- LOGICA CLICK CHECK REVISADO ---
+                // --- LOGICA CLICK CHECK REVISADO (MODIFICADA) ---
                 if (target.classList.contains('check-revisado') || (target.classList.contains('revisado-cell') && target.dataset.state === 'check')) {
                     const today = new Date();
                     dataObject.revisado = today.toISOString();
                     
-                    // NUEVO: CAMBIAR AUTOMATICAMENTE A "SIN DATOS EUROCOP" (AMARILLO)
-                    dataObject.eurocop = true; 
+                    // CAMBIO: Poner automáticamente en EUROCOP (AMARILLO)
+                    dataObject.eurocop = true;
                     dataObject.alerta = false;
                     dataObject.notificado = false;
                     
@@ -1769,10 +1597,7 @@
                         dataObject.revisado = today.toISOString();
                     } else {
                         dataObject.revisado = null;
-                        // Resetear estado si se quita el check
-                        dataObject.eurocop = false;
-                        dataObject.alerta = false;
-                        dataObject.notificado = false;
+                        dataObject.eurocop = false; // Resetear
                     }
                     syncDuplicatesState(dataObject.matricula, dataObject);
                 }
