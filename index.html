@@ -43,11 +43,11 @@
         .top-nav-link {
             display: inline-flex;
             align-items: center;
-            padding: 0 15px;
+            padding: 0 10px; /* Reducido el padding para ahorrar espacio */
             height: 30px;
-            font-size: 0.85rem;
+            font-size: 0.8rem; /* TAMAÑO DE FUENTE REDUCIDO */
             font-weight: 500;
-            color: #e2e8f0;
+            color: white; /* Color de texto blanco unificado */
             white-space: nowrap; 
             cursor: pointer;
             text-decoration: none;
@@ -55,10 +55,21 @@
             transition: all 0.2s;
             background: transparent;
             border-radius: 4px;
+            margin: 0 2px;
         }
-        .top-nav-link:hover { background-color: rgba(255,255,255,0.1); color: #fff; }
-        .top-nav-link i { margin-right: 6px; font-size: 0.8rem; color: #93c5fd; }
+        .top-nav-link:hover { opacity: 0.9; }
         
+        /* Colores de Fondo para la Barra Superior (Basados en tipo y color) */
+        .top-nav-link.type-parent { 
+            background-color: #1e40af; /* Azul para carpetas */
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .top-nav-link.type-main {
+            background-color: #16a34a; /* Verde para enlaces */
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        /* Los enlaces con color personalizado se aplicarán directamente vía JS */
+
         .top-back-btn {
             background-color: #dc2626; 
             border: none;
@@ -559,7 +570,7 @@
             history.pushState({folder: key}, '', '#folder=' + key);
             renderMenuButtons();
         } else if (data.htmlCode || data.href) {
-            // CONTENIDO (Verde) -> VISOR CON BARRAS
+            // CONTENIDO (Verde/Personalizado) -> VISOR CON BARRAS
             history.pushState({content: true}, '', '#view');
             showIframeArea(data);
         }
@@ -583,8 +594,21 @@
             visibleButtons.forEach(([key, data]) => {
                 const topBtn = document.createElement('a');
                 topBtn.className = 'top-nav-link';
-                let iconClass = data.type === 'parent' ? 'fa-folder' : 'fa-link';
-                topBtn.innerHTML = `<i class="fas ${iconClass}"></i> ${data.text}`;
+                
+                // Determinar la clase de estilo y color
+                let color = data.color;
+                let typeClass = data.type === 'parent' ? 'type-parent' : 'type-main';
+                
+                topBtn.classList.add(typeClass);
+                
+                // Aplicar color personalizado si no es la carpeta por defecto o el enlace por defecto
+                if (data.color && (data.color !== '#1e40af' || data.type !== 'parent') && (data.color !== '#16a34a' || data.type !== 'main')) {
+                    topBtn.style.backgroundColor = data.color;
+                    topBtn.style.color = 'white'; 
+                }
+
+                // ELIMINACIÓN DE ICONOS - Solo se muestra el texto
+                topBtn.innerHTML = `${data.text}`; 
                 topBtn.onclick = () => handleGenericButtonClick(key, data);
                 topHorizontalMenu.appendChild(topBtn);
             });
@@ -609,7 +633,8 @@
             const contentDiv = document.createElement('div');
             contentDiv.className = 'sidebar-row-content';
             let iconClass = data.type === 'parent' ? 'fa-folder' : 'fa-link';
-            contentDiv.innerHTML = `<i class="fas ${iconClass}"></i> <span>${data.text}</span>`;
+            // Mantenemos los iconos en el menú lateral
+            contentDiv.innerHTML = `<i class="fas ${iconClass}"></i> <span>${data.text}</span>`; 
             contentDiv.onclick = () => { 
                 handleGenericButtonClick(key, data); 
                 closeSidebar(); 
@@ -759,7 +784,7 @@
     dragZone.ondrop = e => { e.preventDefault(); dragZone.classList.remove('drag-over-container'); if(draggedItem) { mainMenuGrid.appendChild(draggedItem); updateOrder(); } };
     function updateOrder() { const u={}; document.querySelectorAll('#main-menu-grid .menu-button-container').forEach((b,i) => u[`/${BUTTONS_NODE}/${b.dataset.id}/order`]=i+1); db.ref().update(u); }
 
-    // --- LOGIN (RESTAURADO EL LOGIN OBLIGATORIO) ---
+    // --- LOGIN (FINAL) ---
     function initAppLogic() {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -791,26 +816,21 @@
 
     const loginWithGoogle = () => { 
         const p = new firebase.auth.GoogleAuthProvider(); 
-        // Forzar selección de cuenta para cambiarla si es necesario
         p.setCustomParameters({ prompt: 'select_account' }); 
-        
         auth.signInWithPopup(p).catch(e => alert("Error: " + e.message)); 
     };
     
-    // Función de cierre de sesión mejorada
     const logout = () => { 
         if(isEditMode) toggleEditModeUI(); 
         
         auth.signOut().then(() => {
-            // Limpiar la interfaz después de cerrar sesión
+            // Limpiar la interfaz
             adminPanel.style.display = 'none';
             userControls.style.display = 'none';
+            showMenuArea(); // Asegura volver a la vista del menú (no al iframe)
             
-            // Mostrar el modal de login, forzando al usuario a autenticarse de nuevo.
+            // Mostrar el modal de login.
             modalLogin.style.display = 'flex';
-            
-            // Opcional: Recargar la página para asegurar la limpieza total del estado (más robusto)
-            // location.reload(); 
         }).catch((error) => {
             console.error("Error al cerrar sesión:", error);
             // En caso de error, igualmente forzamos la vista de login
@@ -846,7 +866,6 @@
     document.getElementById('show-edit-menu-modal').onclick = toggleEditModeUI;
     
     window.addEventListener('DOMContentLoaded', () => {
-        // Se asegura que el botón de login tenga la función correcta
         modalLogin.innerHTML = `<div class="modal"><div class="modal-header-logo"><img src="logogad.png"></div><h2>Acceso GAD</h2><button id="google-login-btn" class="google-btn"><i class="fab fa-google" style="color:#DB4437;"></i> Google Login</button></div>`;
         document.getElementById('google-login-btn').onclick = loginWithGoogle;
         
