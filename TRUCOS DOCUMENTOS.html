@@ -71,7 +71,7 @@
     </div>
   </header>
 
-  <h1 class="text-gray-800 text-center mt-6 text-xl md:text-2xl font-bold px-4 uppercase tracking-wide">TRUCOS DOCUMENTOS POR PAÍS Y TIPO</h1>
+  <h1 class="text-gray-800 text-center mt-6 text-xl md:text-2xl font-bold px-4 uppercase tracking-wide">Documentoscopia Internacional</h1>
 
   <div class="w-11/12 max-w-5xl mx-auto mt-6 bg-white p-3 md:p-4 rounded-xl shadow-md border border-gray-100 sticky top-2 z-40">
       
@@ -157,7 +157,9 @@
     let currentCountryKey = null;
     let isEditMode = false;
     let currentDocuments = {}; 
-    const paisesEuropa = ["Albania", "Alemania", "Andorra", "Austria", "Bélgica", "Bielorrusia", "Bosnia y Herzegovina", "Bulgaria", "Chipre", "Croacia", "Dinamarca", "Eslovaquia", "Eslovenia", "España", "Estonia", "Finlandia", "Francia", "Grecia", "Hungría", "Irlanda", "Islandia", "Italia", "Kosovo", "Letonia", "Liechtenstein", "Lituania", "Luxemburgo", "Malta", "Moldavia", "Mónaco", "Montenegro", "Noruega", "Países Bajos", "Polonia", "Portugal", "Reino Unido", "República Checa", "Macedonia del Norte", "Rumanía", "Rusia", "San Marino", "Serbia", "Suecia", "Suiza", "Ucrania", "Vaticano"];
+    
+    // Global flag to prevent re-entry during cleanup
+    let isCleaningUp = false; 
 
     // --- MANEJO DE CARRUSEL ---
     const activeCarouselIndex = {}; // Estado para el índice activo de cada carrusel
@@ -223,38 +225,82 @@
 
     // --- INICIALIZACIÓN Y CARGA DE DATOS ---
     document.addEventListener('DOMContentLoaded', () => {
-        verificarYSembrarPaises();
+        // Se ha eliminado la siembra inicial de países vacíos.
         cargarListaPaises();
     });
-
-    function verificarYSembrarPaises() {
-        dbRef.once('value', snapshot => {
-            if (!snapshot.exists()) {
-                const updates = {};
-                paisesEuropa.forEach(nombre => {
-                    updates[crearIdSegura(nombre)] = { nombre: nombre };
-                });
-                dbRef.update(updates);
-            }
-        });
+    
+    // Helper function to handle selector population and state restoration
+    function populateSelector(selector, countriesToLoad, prevVal) {
+        countriesToLoad.sort((a, b) => a.nombre.localeCompare(b.nombre))
+            .forEach(p => {
+                selector.innerHTML += `<option value="${p.key}">${p.nombre}</option>`;
+            });
+            
+        // Restore previous selection if it's still valid
+        if (prevVal && countriesToLoad.some(p => p.key === prevVal)) {
+             selector.value = prevVal;
+             if (!currentCountryKey) { 
+                 cargarDocumentosPais(); 
+             }
+        } else {
+             // Clear state if the selected country was deleted or not found
+             currentCountryKey = null;
+             document.getElementById('documentsContainer').innerHTML = '<div class="text-center text-gray-400 py-10">Selecciona un país para ver sus documentos.</div>';
+             document.getElementById('addDocBtnContainer').classList.add('hidden');
+        }
     }
+
 
     function cargarListaPaises() {
         const selector = document.getElementById('paisSelector');
+        
+        // Listener para cargar solo países con documentos y eliminar los vacíos.
         dbRef.on('value', snapshot => {
+            if (isCleaningUp) return; // Evita re-entrada durante la limpieza
+            
             const data = snapshot.val();
             const prevVal = selector.value;
             selector.innerHTML = '<option value="">-- Selecciona País --</option>';
+            
+            let countriesToLoad = [];
+            const updates = {};
+            let needsCleanup = false;
+
             if (data) {
-                Object.keys(data).map(k => ({ key: k, nombre: data[k].nombre }))
-                    .sort((a, b) => a.nombre.localeCompare(b.nombre))
-                    .forEach(p => {
-                        selector.innerHTML += `<option value="${p.key}">${p.nombre}</option>`;
+                Object.keys(data).forEach(key => {
+                    const country = data[key];
+                    // Un país tiene documentos si el nodo 'documentos' existe y tiene claves
+                    const hasDocuments = country.documentos && Object.keys(country.documentos).length > 0;
+                    
+                    if (hasDocuments) {
+                        countriesToLoad.push({ key: key, nombre: country.nombre });
+                    } else {
+                        // País vacío (sin documentos) -> Marcar para eliminación
+                        updates[key] = null;
+                        needsCleanup = true;
+                    }
+                });
+
+                if (needsCleanup) {
+                    isCleaningUp = true;
+                    dbRef.update(updates).then(() => {
+                        // La limpieza fue exitosa. El listener se disparará de nuevo con la DB limpia.
+                        isCleaningUp = false;
+                    }).catch(e => {
+                        console.error("Error de limpieza:", e);
+                        isCleaningUp = false;
+                        // Si hay error, se carga la lista filtrada actual
+                        populateSelector(selector, countriesToLoad, prevVal); 
                     });
+                    return; // Esperar el siguiente evento después de la limpieza
+                }
+
+                // Si no se necesita limpieza, poblar el selector con los países filtrados
+                populateSelector(selector, countriesToLoad, prevVal);
             }
-            if (prevVal) selector.value = prevVal;
         });
     }
+
 
     function cargarDocumentosPais() {
         currentCountryKey = document.getElementById('paisSelector').value;
@@ -334,6 +380,7 @@
     }
 
     function generateCarouselHTML(doc) {
+        // Asegurar que solo se consideran imágenes con URL
         const images = doc.imageUrls ? doc.imageUrls.filter(img => img.url) : [];
         const totalImages = images.length;
 
@@ -381,10 +428,17 @@
 
         const defaultLabels = ["Anverso", "Reverso", "Detalle 1"];
         
-        // Render inputs for existing images
-        images.forEach((img, index) => {
-            const label = img.label || defaultLabels[index] || `Detalle ${index - 1}`;
-            const isRemovable = index >= defaultLabels.length; // Allow removal only for dynamic fields (index 3+)
+        // Render inputs for existing images and ensure there are at least 3 placeholders in edit mode
+        const inputsToRender = [...images];
+        if (isEditMode) {
+             while(inputsToRender.length < 3) {
+                inputsToRender.push({ url: "", label: defaultLabels[inputsToRender.length] });
+             }
+        }
+
+        inputsToRender.forEach((img, index) => {
+            const label = defaultLabels[index] || `Detalle ${index - 1}`;
+            const isRemovable = index >= defaultLabels.length; 
             
             html += `
                 <div class="flex items-center gap-2 mb-2 image-input-group" data-index="${index}">
@@ -408,12 +462,11 @@
         const inputsContainer = card.querySelector('#dynamic-inputs-' + docId) || card.querySelector('.edit-only-field');
         
         // Find the next available detail index
-        const currentInputs = card.querySelectorAll('.url-input');
-        const nextIndex = currentInputs.length;
-        const newLabel = `Detalle ${nextIndex - 1}`; // If index 3 is Detail 1, index 4 is Detail 2
+        const currentInputs = card.querySelectorAll('.url-input').length;
+        const newLabel = `Detalle ${currentInputs - 1}`; 
 
         const newHTML = `
-            <div class="flex items-center gap-2 mb-2 image-input-group fade-in" data-index="${nextIndex}">
+            <div class="flex items-center gap-2 mb-2 image-input-group fade-in" data-index="${currentInputs}">
                 <label class="block text-xs font-bold text-gray-400 uppercase w-24 flex-shrink-0 whitespace-nowrap">${newLabel}:</label>
                 <input type="text" value="" placeholder="Pegar enlace de ${newLabel}..." class="w-full text-xs p-2 border rounded bg-white url-input" data-label="${newLabel}">
                 <button onclick="removeUrlInput(this, '${docId}')" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-times"></i></button>
@@ -425,30 +478,22 @@
     function removeUrlInput(button, docId) {
         const group = button.closest('.image-input-group');
         group.remove();
-        // The titles will be re-assigned on next render/save if needed, but for now we just remove the DOM element.
+        // Nota: Las etiquetas de Detalle se re-asignan correctamente al guardar
     }
 
 
     function crearTarjetaDocumento(doc) {
-        // Fallback for old documents without imageUrls array
+        // Fallback para documentos antiguos o para asegurar el array
         if (!doc.imageUrls && (doc.url || doc.url2)) {
             doc.imageUrls = [];
             if (doc.url) doc.imageUrls.push({ url: doc.url, label: "Anverso" });
             if (doc.url2) doc.imageUrls.push({ url: doc.url2, label: "Reverso" });
-            // Remove obsolete fields for future consistency
             delete doc.url;
             delete doc.url2;
         } else if (!doc.imageUrls) {
-            doc.imageUrls = []; // Ensure it's an array for carousel generation
+            doc.imageUrls = []; 
         }
         
-        // If it's a new document/empty, ensure default placeholders exist in edit mode
-        if (isEditMode && doc.imageUrls.length < 3) {
-            const defaultLabels = ["Anverso", "Reverso", "Detalle 1"];
-            while(doc.imageUrls.length < 3) {
-                doc.imageUrls.push({ url: "", label: defaultLabels[doc.imageUrls.length] });
-            }
-        }
 
         return `
         <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 fade-in group relative" id="card-${doc.id}">
@@ -558,9 +603,14 @@
         
         // Recoger todas las URLs de imagen
         const imageUrls = [];
-        card.querySelectorAll('.url-input').forEach(input => {
+        const defaultLabels = ["Anverso", "Reverso", "Detalle 1"];
+        
+        card.querySelectorAll('.url-input').forEach((input, index) => {
             const url = input.value.trim();
-            const label = input.getAttribute('data-label') || 'Detalle';
+            let label = defaultLabels[index];
+            if (!label) {
+                label = `Detalle ${index - 1}`;
+            }
 
             if (url) {
                 imageUrls.push({ url: url, label: label });
@@ -582,12 +632,38 @@
         const nombre = prompt("Nombre del nuevo país:");
         if (!nombre) return;
         const id = crearIdSegura(nombre);
+
+        const updates = {};
+        // 1. Guardar el nombre del país
+        updates[`${id}/nombre`] = nombre.trim();
+        // 2. Crear un documento inicial para que el país no se considere 'vacío' y se muestre.
+        const newDocKey = db.ref().push().key;
+        updates[`${id}/documentos/${newDocKey}`] = {
+            titulo: "Nuevo Documento (Pendiente)",
+            imageUrls: [
+                { url: "", label: "Anverso" },
+                { url: "", label: "Reverso" },
+                { url: "", label: "Detalle 1" }
+            ], 
+            info: "<ul><li>Escribe aquí los trucos de seguridad...</li></ul>"
+        };
+        
         dbRef.child(id).once('value', s => {
-            if (s.exists()) alert("Ya existe.");
-            else dbRef.child(id).set({ nombre: nombre }).then(() => {
-                document.getElementById('paisSelector').value = id;
-                cargarDocumentosPais();
-            });
+            if (s.exists()) {
+                 alert("Ya existe un país con un nombre similar.");
+            } else {
+                 dbRef.update(updates).then(() => {
+                    alert(`País '${nombre}' creado. Rellena los datos y guarda.`);
+                    // Seleccionar y cargar el país recién creado
+                    const selector = document.getElementById('paisSelector');
+                    // Necesario forzar la recarga/selección
+                    setTimeout(() => {
+                        selector.value = id;
+                        cargarDocumentosPais();
+                        if (!isEditMode) toggleEditMode(); 
+                    }, 100); 
+                });
+            }
         });
     }
 
@@ -621,6 +697,7 @@
     function borrarDocumento(docId) {
         if (confirm("¿Seguro que quieres eliminar este documento y toda su info?")) {
             dbRef.child(currentCountryKey).child('documentos').child(docId).remove();
+            // La eliminación del país si queda vacío será manejada automáticamente por cargarListaPaises()
         }
     }
 
