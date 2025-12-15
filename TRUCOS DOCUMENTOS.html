@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base de Datos Documental - GAD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    /* LOGO INTEGRADO RESPONSIVE */
+    .header-logo-container {
+         width: 8rem; height: 8rem; display: flex; justify-content: center; align-items: center;
+    }
+    @media (min-width: 768px) {
+        .header-logo-container { width: 10rem; height: 10rem; }
+    }
+
+    /* Animaciones suaves */
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Estilos Editor Texto (Sin scroll, altura automática) */
+    .editable-content {
+        min-height: 100px;
+        outline: none;
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s;
+        height: auto; 
+    }
+    .editing .editable-content { border: 1px dashed #9ca3af; }
+    .viewing .editable-content { border: none; }
+    
+    /* Contenedor de Imagenes (Fondo Blanco, Sin Bordes) */
+    .image-card-wrapper {
+        background-color: #ffffff; 
+        height: auto;
+    }
+
+    /* Estilo para la altura máxima de la imagen en carrusel */
+    .image-card {
+        height: 350px; /* Tamaño ligeramente más grande */
+        background-color: #ffffff;
+        position: relative;
+    }
+    @media (min-width: 768px) {
+        .image-card { height: 400px; }
+    }
+
+    /* Estilo para las imágenes del carrusel */
+    .carousel-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        position: absolute;
+        top: 0; left: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    .carousel-image.active { opacity: 1; z-index: 10; }
+    .carousel-image.hidden-img { opacity: 0; z-index: 1; pointer-events: none; }
+
+    #imageModal { backdrop-filter: blur(5px); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col relative pb-20">
+
+  <header class="bg-blue-600 w-full flex justify-center items-center py-4 shadow-xl relative z-10">
+    <div class="header-logo-container">
+      <img src="logogad.png" onerror="this.src='https://via.placeholder.com/150/0000FF/FFFFFF?text=LOGO+GAD'" alt="Logo GAD" class="w-full h-full object-contain drop-shadow-lg">
+    </div>
+  </header>
+
+  <h1 class="text-gray-800 text-center mt-6 text-xl md:text-2xl font-bold px-4 uppercase tracking-wide">TRUCOS DOCUMENTOS POR PAÍS Y TIPO</h1>
+
+  <div class="w-11/12 max-w-5xl mx-auto mt-6 bg-white p-3 md:p-4 rounded-xl shadow-md border border-gray-100 sticky top-2 z-40">
+      
+      <div class="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 items-end">
+          
+          <div class="col-span-2 md:col-span-4 relative">
+              <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">País</label>
+              <div class="flex gap-2">
+                  <select id="paisSelector" onchange="cargarDocumentosPais()" class="block w-full p-2 bg-gray-50 border border-gray-300 rounded-lg font-bold text-gray-800 shadow-sm text-sm focus:ring-2 focus:ring-blue-500">
+                      <option value="">-- Selecciona País --</option>
+                  </select>
+                  <button id="btnRenameCountry" onclick="renombrarPaisActual()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded shadow" title="Renombrar País">
+                      <i class="fas fa-pen text-sm"></i>
+                  </button>
+              </div>
+          </div>
+
+          <div class="col-span-2 md:col-span-5">
+              <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Filtrar Documento (Título)</label>
+              <select id="titleFilter" onchange="renderizarDocumentos()" class="block w-full p-2 bg-blue-50 border border-blue-300 rounded-lg font-bold text-blue-900 shadow-sm text-sm focus:ring-2 focus:ring-blue-500">
+                  <option value="ALL">📂 TODOS LOS DOCUMENTOS</option>
+              </select>
+          </div>
+
+          <div class="col-span-2 md:col-span-3 flex justify-end gap-2">
+               <button onclick="nuevoPais()" class="bg-gray-700 text-white px-3 py-2 rounded shadow hover:bg-gray-800 text-xs font-bold whitespace-nowrap">
+                  <i class="fas fa-plus mr-1"></i> País
+              </button>
+              <button id="btnToggleEdit" onclick="toggleEditMode()" class="bg-yellow-500 text-white px-3 py-2 rounded shadow hover:bg-yellow-600 text-xs font-bold whitespace-nowrap transition-colors">
+                  <i class="fas fa-pencil-alt mr-1"></i> EDITAR
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <div id="editorToolbar" class="hidden w-11/12 max-w-5xl mx-auto mt-2 bg-gray-800 text-white p-2 rounded-lg shadow-lg flex flex-wrap gap-2 justify-center sticky top-28 z-30">
+      <span class="text-xs font-bold uppercase mr-2 self-center text-gray-400 hidden sm:inline">Herramientas:</span>
+      <button onmousedown="formatDoc('bold')" class="hover:bg-gray-600 p-1 rounded w-7"><i class="fas fa-bold"></i></button>
+      <button onmousedown="formatDoc('italic')" class="hover:bg-gray-600 p-1 rounded w-7"><i class="fas fa-italic"></i></button>
+      <button onmousedown="formatDoc('foreColor', 'red')" class="hover:bg-gray-600 p-1 rounded w-7 text-red-400 font-bold">A</button>
+      <button onmousedown="formatDoc('foreColor', '#2563eb')" class="hover:bg-gray-600 p-1 rounded w-7 text-blue-400 font-bold">A</button>
+      <button onmousedown="formatDoc('removeFormat')" class="hover:bg-gray-600 p-1 rounded w-7"><i class="fas fa-eraser"></i></button>
+  </div>
+
+  <div id="documentsContainer" class="w-11/12 max-w-5xl mx-auto mt-6 mb-20 space-y-12 viewing">
+      <div class="text-center text-gray-400 py-10">Selecciona un país para ver sus documentos.</div>
+  </div>
+
+  <div id="addDocBtnContainer" class="hidden w-11/12 max-w-5xl mx-auto mb-10 text-center">
+      <button onclick="agregarNuevoDocumento()" class="bg-green-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-full shadow-lg hover:bg-green-700 font-bold transform hover:scale-105 transition-all text-sm md:text-base">
+          <i class="fas fa-plus-circle mr-2"></i> AÑADIR NUEVO DOCUMENTO
+      </button>
+  </div>
+
+  <div id="imageModal" class="fixed inset-0 bg-black/90 hidden z-50 flex justify-center items-center p-2 md:p-4" onclick="this.classList.add('hidden')">
+      <img id="modalImg" src="" class="max-w-full max-h-full rounded shadow-2xl border-2 border-white">
+      <p class="absolute bottom-5 text-white text-xs md:text-sm font-bold bg-black/50 px-3 py-1 rounded">Clic para cerrar</p>
+  </div>
+
+  <footer class="mt-auto text-center py-4 md:py-6 bg-gray-200 border-t border-gray-300 w-full">
+    <p class="font-bold text-xs md:text-sm text-gray-700">GRUPO DE ANÁLISIS DOCUMENTAL</p>
+    <p class="font-bold text-[10px] text-gray-600">POLICÍA LOCAL DE ALICANTE</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script> 
+
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
+        authDomain: "gad-alicante-v1.firebaseapp.com",
+        databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "gad-alicante-v1",
+        storageBucket: "gad-alicante-v1.appspot.com",
+        messagingSenderId: "545835357966",
+        appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const dbRef = db.ref('base_datos_paises_v2');
+
+    let currentCountryKey = null;
+    let isEditMode = false;
+    let currentDocuments = {}; 
+    const paisesEuropa = ["Albania", "Alemania", "Andorra", "Austria", "Bélgica", "Bielorrusia", "Bosnia y Herzegovina", "Bulgaria", "Chipre", "Croacia", "Dinamarca", "Eslovaquia", "Eslovenia", "España", "Estonia", "Finlandia", "Francia", "Grecia", "Hungría", "Irlanda", "Islandia", "Italia", "Kosovo", "Letonia", "Liechtenstein", "Lituania", "Luxemburgo", "Malta", "Moldavia", "Mónaco", "Montenegro", "Noruega", "Países Bajos", "Polonia", "Portugal", "Reino Unido", "República Checa", "Macedonia del Norte", "Rumanía", "Rusia", "San Marino", "Serbia", "Suecia", "Suiza", "Ucrania", "Vaticano"];
+
+    // --- MANEJO DE CARRUSEL ---
+    const activeCarouselIndex = {}; // Estado para el índice activo de cada carrusel
+
+    function initCarousel(docId, totalImages) {
+        if (totalImages === 0) return;
+        activeCarouselIndex[docId] = 0;
+        showImage(docId, 0, totalImages);
+    }
+
+    function showImage(docId, index, totalImages) {
+        const imagesContainer = document.getElementById(`carousel-images-${docId}`);
+        const indicatorsContainer = document.getElementById(`carousel-indicators-${docId}`);
+        const prevBtn = document.getElementById(`prev-btn-${docId}`);
+        const nextBtn = document.getElementById(`next-btn-${docId}`);
+
+        if (!imagesContainer) return;
+        
+        const images = imagesContainer.querySelectorAll('.carousel-image');
+        const indicators = indicatorsContainer.querySelectorAll('button');
+
+        images.forEach((img, i) => {
+            if (i === index) {
+                img.classList.remove('hidden-img');
+                img.classList.add('active');
+            } else {
+                img.classList.add('hidden-img');
+                img.classList.remove('active');
+            }
+        });
+
+        indicators.forEach((ind, i) => {
+            if (i === index) {
+                ind.classList.replace('bg-gray-400', 'bg-blue-600');
+            } else {
+                ind.classList.replace('bg-blue-600', 'bg-gray-400');
+            }
+        });
+
+        // Mostrar/Ocultar controles si hay más de una imagen
+        if (totalImages > 1) {
+             [prevBtn, nextBtn].forEach(btn => btn && btn.classList.remove('hidden'));
+        } else {
+             [prevBtn, nextBtn].forEach(btn => btn && btn.classList.add('hidden'));
+        }
+
+        activeCarouselIndex[docId] = index;
+    }
+
+    function prevImage(docId) {
+        const totalImages = document.getElementById(`carousel-images-${docId}`).querySelectorAll('.carousel-image').length;
+        if (totalImages === 0) return;
+        let newIndex = (activeCarouselIndex[docId] - 1 + totalImages) % totalImages;
+        showImage(docId, newIndex, totalImages);
+    }
+
+    function nextImage(docId) {
+        const totalImages = document.getElementById(`carousel-images-${docId}`).querySelectorAll('.carousel-image').length;
+        if (totalImages === 0) return;
+        let newIndex = (activeCarouselIndex[docId] + 1) % totalImages;
+        showImage(docId, newIndex, totalImages);
+    }
+
+    // --- INICIALIZACIÓN Y CARGA DE DATOS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        verificarYSembrarPaises();
+        cargarListaPaises();
+    });
+
+    function verificarYSembrarPaises() {
+        dbRef.once('value', snapshot => {
+            if (!snapshot.exists()) {
+                const updates = {};
+                paisesEuropa.forEach(nombre => {
+                    updates[crearIdSegura(nombre)] = { nombre: nombre };
+                });
+                dbRef.update(updates);
+            }
+        });
+    }
+
+    function cargarListaPaises() {
+        const selector = document.getElementById('paisSelector');
+        dbRef.on('value', snapshot => {
+            const data = snapshot.val();
+            const prevVal = selector.value;
+            selector.innerHTML = '<option value="">-- Selecciona País --</option>';
+            if (data) {
+                Object.keys(data).map(k => ({ key: k, nombre: data[k].nombre }))
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                    .forEach(p => {
+                        selector.innerHTML += `<option value="${p.key}">${p.nombre}</option>`;
+                    });
+            }
+            if (prevVal) selector.value = prevVal;
+        });
+    }
+
+    function cargarDocumentosPais() {
+        currentCountryKey = document.getElementById('paisSelector').value;
+        const container = document.getElementById('documentsContainer');
+        const btnAdd = document.getElementById('addDocBtnContainer');
+        const btnRename = document.getElementById('btnRenameCountry');
+
+        if (!currentCountryKey) {
+            container.innerHTML = '<div class="text-center text-gray-400 py-10">Selecciona un país.</div>';
+            btnAdd.classList.add('hidden');
+            if(isEditMode) btnRename.classList.add('hidden');
+            dbRef.child(currentCountryKey).child('documentos').off(); 
+            return;
+        }
+
+        if (isEditMode) {
+            btnAdd.classList.remove('hidden');
+            btnRename.classList.remove('hidden');
+        }
+
+        dbRef.child(currentCountryKey).child('documentos').off(); 
+        
+        dbRef.child(currentCountryKey).child('documentos').on('value', snapshot => {
+            currentDocuments = snapshot.val() || {};
+            populateTitleFilter(currentDocuments);
+            renderizarDocumentos();
+        });
+    }
+    
+    function populateTitleFilter(documentsData) {
+        const selector = document.getElementById('titleFilter');
+        const docs = documentsData ? Object.values(documentsData) : [];
+        
+        const uniqueTitles = [...new Set(docs.map(d => d.titulo || 'Sin Título'))].sort();
+
+        let html = '<option value="ALL">📂 TODOS LOS DOCUMENTOS</option>';
+        uniqueTitles.forEach(title => {
+            const encodedTitle = encodeURIComponent(title);
+            html += `<option value="${encodedTitle}">${title}</option>`;
+        });
+
+        selector.innerHTML = html;
+        const currentFilter = decodeURIComponent(selector.value);
+        if(currentFilter !== 'ALL' && !uniqueTitles.includes(currentFilter)) {
+            selector.value = 'ALL';
+        }
+    }
+
+    function renderizarDocumentos() {
+        const container = document.getElementById('documentsContainer');
+        const filterTitle = decodeURIComponent(document.getElementById('titleFilter').value);
+        container.innerHTML = '';
+        
+        let docsArray = Object.keys(currentDocuments).map(k => ({ id: k, ...currentDocuments[k] }));
+
+        if (filterTitle !== 'ALL') {
+            docsArray = docsArray.filter(d => (d.titulo || 'Sin Título') === filterTitle);
+        }
+
+        if (docsArray.length === 0) {
+            container.innerHTML = `<div class="text-center bg-white p-6 rounded-xl border border-dashed border-gray-300">
+                <p class="text-gray-500">No se encontraron documentos ${filterTitle !== 'ALL' ? `con el título <strong>"${filterTitle}"</strong>` : 'registrados'}.</p>
+            </div>`;
+            return;
+        }
+
+        docsArray.forEach(doc => {
+            container.insertAdjacentHTML('beforeend', crearTarjetaDocumento(doc));
+            // Inicializar carrusel
+            const images = doc.imageUrls ? doc.imageUrls.filter(img => img.url) : [];
+            if (images.length > 0) {
+                 initCarousel(doc.id, images.length);
+            }
+        });
+
+        actualizarVisibilidadModo();
+    }
+
+    function generateCarouselHTML(doc) {
+        const images = doc.imageUrls ? doc.imageUrls.filter(img => img.url) : [];
+        const totalImages = images.length;
+
+        if (totalImages === 0) {
+            return `<div class="w-full h-32 flex justify-center items-center bg-gray-100 rounded-lg text-gray-400">Sin Imágenes Cargadas</div>`;
+        }
+
+        let imagesHTML = images.map((img, index) => {
+            const label = img.label || `Imagen ${index + 1}`;
+            const isFirst = index === 0;
+            return `
+                <img src="${img.url}" class="carousel-image ${isFirst ? 'active' : 'hidden-img'} bg-white cursor-pointer" 
+                     onclick="if(!isEditMode) abrirImagen('${img.url}')" 
+                     onerror="this.src='https://via.placeholder.com/600x400/FEE2E2/B91C1C?text=Error:+${label.toUpperCase()}'"
+                     alt="${label}">
+                <span class="absolute top-2 left-2 bg-black/60 text-white text-xs font-bold px-2 py-1 rounded z-20">${label}</span>
+            `;
+        }).join('');
+
+        let indicatorsHTML = images.map((_, index) => 
+            `<button class="w-2 h-2 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-gray-400'} hover:bg-blue-400 transition-colors" onclick="showImage('${doc.id}', ${index}, ${totalImages})"></button>`
+        ).join('');
+
+        return `
+            <div id="carousel-${doc.id}" class="relative mx-auto w-full md:w-3/4">
+                <div id="carousel-images-${doc.id}" class="overflow-hidden relative image-card rounded-lg shadow-md">
+                    ${imagesHTML}
+                </div>
+                <button id="prev-btn-${doc.id}" onclick="prevImage('${doc.id}')" class="absolute left-0 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 hover:bg-black text-white p-2 rounded-full z-20 transition-all shadow-lg">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="next-btn-${doc.id}" onclick="nextImage('${doc.id}')" class="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 bg-black/70 hover:bg-black text-white p-2 rounded-full z-20 transition-all shadow-lg">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div id="carousel-indicators-${doc.id}" class="flex justify-center mt-3 gap-2">
+                    ${indicatorsHTML}
+                </div>
+            </div>
+        `;
+    }
+
+    function generateImageInputsHTML(doc) {
+        let html = '';
+        const images = doc.imageUrls || [];
+
+        const defaultLabels = ["Anverso", "Reverso", "Detalle 1"];
+        
+        // Render inputs for existing images
+        images.forEach((img, index) => {
+            const label = img.label || defaultLabels[index] || `Detalle ${index - 1}`;
+            const isRemovable = index >= defaultLabels.length; // Allow removal only for dynamic fields (index 3+)
+            
+            html += `
+                <div class="flex items-center gap-2 mb-2 image-input-group" data-index="${index}">
+                    <label class="block text-xs font-bold text-gray-400 uppercase w-24 flex-shrink-0 whitespace-nowrap">${label}:</label>
+                    <input type="text" value="${img.url || ''}" placeholder="Pegar enlace de ${label}..." class="w-full text-xs p-2 border rounded bg-white url-input" data-label="${label}">
+                    ${isRemovable ? `<button onclick="removeUrlInput(this, '${doc.id}')" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-times"></i></button>` : '<div class="w-5"></div>'}
+                </div>
+            `;
+        });
+        
+        // Placeholder for dynamically added inputs
+        html += `<div id="dynamic-inputs-${doc.id}"></div>`;
+
+        // Button to add more
+        html += `<button onclick="addUrlInput('${doc.id}')" class="bg-gray-700 text-white text-xs px-3 py-1 rounded mt-2 hover:bg-gray-800"><i class="fas fa-plus mr-1"></i> Añadir otra imagen</button>`;
+        return html;
+    }
+
+    function addUrlInput(docId) {
+        const card = document.getElementById(`card-${docId}`);
+        const inputsContainer = card.querySelector('#dynamic-inputs-' + docId) || card.querySelector('.edit-only-field');
+        
+        // Find the next available detail index
+        const currentInputs = card.querySelectorAll('.url-input');
+        const nextIndex = currentInputs.length;
+        const newLabel = `Detalle ${nextIndex - 1}`; // If index 3 is Detail 1, index 4 is Detail 2
+
+        const newHTML = `
+            <div class="flex items-center gap-2 mb-2 image-input-group fade-in" data-index="${nextIndex}">
+                <label class="block text-xs font-bold text-gray-400 uppercase w-24 flex-shrink-0 whitespace-nowrap">${newLabel}:</label>
+                <input type="text" value="" placeholder="Pegar enlace de ${newLabel}..." class="w-full text-xs p-2 border rounded bg-white url-input" data-label="${newLabel}">
+                <button onclick="removeUrlInput(this, '${docId}')" class="text-red-500 hover:text-red-700 p-1"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+        inputsContainer.insertAdjacentHTML('beforeend', newHTML);
+    }
+
+    function removeUrlInput(button, docId) {
+        const group = button.closest('.image-input-group');
+        group.remove();
+        // The titles will be re-assigned on next render/save if needed, but for now we just remove the DOM element.
+    }
+
+
+    function crearTarjetaDocumento(doc) {
+        // Fallback for old documents without imageUrls array
+        if (!doc.imageUrls && (doc.url || doc.url2)) {
+            doc.imageUrls = [];
+            if (doc.url) doc.imageUrls.push({ url: doc.url, label: "Anverso" });
+            if (doc.url2) doc.imageUrls.push({ url: doc.url2, label: "Reverso" });
+            // Remove obsolete fields for future consistency
+            delete doc.url;
+            delete doc.url2;
+        } else if (!doc.imageUrls) {
+            doc.imageUrls = []; // Ensure it's an array for carousel generation
+        }
+        
+        // If it's a new document/empty, ensure default placeholders exist in edit mode
+        if (isEditMode && doc.imageUrls.length < 3) {
+            const defaultLabels = ["Anverso", "Reverso", "Detalle 1"];
+            while(doc.imageUrls.length < 3) {
+                doc.imageUrls.push({ url: "", label: defaultLabels[doc.imageUrls.length] });
+            }
+        }
+
+        return `
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 fade-in group relative" id="card-${doc.id}">
+            
+            <div class="bg-gray-50 p-3 border-b border-gray-100 flex justify-between items-center flex-wrap gap-2">
+                
+                <div class="flex-grow min-w-[200px] max-w-full">
+                    <input type="text" value="${doc.titulo || 'Sin Título'}" 
+                           class="text-base md:text-lg font-bold text-gray-800 bg-transparent border-none w-full focus:bg-white focus:ring-2 focus:ring-blue-200 rounded px-2 title-input" 
+                           ${isEditMode ? '' : 'disabled'}>
+                </div>
+                
+                ${isEditMode ? `
+                    <div class="flex gap-2 ml-auto items-center">
+                        <button onclick="borrarDocumento('${doc.id}')" class="text-red-600 hover:text-red-800 px-3 py-1 text-sm rounded transition-colors whitespace-nowrap">
+                            <i class="fas fa-trash mr-1"></i> Borrar
+                        </button>
+                    </div>
+                ` : ''}
+            </div>
+
+            <div class="image-card-wrapper p-4 md:p-6 w-full border-b border-gray-100">
+                ${generateCarouselHTML(doc)}
+            </div>
+
+            <div class="edit-only-field ${isEditMode ? '' : 'hidden'} p-3 bg-gray-100 border-b space-y-2">
+                 ${generateImageInputsHTML(doc)}
+            </div>
+
+            <div class="p-4 md:p-6 w-full bg-white">
+                <div class="flex justify-between items-end mb-2 border-b pb-2">
+                    <span class="text-sm font-bold text-blue-600 uppercase tracking-wider"><i class="fas fa-shield-alt mr-2"></i>Notas de Seguridad / Trucos</span>
+                    
+                    ${isEditMode ? `
+                        <button onclick="guardarDocumentoEnFirebase('${doc.id}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded shadow-sm whitespace-nowrap transition-colors">
+                            <i class="fas fa-save mr-1"></i> GUARDAR CAMBIOS
+                        </button>
+                    ` : ''}
+
+                </div>
+                
+                <div id="content-${doc.id}" class="editable-content text-gray-700 text-sm md:text-base leading-relaxed" 
+                     contenteditable="${isEditMode}">
+                     ${doc.info || '<ul><li>Sin información registrada.</li></ul>'}
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-3 text-right ${isEditMode ? '' : 'hidden'}">
+                <button onclick="guardarDocumentoEnFirebase('${doc.id}')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs md:text-sm font-bold px-4 py-2 md:px-6 md:py-2 rounded uppercase tracking-wider shadow">
+                    <i class="fas fa-save mr-2"></i> GUARDAR CAMBIOS
+                </button>
+            </div>
+        </div>
+        `;
+    }
+
+    // --- LÓGICA MODO EDICIÓN y GUARDADO ---
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        const btn = document.getElementById('btnToggleEdit');
+        const toolbar = document.getElementById('editorToolbar');
+        const container = document.getElementById('documentsContainer');
+        const btnAdd = document.getElementById('addDocBtnContainer');
+        const btnRename = document.getElementById('btnRenameCountry');
+
+        if (isEditMode) {
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> FINALIZAR';
+            btn.classList.replace('bg-yellow-500', 'bg-green-600');
+            btn.classList.replace('hover:bg-yellow-600', 'hover:bg-green-700');
+            toolbar.classList.remove('hidden');
+            container.classList.add('editing');
+            container.classList.remove('viewing');
+            if(currentCountryKey) {
+                btnAdd.classList.remove('hidden');
+                btnRename.classList.remove('hidden');
+            }
+        } else {
+            btn.innerHTML = '<i class="fas fa-pencil-alt mr-1"></i> EDITAR';
+            btn.classList.replace('bg-green-600', 'bg-yellow-500');
+            btn.classList.replace('hover:bg-green-700', 'hover:bg-yellow-600');
+            toolbar.classList.add('hidden');
+            container.classList.remove('editing');
+            container.classList.add('viewing');
+            btnAdd.classList.add('hidden');
+            btnRename.classList.add('hidden');
+        }
+        renderizarDocumentos(); 
+    }
+
+    function actualizarVisibilidadModo() {
+        document.querySelectorAll('.editable-content').forEach(el => el.contentEditable = isEditMode);
+        document.querySelectorAll('.title-input').forEach(el => el.disabled = !isEditMode);
+
+        if(isEditMode) {
+            document.querySelectorAll('.edit-only-field').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.bg-gray-800').forEach(el => el.classList.remove('hidden'));
+        } else {
+            document.querySelectorAll('.edit-only-field').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.bg-gray-800').forEach(el => el.classList.add('hidden'));
+        }
+    }
+
+    function guardarDocumentoEnFirebase(docId) {
+        const card = document.getElementById(`card-${docId}`);
+        const titulo = card.querySelector('.title-input').value;
+        const info = document.getElementById(`content-${docId}`).innerHTML;
+        
+        // Recoger todas las URLs de imagen
+        const imageUrls = [];
+        card.querySelectorAll('.url-input').forEach(input => {
+            const url = input.value.trim();
+            const label = input.getAttribute('data-label') || 'Detalle';
+
+            if (url) {
+                imageUrls.push({ url: url, label: label });
+            }
+        });
+
+        dbRef.child(currentCountryKey).child('documentos').child(docId).update({
+            titulo: titulo,
+            imageUrls: imageUrls, // Guardar el array de imágenes
+            info: info
+        }).then(() => {
+            alert("Guardado correctamente. Se actualizarán los filtros.");
+            cargarDocumentosPais(); 
+        });
+    }
+
+    // --- CRUD DE PAÍSES ---
+    function nuevoPais() {
+        const nombre = prompt("Nombre del nuevo país:");
+        if (!nombre) return;
+        const id = crearIdSegura(nombre);
+        dbRef.child(id).once('value', s => {
+            if (s.exists()) alert("Ya existe.");
+            else dbRef.child(id).set({ nombre: nombre }).then(() => {
+                document.getElementById('paisSelector').value = id;
+                cargarDocumentosPais();
+            });
+        });
+    }
+
+    function renombrarPaisActual() {
+        if(!currentCountryKey) return;
+        const selector = document.getElementById('paisSelector');
+        const nombreActual = selector.options[selector.selectedIndex].text;
+        const nuevoNombre = prompt("Editar nombre del país:", nombreActual);
+        if(nuevoNombre && nuevoNombre.trim() !== nombreActual) {
+             dbRef.child(currentCountryKey).update({ nombre: nuevoNombre.trim() })
+             .then(() => alert("Nombre actualizado."))
+             .catch(error => alert("Error al renombrar: " + error.message));
+        }
+    }
+
+    function agregarNuevoDocumento() {
+        if (!currentCountryKey) return;
+        
+        const nuevoRef = dbRef.child(currentCountryKey).child('documentos').push();
+        nuevoRef.set({
+            titulo: "Nuevo Documento",
+            imageUrls: [
+                { url: "", label: "Anverso" },
+                { url: "", label: "Reverso" },
+                { url: "", label: "Detalle 1" }
+            ], 
+            info: "<ul><li>Escribe aquí los trucos de seguridad...</li></ul>"
+        });
+    }
+
+    function borrarDocumento(docId) {
+        if (confirm("¿Seguro que quieres eliminar este documento y toda su info?")) {
+            dbRef.child(currentCountryKey).child('documentos').child(docId).remove();
+        }
+    }
+
+    // --- UTILIDADES ---
+    function crearIdSegura(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]/g, "_");
+    }
+
+    function formatDoc(cmd, value = null) {
+        document.execCommand(cmd, false, value);
+    }
+
+    function abrirImagen(url) {
+        if (!url) return;
+        document.getElementById('modalImg').src = url;
+        document.getElementById('imageModal').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
