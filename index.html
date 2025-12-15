@@ -761,8 +761,6 @@
 
     // --- LOGIN (RESTAURADO EL LOGIN OBLIGATORIO) ---
     function initAppLogic() {
-        // *** SE ELIMINA LA COMPROBACIÓN file: Y SE FUERZA EL LOGIN SIEMPRE ***
-        
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const emailKey = sanitizeEmail(user.email);
@@ -783,7 +781,6 @@
         const now = Date.now();
         const ip = await getClientIP();
         
-        // El log y update de acceso se mantiene
         db.ref(USERS_NODE + '/' + emailKey).transaction(d => d ? {...d, email: user.email, accesos: (d.accesos||0)+1, ultimoAcceso: now} : (isAdmin ? {email:user.email, accesos:1, ultimoAcceso:now, nombre:'Admin'} : d));
         db.ref('visitLog').push().set({ userId: emailKey, userName: user.displayName||user.email, email: user.email, timestamp: now, ip: ip });
 
@@ -792,8 +789,35 @@
         else userControls.style.display = 'block';
     }
 
-    const loginWithGoogle = () => { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p).catch(e => alert("Error: " + e.message)); };
-    const logout = () => { if(isEditMode) toggleEditModeUI(); auth.signOut().then(() => location.reload()); };
+    const loginWithGoogle = () => { 
+        const p = new firebase.auth.GoogleAuthProvider(); 
+        // Forzar selección de cuenta para cambiarla si es necesario
+        p.setCustomParameters({ prompt: 'select_account' }); 
+        
+        auth.signInWithPopup(p).catch(e => alert("Error: " + e.message)); 
+    };
+    
+    // Función de cierre de sesión mejorada
+    const logout = () => { 
+        if(isEditMode) toggleEditModeUI(); 
+        
+        auth.signOut().then(() => {
+            // Limpiar la interfaz después de cerrar sesión
+            adminPanel.style.display = 'none';
+            userControls.style.display = 'none';
+            
+            // Mostrar el modal de login, forzando al usuario a autenticarse de nuevo.
+            modalLogin.style.display = 'flex';
+            
+            // Opcional: Recargar la página para asegurar la limpieza total del estado (más robusto)
+            // location.reload(); 
+        }).catch((error) => {
+            console.error("Error al cerrar sesión:", error);
+            // En caso de error, igualmente forzamos la vista de login
+            modalLogin.style.display = 'flex';
+        });
+    };
+    
     document.getElementById('btn-logout').onclick = logout;
     document.getElementById('btn-logout-user').onclick = logout;
 
@@ -822,7 +846,7 @@
     document.getElementById('show-edit-menu-modal').onclick = toggleEditModeUI;
     
     window.addEventListener('DOMContentLoaded', () => {
-        // Se mantiene la creación del modal de login de Google
+        // Se asegura que el botón de login tenga la función correcta
         modalLogin.innerHTML = `<div class="modal"><div class="modal-header-logo"><img src="logogad.png"></div><h2>Acceso GAD</h2><button id="google-login-btn" class="google-btn"><i class="fab fa-google" style="color:#DB4437;"></i> Google Login</button></div>`;
         document.getElementById('google-login-btn').onclick = loginWithGoogle;
         
