@@ -17,7 +17,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
             margin: 0; padding: 0;
-            overflow: hidden; /* Evitamos doble scroll en el body principal */
+            overflow: hidden; 
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -34,7 +34,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 100; /* Siempre por encima */
             position: relative;
-            flex-shrink: 0; /* No encoger */
+            flex-shrink: 0; 
         }
 
         .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -75,7 +75,6 @@
         .top-back-btn:hover { background-color: #b91c1c; }
 
         /* --- 2. CONTENEDOR SCROLLABLE PRINCIPAL --- */
-        /* Este contenedor envuelve el logo grande y el menú de botones */
         #main-scroll-area {
             flex-grow: 1;
             overflow-y: auto;
@@ -88,9 +87,9 @@
         /* --- 3. CONTENEDOR VISOR IFRAME (OCULTO POR DEFECTO) --- */
         #iframe-viewer-area {
             flex-grow: 1;
-            display: none; /* Oculto inicialmente */
+            display: none; 
             width: 100%;
-            height: calc(100vh - 50px); /* Altura total menos barra superior */
+            height: calc(100vh - 50px); 
             background: white;
             position: relative;
         }
@@ -580,7 +579,6 @@
         }
 
         // Mostrar botones (marcadores) SOLO si no estamos viendo contenido
-        // Opcional: Si quieres que se vean los marcadores incluso viendo contenido, quita el "!isViewingContent"
         if (!isViewingContent && visibleButtons) {
             visibleButtons.forEach(([key, data]) => {
                 const topBtn = document.createElement('a');
@@ -761,20 +759,17 @@
     dragZone.ondrop = e => { e.preventDefault(); dragZone.classList.remove('drag-over-container'); if(draggedItem) { mainMenuGrid.appendChild(draggedItem); updateOrder(); } };
     function updateOrder() { const u={}; document.querySelectorAll('#main-menu-grid .menu-button-container').forEach((b,i) => u[`/${BUTTONS_NODE}/${b.dataset.id}/order`]=i+1); db.ref().update(u); }
 
-    // --- LOGIN ---
+    // --- LOGIN (RESTAURADO EL LOGIN OBLIGATORIO) ---
     function initAppLogic() {
-        if (window.location.protocol === 'file:') {
-            console.warn("Modo Local Detectado.");
-            grantAccess({ email: ADMIN_EMAIL, displayName: "Admin Local" }, true);
-            return; 
-        }
+        // *** SE ELIMINA LA COMPROBACIÓN file: Y SE FUERZA EL LOGIN SIEMPRE ***
+        
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const emailKey = sanitizeEmail(user.email);
                 if (user.email === ADMIN_EMAIL) { grantAccess(user, true); return; }
                 const snap = await db.ref(USERS_NODE + '/' + emailKey).once('value');
                 if (snap.exists()) grantAccess(user, false);
-                else { alert('ACCESO DENEGADO'); auth.signOut(); modalLogin.style.display = 'flex'; }
+                else { alert('ACCESO DENEGADO. Contacte con el administrador.'); auth.signOut(); modalLogin.style.display = 'flex'; }
             } else {
                 modalLogin.style.display = 'flex'; adminPanel.style.display = 'none'; userControls.style.display = 'none';
             }
@@ -788,10 +783,9 @@
         const now = Date.now();
         const ip = await getClientIP();
         
-        if(window.location.protocol !== 'file:') {
-            db.ref(USERS_NODE + '/' + emailKey).transaction(d => d ? {...d, email: user.email, accesos: (d.accesos||0)+1, ultimoAcceso: now} : (isAdmin ? {email:user.email, accesos:1, ultimoAcceso:now, nombre:'Admin'} : d));
-            db.ref('visitLog').push().set({ userId: emailKey, userName: user.displayName||user.email, email: user.email, timestamp: now, ip: ip });
-        }
+        // El log y update de acceso se mantiene
+        db.ref(USERS_NODE + '/' + emailKey).transaction(d => d ? {...d, email: user.email, accesos: (d.accesos||0)+1, ultimoAcceso: now} : (isAdmin ? {email:user.email, accesos:1, ultimoAcceso:now, nombre:'Admin'} : d));
+        db.ref('visitLog').push().set({ userId: emailKey, userName: user.displayName||user.email, email: user.email, timestamp: now, ip: ip });
 
         document.getElementById('user-info-display').innerHTML = `<i class="fas fa-user-circle"></i> ${user.email}`;
         if (isAdmin) { adminPanel.style.display = 'flex'; document.getElementById('edit-title-icon').style.display = isEditMode ? 'inline-block' : 'none'; } 
@@ -828,6 +822,7 @@
     document.getElementById('show-edit-menu-modal').onclick = toggleEditModeUI;
     
     window.addEventListener('DOMContentLoaded', () => {
+        // Se mantiene la creación del modal de login de Google
         modalLogin.innerHTML = `<div class="modal"><div class="modal-header-logo"><img src="logogad.png"></div><h2>Acceso GAD</h2><button id="google-login-btn" class="google-btn"><i class="fab fa-google" style="color:#DB4437;"></i> Google Login</button></div>`;
         document.getElementById('google-login-btn').onclick = loginWithGoogle;
         
