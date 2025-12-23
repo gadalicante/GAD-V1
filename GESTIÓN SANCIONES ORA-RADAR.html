@@ -58,9 +58,24 @@
         .card-header { padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; flex-wrap: wrap; gap: 10px; }
         .left-col { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         
-        /* REINCIDENTES */
-        .plate-box { font-family: monospace; font-size: 1.3em; font-weight: 900; background: #f1f2f6; padding: 5px 10px; border-radius: 6px; border: 1px solid #ced6e0; text-align: center; }
+        /* REINCIDENTES Y MATRÍCULA (MODIFICADO PARA TAMAÑO FIJO) */
+        .plate-box { 
+            font-family: 'Courier New', monospace; /* Fuente monoespaciada estricta */
+            font-size: 1.4em; 
+            font-weight: 900; 
+            background: #f1f2f6; 
+            padding: 5px 0; /* Padding lateral 0 para ajustar ancho fijo */
+            border-radius: 6px; 
+            border: 1px solid #ced6e0; 
+            text-align: center;
+            width: 220px; /* ANCHO FIJO PARA 12 DÍGITOS */
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
         .plate-box.reincident { background-color: #ffcccc; border-color: #e74c3c; color: #b71c1c; }
+        
         .count-badge { background: #eee; padding: 4px 10px; border-radius: 15px; font-weight: bold; font-size: 0.8em; }
         .count-badge.reincident { color: #e74c3c; background: #ffebeb; border: 1px solid #e74c3c; }
 
@@ -95,6 +110,9 @@
         #legend-panel.visible { display: block; animation: slideIn 0.3s; }
         @keyframes slideIn { from { transform: translateY(-100%); } to { transform: translateY(0); } }
         .help-step { margin-bottom: 20px; border-left: 4px solid #ddd; padding-left: 15px; }
+        .help-step h4 { margin: 0 0 5px 0; color: #2c3e50; }
+        .help-step p { margin: 0; color: #666; font-size: 0.95em; }
+        .tag-help { padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
     </style>
 </head>
 <body class="mode-ora">
@@ -214,15 +232,48 @@
         const DB_REF = 'denuncias_global_ORA-RADAR';
         const CORREO_SANCIONES = "unidad.sanciones@alicante.es";
         
+        // CONTENIDO DEL MANUAL DE AYUDA RESTAURADO
         const DEFAULT_HELP_HTML = `
             <h2 style="color:#2980b9; border-bottom:2px solid #eee; padding-bottom:10px;">📖 Guía de Uso Paso a Paso</h2>
+            
             <div class="help-step" style="border-left-color: #3498db;">
                 <h4>1. Importar Datos (Excel)</h4>
-                <p>Arrastra tu archivo Excel al recuadro <strong>"SOLTAR EXCEL AQUÍ"</strong>.</p>
+                <p>Arrastra tu archivo Excel al recuadro <strong>"SOLTAR EXCEL AQUÍ"</strong>. El sistema:</p>
+                <ul>
+                    <li>Añade los nuevos registros.</li>
+                    <li>Elimina automáticamente matrículas españolas.</li>
+                    <li>Detecta duplicados para no repetir la misma multa.</li>
+                </ul>
             </div>
+
             <div class="help-step" style="border-left-color: #f1c40f;">
-                <h4>2. Edición de Vehículo</h4>
-                <p>Si faltan datos como Marca o Modelo, pulsa el icono del <strong>Lápiz azul <i class="fas fa-pen"></i></strong> en la cabecera de la tarjeta.</p>
+                <h4>2. Revisión de Pendientes</h4>
+                <p>Pulsa el botón amarillo <strong><i class="fas fa-hourglass-half"></i> Pendientes</strong>. Verás solo los vehículos nuevos que no has revisado.</p>
+                <p>Haz clic en la <strong>tarjeta del vehículo</strong> para ver los detalles (fecha, hora, calle, marca...).</p>
+            </div>
+
+            <div class="help-step" style="border-left-color: #2c3e50;">
+                <h4>3. Gestionar Estados (Botones de la Tarjeta)</h4>
+                <p>Cada vehículo tiene 3 botones de acción a la derecha:</p>
+                <ul style="list-style:none; padding:0;">
+                    <li style="margin-bottom:8px;">
+                        <span class="tag-help" style="background:#ffeb3b; color:#000;">SIN DATOS</span> 
+                        Si has buscado en Eurocop y no hay datos, pulsa este botón. Desaparecerá de pendientes.
+                    </li>
+                    <li style="margin-bottom:8px;">
+                        <span class="tag-help" style="background:#ff5252; color:white;">ALERTA</span> 
+                        Úsalo para vehículos de interés. Copia el texto oficial de inmovilización automáticamente.
+                    </li>
+                    <li>
+                        <span class="tag-help" style="background:#4CAF50; color:white;">NOTIFICADO</span> 
+                        Abre el formulario para rellenar Nombre, DNI, etc. <strong>Guarda los datos en la nube</strong> y abre Outlook automáticamente para enviar el correo a Sanciones.
+                    </li>
+                </ul>
+            </div>
+
+            <div class="help-step" style="border-left-color: #e74c3c;">
+                <h4>4. Reincidentes</h4>
+                <p>Pulsa el botón rojo <strong>Reincidentes</strong>. Muestra vehículos con más de 1 denuncia, ordenados del que más tiene al que menos.</p>
             </div>
         `;
 
@@ -260,7 +311,6 @@
             render();
         }
 
-        // CARGA DE DATOS
         database.ref(DB_REF).on('value', snap => {
             const val = snap.val();
             let rawList = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
@@ -398,111 +448,90 @@
             closeModal('edit-vehicle-modal');
         }
 
-        // --- IMPORTACIÓN EXCEL ORIGINAL (RESTAURADA) ---
+        // --- IMPORTACIÓN EXCEL ---
         function sanitizeKey(key) {
             if (!key) return '';
             return key.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.$#\[\]\/]/g, '_').replace(/\s/g, '_');
         }
 
         function getCanonicalKey(sanitizedKey) {
-            if (sanitizedKey === 'matricula' || sanitizedKey === 'placa') return 'matricula';
+            if (sanitizedKey.includes('matricula') || sanitizedKey.includes('placa')) return 'matricula';
             if (sanitizedKey.includes('fecha')) return 'fecha';
-            if (sanitizedKey === 'marca') return 'marca';
-            if (sanitizedKey === 'modelo') return 'modelo';
-            if (sanitizedKey === 'calle' || sanitizedKey === 'lugar' || sanitizedKey === 'ubicacion') return 'lugar';
+            if (sanitizedKey.includes('marca')) return 'marca';
+            if (sanitizedKey.includes('modelo')) return 'modelo';
+            if (sanitizedKey.includes('calle') || sanitizedKey.includes('lugar') || sanitizedKey.includes('ubicacion')) return 'lugar';
+            if (sanitizedKey.includes('hora')) return 'hora';
             return null;
         }
 
-        function extraerDatosExcel(file) {
-            return new Promise((resolve, reject) => {
+        async function handleImport(file) {
+            pushHistory();
+            try {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
                         const jsonData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                         
-                        const sanitized = jsonData.map(row => {
-                            const newRow = {};
+                        let added = 0;
+                        let duplicates = 0;
+
+                        jsonData.forEach(row => {
+                            let newRow = {};
                             Object.keys(row).forEach(k => {
                                 const ck = getCanonicalKey(sanitizeKey(k));
-                                if (ck) {
-                                    let v = row[k];
-                                    if (ck === 'fecha') {
-                                        // Lógica robusta de fecha del Archivo 2
-                                        if (v instanceof Date) newRow[ck] = v;
-                                        else if (typeof v === 'number') newRow[ck] = new Date(Math.round((v - 25569) * 86400 * 1000));
-                                        else newRow[ck] = new Date(v);
-                                    } else {
-                                        newRow[ck] = v;
-                                    }
-                                }
+                                if(ck) newRow[ck] = row[k];
                             });
-                            if(row['Hora denuncia'] && newRow.fecha) {
-                                const [h, m] = row['Hora denuncia'].toString().split(':');
-                                if(h && m) newRow.fecha.setHours(h, m);
+
+                            const mat = String(newRow.matricula || '').trim().replace(/\s/g,'').toUpperCase();
+                            if(!mat) return;
+
+                            if(/^\d{4}[A-Z]{3}$/i.test(mat) || /^[A-Z]{1,2}\d{4}[A-Z]{1,2}$/i.test(mat)) return;
+
+                            let finalDate = new Date();
+                            if(newRow.fecha) {
+                                if(newRow.fecha instanceof Date) finalDate = newRow.fecha;
+                                else if(typeof newRow.fecha === 'number') finalDate = new Date(Math.round((newRow.fecha - 25569) * 86400 * 1000));
+                                else finalDate = new Date(newRow.fecha);
                             }
-                            return newRow;
+                            
+                            if(newRow.hora) {
+                                const t = String(newRow.hora).split(':');
+                                if(t.length>=2) finalDate.setHours(t[0], t[1]);
+                            }
+
+                            const exists = allData.some(d => d.matricula === mat && d.tipo === mode && Math.abs(new Date(d.fecha).getTime() - finalDate.getTime()) < 60000);
+
+                            if(exists) {
+                                duplicates++;
+                            } else {
+                                const prev = allData.find(d => d.matricula === mat);
+                                allData.push({
+                                    id: 'ID_' + Date.now() + '_' + Math.random().toString(36).substr(2),
+                                    matricula: mat,
+                                    fecha: finalDate.toISOString(),
+                                    tipo: mode,
+                                    lugar: newRow.lugar || '',
+                                    marca: newRow.marca || (prev ? prev.marca : ''), 
+                                    modelo: newRow.modelo || (prev ? prev.modelo : ''),
+                                    eurocop: prev ? prev.eurocop : false,
+                                    alerta: prev ? prev.alerta : false,
+                                    notificado: prev ? prev.notificado : false,
+                                    datos_titular: prev ? (prev.datos_titular || {}) : {}
+                                });
+                                added++;
+                            }
                         });
 
-                        const final = sanitized.filter(row => {
-                            if (!row.matricula) return false;
-                            const p = String(row.matricula).trim().replace(/\s/g, '').toUpperCase();
-                            row.matricula = p; 
-                            return !/^\d{4}[A-Z]{3}$/i.test(p) && !/^[A-Z]{1,2}\d{4}[A-Z]{1,2}$/i.test(p);
-                        });
-                        resolve(final);
-                    } catch (err) { reject(err); }
+                        database.ref(DB_REF).set(allData);
+                        alert(`Importación completada:\n✅ ${added} nuevos\n⚠️ ${duplicates} duplicados ignorados`);
+
+                    } catch(err) { console.error(err); alert("Error procesando Excel."); }
                 };
                 reader.readAsArrayBuffer(file);
-            });
-        }
-
-        async function handleImport(file) {
-            pushHistory();
-            try {
-                const newRows = await extraerDatosExcel(file);
-                let addedCount = 0;
-                let duplicateCount = 0;
-
-                newRows.forEach(n => {
-                    const fechaISO = n.fecha instanceof Date ? n.fecha.toISOString() : new Date().toISOString();
-                    
-                    const isExactDuplicate = allData.some(old => 
-                        old.matricula === n.matricula && 
-                        old.tipo === mode && 
-                        Math.abs(new Date(old.fecha).getTime() - new Date(fechaISO).getTime()) < 60000
-                    );
-
-                    if (isExactDuplicate) {
-                        duplicateCount++;
-                    } else {
-                        const existingPlate = allData.find(old => old.matricula === n.matricula);
-                        
-                        const newRecord = {
-                            id: btoa(n.matricula + fechaISO + Math.random()), 
-                            matricula: n.matricula,
-                            fecha: fechaISO,
-                            tipo: mode, 
-                            lugar: n.lugar || '',
-                            marca: n.marca || (existingPlate ? existingPlate.marca : ''), 
-                            modelo: n.modelo || (existingPlate ? existingPlate.modelo : ''),
-                            eurocop: existingPlate ? existingPlate.eurocop : false,
-                            alerta: existingPlate ? existingPlate.alerta : false,
-                            notificado: existingPlate ? existingPlate.notificado : false,
-                            datos_titular: existingPlate ? (existingPlate.datos_titular || {}) : {}
-                        };
-                        
-                        allData.push(newRecord);
-                        addedCount++;
-                    }
-                });
-
-                if(addedCount > 0) database.ref(DB_REF).set(allData);
-                alert(`Importación (${mode}):\n✅ ${addedCount} añadidos.\n⚠️ ${duplicateCount} duplicados omitidos.`);
-
             } catch (error) {
                 console.error(error);
-                alert("Error al leer el archivo. Asegúrate de que es un Excel válido.");
+                alert("Error al leer el archivo.");
                 historyStack.pop();
             }
         }
