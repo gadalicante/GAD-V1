@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAD - Ayuda Países v15.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; overflow-x: hidden; width: 100vw; }
+        .main-container { width: 98%; margin: 0 auto; }
+
+        /* Cabecera GAD: Altura mínima profesional (aprox 2mm de margen) */
+        .header-logo { height: 160px; width: auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4)); }
+
+        /* Sidebar: Estilo de botones y colores */
+        .sidebar-item { 
+            font-size: 13px; font-weight: 700; text-transform: uppercase;
+            margin-bottom: 6px; border-radius: 12px; transition: all 0.3s;
+            border: 1px solid transparent; width: 100%; text-align: left; padding: 0.8rem 1rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .country-empty { background-color: #f3f4f6; color: #94a3b8; font-weight: 400; opacity: 0.7; }
+        .country-has-data { background-color: #dcfce7; color: #166534; border-color: #bbf7d0; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .sidebar-item.active { background-color: #2563eb !important; color: white !important; border-color: #1d4ed8; opacity: 1; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+
+        .flag-img { width: 28px; height: auto; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); }
+
+        /* Editor Elástico */
+        .editor-wrapper { 
+            min-height: 700px; background: white; border-radius: 2rem; 
+            border: 1px solid #e2e8f0; margin-bottom: 2rem; 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        #mainEditor { 
+            outline: none; padding: 3rem; color: #1e293b; font-size: 1.15rem; 
+            line-height: 1.8; word-wrap: break-word; overflow-wrap: break-word;
+        }
+        
+        /* Imágenes Inteligentes */
+        .img-block { position: relative; display: inline-block; margin: 20px; vertical-align: top; max-width: 100%; }
+        .img-block img { display: block; max-width: 100%; border-radius: 12px; border: 2px solid #cbd5e1; pointer-events: auto; }
+        .img-tools { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); display: none; gap: 6px; z-index: 100; background: #111827; padding: 6px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .editing .img-block:hover .img-tools { display: flex; }
+        .editing .img-block { cursor: move; border: 2px dashed #2563eb; padding: 4px; border-radius: 14px; }
+        .tool-btn { width: 34px; height: 34px; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: none; }
+        .btn-blue { background: #2563eb; }
+        .btn-red { background: #ef4444; }
+
+        #zoomOverlay { display: none; position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; }
+        #zoomOverlay img { max-width: 98%; max-height: 98%; border-radius: 8px; border: 2px solid #fff; }
+
+        /* Categorías: Tamaño aumentado */
+        .tab-btn { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; border-bottom: 4px solid transparent; padding-bottom: 12px; transition: all 0.2s; }
+        .tab-btn.active { border-bottom: 5px solid #2563eb; color: #2563eb; font-weight: 900; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-blue-900 text-white shadow-2xl py-1 px-6 flex flex-wrap items-center justify-between z-50">
+        <div class="flex items-center gap-8">
+            <img src="logogad.png" onerror="this.src='https://via.placeholder.com/200/FFFFFF/0000FF?text=GAD'" class="header-logo">
+            <div>
+                <h1 class="text-4xl font-black uppercase tracking-tighter">GAD ALICANTE</h1>
+                <p class="text-[11px] font-bold text-blue-300 tracking-[0.5em] uppercase mt-1">NODO PERMANENTE: AYUDA PAÍSES</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <button onclick="nuevoPaisManual()" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl text-[10px] font-black border border-slate-600 transition-all shadow-lg">
+                <i class="fas fa-plus mr-2"></i> AÑADIR PAÍS MANUAL
+            </button>
+            <button id="btnMode" onclick="toggleEdit()" class="bg-amber-500 hover:bg-amber-400 text-blue-950 px-8 py-3 rounded-2xl text-sm font-black shadow-2xl transition-all flex items-center gap-3">
+                <i class="fas fa-lock" id="iconStatus"></i> <span id="textStatus">ENTRAR A MODO EDICIÓN</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex flex-grow flex-col lg:flex-row overflow-hidden main-container">
+        <aside class="w-full lg:w-80 bg-white border-r border-slate-200 flex flex-col shadow-inner overflow-y-auto max-h-[400px] lg:max-h-full">
+            <div class="p-4 bg-slate-50 sticky top-0 z-10 border-b">
+                <input type="text" id="search" placeholder=" Buscar País..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-4 focus:ring-blue-100 transition-all">
+            </div>
+            <nav id="countryList" class="p-3 space-y-1">
+                </nav>
+        </aside>
+
+        <main class="flex-grow flex flex-col bg-slate-100 p-4 md:p-10 overflow-y-auto h-full">
+            <div id="welcome" class="flex-grow flex flex-col items-center justify-center text-slate-300 opacity-20">
+                <i class="fas fa-shield-halved text-[15rem]"></i>
+            </div>
+
+            <div id="contentSection" class="hidden">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                    <h2 id="countryName" class="text-5xl md:text-7xl font-black text-slate-800 uppercase tracking-tighter">--</h2>
+                    <button onclick="eliminarPais()" class="edit-ui hidden bg-red-600 text-white px-6 py-2 rounded-lg text-xs font-black shadow-lg hover:bg-red-700 transition-all">ELIMINAR PAÍS</button>
+                </div>
+
+                <div class="flex gap-6 md:gap-12 border-b border-slate-300 mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                    <button onclick="switchTab('permiso')" id="tab-permiso" class="tab-btn active">Permiso Circulación</button>
+                    <button onclick="switchTab('itv')" id="tab-itv" class="tab-btn">Ficha ITV</button>
+                    <button onclick="switchTab('seguro')" id="tab-seguro" class="tab-btn">Seguro</button>
+                    <button onclick="switchTab('otros')" id="tab-otros" class="tab-btn">Otros / Notas</button>
+                </div>
+
+                <div id="toolbar" class="hidden bg-slate-900 p-4 rounded-t-3xl flex items-center gap-3 flex-wrap border-b border-slate-700">
+                    <button onmousedown="event.preventDefault(); exec('bold')" class="w-12 h-12 text-white hover:bg-slate-700 rounded-xl transition-all"><i class="fas fa-bold"></i></button>
+                    <button onmousedown="event.preventDefault(); exec('insertUnorderedList')" class="w-12 h-12 text-white hover:bg-slate-700 rounded-xl transition-all"><i class="fas fa-list-ul"></i></button>
+                    <div class="w-px h-8 bg-slate-700 mx-2"></div>
+                    <button onclick="addImgBtn()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase shadow-lg border border-blue-400">
+                        <i class="fas fa-camera mr-2"></i> INSERTAR MARCADOR IMAGEN
+                    </button>
+                    <button onclick="save()" class="ml-auto bg-green-600 hover:bg-green-500 text-white px-10 py-3 rounded-xl text-[10px] font-black uppercase shadow-2xl border border-green-400">
+                        <i class="fas fa-save mr-2"></i> GUARDAR CAMBIOS
+                    </button>
+                </div>
+
+                <div class="editor-wrapper">
+                    <div id="mainEditor" ondrop="drop(event)" ondragover="allowDrop(event)" contenteditable="false"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="zoomOverlay" onclick="this.style.display='none'"><img id="zoomImg"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
+            authDomain: "gad-alicante-v1.firebaseapp.com",
+            databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gad-alicante-v1",
+            storageBucket: "gad-alicante-v1.appspot.com",
+            messagingSenderId: "545835357966",
+            appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const ref = firebase.database().ref('Ayuda Países'); 
+
+        let isEdit = false, activeId = null, activeTab = 'permiso', countries = {};
+
+        // LISTA DE MAPEO DE BANDERAS (AQUÍ DEBES AÑADIR LOS PAÍSES NUEVOS)
+        const flagCodes = {
+            "ALBANIA": "al", "ALEMANIA": "de", "ANDORRA": "ad", "ARGELIA": "dz", "ARMENIA": "am", "AUSTRIA": "at", "AZERBAIYAN": "az", "BELGICA": "be", "BIELORRUSIA": "by", "BOSNIA Y HERZEGOVINA": "ba", "BULGARIA": "bg", "CHIPRE": "cy", "CIUDAD DEL VATICANO": "va", "CROACIA": "hr", "DINAMARCA": "dk", "ESLOVAQUIA": "sk", "ESLOVENIA": "si", "ESPANA": "es", "ESTONIA": "ee", "FINLANDIA": "fi", "FRANCIA": "fr", "GEORGIA": "ge", "GRECIA": "gr", "HUNGRIA": "hu", "IRLANDA": "ie", "ISLANDIA": "is", "ITALIA": "it", "KAZAJISTAN": "kz", "LETONIA": "lv", "LIECHTENSTEIN": "li", "LITUANIA": "lt", "LUXEMBURGO": "lu", "MALTA": "mt", "MARRUECOS": "ma", "MOLDAVIA": "md", "MONACO": "mc", "MONTENEGRO": "me", "NORUEGA": "no", "PAISES BAJOS": "nl", "POLONIA": "pl", "PORTUGAL": "pt", "REINO UNIDO": "gb", "REPUBLICA CHECA": "cz", "MACEDONIA DEL NORTE": "mk", "RUMANIA": "ro", "RUSIA": "ru", "SAN MARINO": "sm", "SERBIA": "rs", "SUECIA": "se", "SUIZA": "ch", "TURQUIA": "tr", "UCRANIA": "ua",
+            "LIBIA": "ly", "TUNEZ": "tn", "EGIPTO": "eg" // Añadidos extra
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ref.on('value', s => { countries = s.val() || {}; renderList(); });
+            document.getElementById('search').addEventListener('input', e => renderList(e.target.value));
+            document.getElementById('mainEditor').addEventListener('click', e => {
+                if(!isEdit && e.target.tagName === 'IMG') {
+                    document.getElementById('zoomOverlay').style.display = 'flex';
+                    document.getElementById('zoomImg').src = e.target.src;
+                }
+            });
+        });
+
+        function renderList(filter = '') {
+            const list = document.getElementById('countryList');
+            list.innerHTML = '';
+            Object.keys(countries).sort((a,b) => countries[a].nombre.localeCompare(countries[b].nombre)).forEach(id => {
+                const c = countries[id];
+                const nombreKey = c.nombre.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                if(c.nombre.toLowerCase().includes(filter.toLowerCase())) {
+                    const hasData = c.datos && Object.values(c.datos).some(d => d && d.length > 50);
+                    const btn = document.createElement('button');
+                    let styleClass = hasData ? 'country-has-data' : 'country-empty';
+                    btn.className = `sidebar-item transition-all ${activeId === id ? 'active' : styleClass}`;
+                    btn.onclick = () => { activeId = id; selectCountry(); };
+                    
+                    const code = flagCodes[nombreKey];
+                    const flagHtml = code ? `<img src="https://flagcdn.com/w40/${code}.png" class="flag-img" alt="">` : '';
+                    
+                    btn.innerHTML = `<span>${c.nombre}</span> ${flagHtml}`;
+                    list.appendChild(btn);
+                }
+            });
+        }
+
+        function selectCountry() {
+            document.getElementById('welcome').classList.add('hidden');
+            document.getElementById('contentSection').classList.remove('hidden');
+            document.getElementById('countryName').innerText = countries[activeId].nombre;
+            loadContent(); renderList();
+        }
+
+        function loadContent() {
+            document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<h3>Sin datos registrados.</h3>";
+        }
+
+        function switchTab(t) {
+            activeTab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            loadContent();
+        }
+
+        function toggleEdit() {
+            isEdit = !isEdit;
+            const btn = document.getElementById('btnMode'), toolbar = document.getElementById('toolbar'), editor = document.getElementById('mainEditor');
+            if(isEdit) {
+                btn.classList.replace('bg-amber-500', 'bg-green-600');
+                document.getElementById('iconStatus').className = "fas fa-save";
+                document.getElementById('textStatus').innerText = "VOLVER A MODO CONSULTA";
+                toolbar.classList.remove('hidden'); 
+                editor.contentEditable = "true";
+                editor.parentElement.classList.add('editing');
+                document.querySelectorAll('.edit-ui').forEach(el => el.classList.remove('hidden'));
+            } else {
+                btn.classList.replace('bg-green-600', 'bg-amber-500');
+                document.getElementById('iconStatus').className = "fas fa-lock";
+                document.getElementById('textStatus').innerText = "ENTRAR A MODO EDICIÓN";
+                toolbar.classList.add('hidden'); 
+                editor.contentEditable = "false";
+                editor.parentElement.classList.remove('editing');
+                document.querySelectorAll('.edit-ui').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.temp-btn').forEach(el => el.remove());
+            }
+        }
+
+        function addImgBtn() {
+            const placeholder = `<button class="temp-btn bg-blue-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold m-2" contenteditable="false" onclick="confirmImg(this)">PEGAR IMAGEN AQUÍ</button>&nbsp;`;
+            document.execCommand('insertHTML', false, placeholder);
+        }
+
+        function confirmImg(btn) {
+            const url = prompt("Introduce el enlace Embed de OneDrive:");
+            if(url) {
+                const block = document.createElement('div');
+                block.className = 'img-block';
+                block.contentEditable = "false";
+                block.draggable = true;
+                block.id = 'img_' + Date.now();
+                block.innerHTML = `
+                    <div class="img-tools">
+                        <button onclick="swapUrl(this)" class="tool-btn btn-blue" title="Sustituir"><i class="fas fa-pen"></i></button>
+                        <button onclick="resizer(this, 1.2)" class="tool-btn btn-blue" title="Aumentar"><i class="fas fa-plus"></i></button>
+                        <button onclick="resizer(this, 0.8)" class="tool-btn btn-blue" title="Reducir"><i class="fas fa-minus"></i></button>
+                        <button onclick="this.parentElement.parentElement.remove()" class="tool-btn btn-red" title="Borrar"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <img src="${url}" style="width: 350px;">`;
+                btn.replaceWith(block);
+                block.addEventListener('dragstart', e => e.dataTransfer.setData("text", e.target.id));
+            }
+        }
+
+        function swapUrl(btn) {
+            const img = btn.parentElement.parentElement.querySelector('img');
+            const newUrl = prompt("Sustituir por nueva URL de OneDrive:", img.src);
+            if(newUrl) img.src = newUrl;
+        }
+
+        function resizer(btn, factor) {
+            const img = btn.parentElement.parentElement.querySelector('img');
+            img.style.width = (img.clientWidth * factor) + 'px';
+        }
+
+        function allowDrop(e) { e.preventDefault(); }
+        function drop(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData("text");
+            const element = document.getElementById(id);
+            if(element) {
+                const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                if(range) range.insertNode(element);
+                else e.target.appendChild(element);
+            }
+        }
+
+        function exec(c) { document.execCommand(c, false, null); }
+
+        function save() {
+            if(!activeId) return;
+            const clone = document.getElementById('mainEditor').cloneNode(true);
+            clone.querySelectorAll('.temp-btn').forEach(el => el.remove());
+            ref.child(activeId).child('datos').child(activeTab).set(clone.innerHTML)
+               .then(() => alert("✅ BASE DE DATOS 'Ayuda Países' ACTUALIZADA"));
+        }
+
+        function nuevoPaisManual() {
+            const n = prompt("Nombre del País:");
+            if(!n) return;
+            const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", otros: "" } });
+        }
+
+        function eliminarPais() {
+            if(confirm("¿Eliminar definitivamente este país?")) {
+                ref.child(activeId).remove().then(() => location.reload());
+            }
+        }
+    </script>
+</body>
+</html>
