@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GAD - Ayuda Países v18.3 (Mobile Image Fit)</title>
+    <title>GAD - Ayuda Países v19.0 (Menu & Drag Fix)</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
+        /* --- FUENTES --- */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
         
+        /* --- GENERAL --- */
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #f1f5f9; 
@@ -16,6 +20,7 @@
             width: 100vw; 
             touch-action: manipulation; 
         }
+
         .main-container { 
             width: 98%; 
             margin: 0 auto; 
@@ -24,14 +29,15 @@
 
         /* --- CABECERA RESPONSIVA --- */
         .header-logo { 
-            height: 60px; /* Tamaño móvil */
+            height: 60px; /* Móvil */
             width: auto; 
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); 
             transition: all 0.3s;
         }
+
         @media (min-width: 768px) {
             .header-logo { 
-                height: 140px; /* Tamaño PC */
+                height: 140px; /* PC */
                 filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4)); 
             }
         }
@@ -40,13 +46,14 @@
             font-size: 1.25rem; 
             line-height: 1.2;
         }
+
         @media (min-width: 768px) {
             .header-title {
                 font-size: 2.25rem; 
             }
         }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR (LISTA) --- */
         .sidebar-item { 
             font-size: 13px; 
             font-weight: 700; 
@@ -65,10 +72,26 @@
             user-select: none; 
             -webkit-tap-highlight-color: transparent;
         }
-        .sidebar-item:active { transform: scale(0.98); }
 
-        .country-empty { background-color: #f3f4f6; color: #94a3b8; font-weight: 400; opacity: 0.8; }
-        .country-has-data { background-color: #dcfce7; color: #15803d; border-color: #bbf7d0; font-weight: 800; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .sidebar-item:active { 
+            transform: scale(0.98); 
+        }
+
+        /* Estados de color */
+        .country-empty { 
+            background-color: #f3f4f6; 
+            color: #94a3b8; 
+            font-weight: 400; 
+            opacity: 0.8; 
+        }
+
+        .country-has-data { 
+            background-color: #dcfce7; 
+            color: #15803d; 
+            border-color: #bbf7d0; 
+            font-weight: 800; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+        }
         
         .sidebar-item.active { 
             background-color: #2563eb !important; 
@@ -78,7 +101,13 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); 
         }
 
-        .flag-img { width: 28px; height: auto; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); }
+        .flag-img { 
+            width: 28px; 
+            height: auto; 
+            border-radius: 3px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3); 
+            border: 1px solid rgba(0,0,0,0.1); 
+        }
 
         /* --- EDITOR --- */
         .editor-wrapper { 
@@ -88,8 +117,9 @@
             border: 1px solid #e2e8f0; 
             margin-bottom: 2rem; 
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            overflow: hidden; 
+            overflow: visible !important; /* IMPORTANTE: Para que el menú se vea */
         }
+
         @media (min-width: 768px) { 
             .editor-wrapper { min-height: 700px; } 
         }
@@ -103,8 +133,13 @@
             word-wrap: break-word; 
             overflow-wrap: break-word;
         }
+
         @media (min-width: 768px) { 
-            #mainEditor { padding: 3rem; font-size: 1.15rem; line-height: 1.8; } 
+            #mainEditor { 
+                padding: 3rem; 
+                font-size: 1.15rem; 
+                line-height: 1.8; 
+            } 
         }
 
         /* --- TABS --- */
@@ -113,20 +148,40 @@
             color: #94a3b8; border-bottom: 4px solid transparent; padding-bottom: 8px; 
             transition: all 0.2s; white-space: nowrap; 
         }
+
         @media (min-width: 768px) { 
-            .tab-btn { font-size: 13px; padding-bottom: 12px; } 
+            .tab-btn { 
+                font-size: 13px; 
+                padding-bottom: 12px; 
+            } 
         }
-        .tab-btn.has-data { color: #16a34a; font-weight: 900; }
-        .tab-btn.active { border-bottom: 5px solid #2563eb; color: #2563eb !important; font-weight: 900; }
+
+        .tab-btn.has-data { 
+            color: #16a34a; 
+            font-weight: 900; 
+        }
+
+        .tab-btn.active { 
+            border-bottom: 5px solid #2563eb; 
+            color: #2563eb !important; 
+            font-weight: 900; 
+        }
 
         /* --- GRID --- */
-        .grid-container { position: relative; margin-bottom: 2rem; border-radius: 12px; transition: all 0.2s; }
+        .grid-container { 
+            position: relative; 
+            margin-bottom: 2rem; 
+            border-radius: 12px; 
+            transition: all 0.2s; 
+            overflow: visible !important; /* Permitir salida del menú */
+        }
         
         .row-tools-header { 
             display: none; height: 32px; background: #e2e8f0; border-radius: 10px 10px 0 0; 
             padding: 0 15px; justify-content: flex-end; align-items: center; 
             border: 2px dashed #cbd5e1; border-bottom: none; 
         }
+
         .editing .row-tools-header { display: flex; } 
         
         .row-delete-btn { 
@@ -134,19 +189,34 @@
             text-transform: uppercase; display: flex; align-items: center; gap: 6px; 
             padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.5); 
         }
-        
-        .grid-row-2, .grid-row-1 { display: grid; gap: 1rem; align-items: start; width: 100%; }
+
+        .row-delete-btn:hover { background: #fee2e2; color: #b91c1c; }
+
+        .grid-row-2, .grid-row-1 { 
+            display: grid; 
+            gap: 1rem; 
+            align-items: start; 
+            width: 100%; 
+        }
+
         .grid-row-2 { grid-template-columns: 1fr; } 
         .grid-row-1 { grid-template-columns: 1fr; }
         
         @media (min-width: 768px) { 
-            .grid-row-2 { grid-template-columns: 1fr 1fr; gap: 1.5rem; } 
+            .grid-row-2 { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 1.5rem; 
+            } 
         }
 
         .grid-cell { 
-            min-height: 120px; padding: 10px; border-radius: 12px; 
-            display: flex; flex-direction: column; height: 100%; 
-            overflow: hidden; /* Evita desbordamiento */
+            min-height: 120px; 
+            padding: 10px; 
+            border-radius: 12px; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: visible !important; /* CRUCIAL: No cortar menú */
         }
         
         .editing .grid-container { background: #f8fafc; }
@@ -167,47 +237,70 @@
             color: #94a3b8; font-weight: 700; font-size: 12px; background: #f8fafc; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; 
         }
+        .placeholder-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6; }
         body:not(.editing-mode) .placeholder-btn { display: none !important; }
 
-        /* --- IMÁGENES (CORRECCIÓN DE CORTE EN MÓVIL) --- */
+        /* --- IMÁGENES --- */
         .img-block { 
             position: relative; display: block; 
-            max-width: 100%; /* Base */
+            max-width: 100%; 
             margin: 0; 
             opacity: 1 !important; filter: none !important; mix-blend-mode: normal !important; 
         }
+
+        /* REGLA MÓVIL (Ancho 100%) */
+        @media (max-width: 768px) {
+            .img-block { width: 100% !important; height: auto !important; }
+        }
+
         .img-block img { 
             display: block; width: 100%; height: auto; 
             border-radius: 12px; border: 2px solid #cbd5e1; pointer-events: auto; 
         }
-        
-        /* ¡ESTO ES LO NUEVO PARA ARREGLAR LAS IMÁGENES CORTADAS! */
-        @media (max-width: 768px) {
-            .img-block {
-                width: 100% !important; /* Fuerza a ocupar el ancho de la celda en móvil */
-                height: auto !important;
-            }
+
+        /* ESTILO ARRASTRE (FIX IMPORTANTE: pointer-events none) */
+        .img-block.dragging { 
+            opacity: 0.5 !important; 
+            border: 2px dashed #3b82f6; 
+            pointer-events: none !important; /* Clave para que funcione el drop */
+            z-index: 0 !important;
         }
 
-        .img-block.dragging { opacity: 0.5 !important; border: 2px dashed #3b82f6; }
-
+        /* MENU FLOTANTE */
         .img-tools { 
-            position: absolute; top: -45px; left: 50%; transform: translateX(-50%); 
-            display: none; gap: 4px; z-index: 100; 
-            background: #1e293b; padding: 6px; border-radius: 8px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); white-space: nowrap; 
+            position: absolute; 
+            top: -45px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: none; 
+            gap: 4px; 
+            z-index: 9999; /* Muy alto para estar encima de todo */
+            background: #1e293b; 
+            padding: 6px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            white-space: nowrap; 
         }
+
         .img-tools::after { 
             content: ''; position: absolute; bottom: -5px; left: 50%; margin-left: -5px; 
             border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent; 
         }
+
+        /* Al pasar el ratón, subimos el z-index de la imagen para que su menú gane */
+        .editing .img-block:hover { 
+            z-index: 100; 
+        }
         .editing .img-block:hover .img-tools { display: flex; }
+        .editing .img-block { cursor: grab; border: 2px solid transparent; }
         
         .tool-btn { 
             width: 32px; height: 32px; color: white; border-radius: 6px; 
             display: flex; align-items: center; justify-content: center; font-size: 14px; 
         }
-        .btn-blue { background: #3b82f6; } .btn-red { background: #ef4444; } .btn-gray { background: #475569; }
+        .btn-blue { background: #3b82f6; } 
+        .btn-red { background: #ef4444; } 
+        .btn-gray { background: #475569; }
         .separator { width: 1px; height: 18px; background: #475569; margin: 0 4px; }
 
         /* --- VISOR --- */
@@ -225,7 +318,6 @@
             cursor: grab; transform-origin: center center; transition: transform 0.1s ease-out; user-select: none; 
         }
         #zoomImg:active { cursor: grabbing; }
-        
         .nav-btn { 
             position: absolute; top: 50%; transform: translateY(-50%); 
             background: rgba(255,255,255,0.2); color: white; border: none; 
@@ -233,20 +325,16 @@
             z-index: 10001; transition: 0.2s; 
         }
         .nav-btn:hover { background: rgba(255,255,255,0.4); }
-        .prev-btn { left: 10px; } 
-        .next-btn { right: 10px; }
-        
+        .prev-btn { left: 10px; } .next-btn { right: 10px; }
         .close-zoom-btn { 
             position: absolute; top: 20px; right: 20px; font-size: 30px; 
             color: white; cursor: pointer; opacity: 0.8; z-index: 10002; 
             padding: 10px; background: rgba(0,0,0,0.3); border-radius: 50%; 
             width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; 
         }
-        
         .zoom-legend { 
             margin-top: 20px; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 600; 
-            text-transform: uppercase; letter-spacing: 1px; pointer-events: none; 
-            text-align: center; padding: 0 10px; 
+            text-transform: uppercase; letter-spacing: 1px; pointer-events: none; text-align: center; padding: 0 10px; 
         }
 
         /* --- TOOLBAR --- */
@@ -270,12 +358,8 @@
         </div>
         
         <div class="hidden md:flex items-center gap-4">
-            <button onclick="nuevoPaisManual()" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl text-[10px] font-black border border-slate-600 transition-all shadow-lg">
-                <i class="fas fa-plus mr-2"></i> AÑADIR PAÍS
-            </button>
-            <button id="btnMode" onclick="toggleEdit()" class="bg-amber-500 hover:bg-amber-400 text-blue-950 px-8 py-3 rounded-2xl text-sm font-black shadow-2xl transition-all flex items-center gap-3">
-                <i class="fas fa-lock" id="iconStatus"></i> <span id="textStatus">ENTRAR A MODO EDICIÓN</span>
-            </button>
+            <button onclick="nuevoPaisManual()" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl text-[10px] font-black border border-slate-600 transition-all shadow-lg"><i class="fas fa-plus mr-2"></i> AÑADIR PAÍS</button>
+            <button id="btnMode" onclick="toggleEdit()" class="bg-amber-500 hover:bg-amber-400 text-blue-950 px-8 py-3 rounded-2xl text-sm font-black shadow-2xl transition-all flex items-center gap-3"><i class="fas fa-lock" id="iconStatus"></i> <span id="textStatus">ENTRAR A MODO EDICIÓN</span></button>
         </div>
     </header>
 
@@ -288,16 +372,12 @@
         </aside>
 
         <main class="flex-grow flex flex-col bg-slate-100 p-3 md:p-10 overflow-y-auto h-full overflow-x-hidden min-h-[65vh]">
-            <div id="welcome" class="flex-grow flex flex-col items-center justify-center text-slate-300 opacity-20 py-10">
-                <i class="fas fa-shield-halved text-[8rem] md:text-[15rem]"></i>
-            </div>
+            <div id="welcome" class="flex-grow flex flex-col items-center justify-center text-slate-300 opacity-20 py-10"><i class="fas fa-shield-halved text-[8rem] md:text-[15rem]"></i></div>
             
             <div id="contentSection" class="hidden">
                 <div class="flex flex-col md:flex-row md:items-end justify-between mb-4 md:mb-8 gap-2">
                     <h2 id="countryName" class="text-3xl md:text-7xl font-black text-slate-800 uppercase tracking-tighter">--</h2>
-                    <button onclick="eliminarPais()" class="edit-ui hidden bg-red-600 text-white px-6 py-2 rounded-lg text-xs font-black shadow-lg hover:bg-red-700 transition-all">
-                        <i class="fas fa-trash-alt mr-2"></i> ELIMINAR PAÍS
-                    </button>
+                    <button onclick="eliminarPais()" class="edit-ui hidden bg-red-600 text-white px-6 py-2 rounded-lg text-xs font-black shadow-lg hover:bg-red-700 transition-all"><i class="fas fa-trash-alt mr-2"></i> ELIMINAR PAÍS</button>
                 </div>
                 
                 <div class="flex gap-4 md:gap-12 border-b border-slate-300 mb-4 md:mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide pb-1">
@@ -309,15 +389,13 @@
                 </div>
                 
                 <div id="toolbar" class="hidden bg-slate-900 p-3 rounded-t-2xl flex items-center gap-2 flex-wrap border-b border-slate-700 sticky top-0 z-20 shadow-2xl">
-                    <div class="toolbar-group">
-                        <button onclick="undo()" class="tool-icon-btn bg-slate-600 hover:bg-slate-500" title="Deshacer"><i class="fas fa-undo"></i></button>
-                    </div>
+                    <div class="toolbar-group"><button onclick="undo()" class="tool-icon-btn bg-slate-600 hover:bg-slate-500" title="Deshacer"><i class="fas fa-undo"></i></button></div>
                     <div class="toolbar-group">
                         <button onmousedown="event.preventDefault(); exec('bold')" class="tool-icon-btn"><i class="fas fa-bold"></i></button>
                         <button onmousedown="event.preventDefault(); exec('insertUnorderedList')" class="tool-icon-btn"><i class="fas fa-list-ul"></i></button>
-                        <button onmousedown="event.preventDefault(); exec('justifyLeft')" class="tool-icon-btn"><i class="fas fa-align-left"></i></button>
-                        <button onmousedown="event.preventDefault(); exec('justifyCenter')" class="tool-icon-btn"><i class="fas fa-align-center"></i></button>
-                        <button onmousedown="event.preventDefault(); exec('justifyRight')" class="tool-icon-btn"><i class="fas fa-align-right"></i></button>
+                        <button onmousedown="event.preventDefault(); exec('justifyLeft')" class="tool-icon-btn" title="Izquierda"><i class="fas fa-align-left"></i></button>
+                        <button onmousedown="event.preventDefault(); exec('justifyCenter')" class="tool-icon-btn" title="Centro"><i class="fas fa-align-center"></i></button>
+                        <button onmousedown="event.preventDefault(); exec('justifyRight')" class="tool-icon-btn" title="Derecha"><i class="fas fa-align-right"></i></button>
                         <button onmousedown="event.preventDefault(); exec('justifyFull')" class="tool-icon-btn"><i class="fas fa-align-justify"></i></button>
                     </div>
                     <div class="toolbar-group">
@@ -326,10 +404,7 @@
                             <button onmousedown="event.preventDefault(); exec('foreColor', '#dc2626')" class="color-dot-btn bg-red-600"></button>
                             <button onmousedown="event.preventDefault(); exec('foreColor', '#16a34a')" class="color-dot-btn bg-green-600"></button>
                         </div>
-                        <select onchange="exec('fontSize', this.value); this.value=''" class="tool-select w-12 text-center">
-                            <option value="" disabled selected>T</option>
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option>
-                        </select>
+                        <select onchange="exec('fontSize', this.value); this.value=''" class="tool-select w-12 text-center"><option value="" disabled selected>T</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option></select>
                     </div>
                     <span class="insert-label">INSERTAR:</span>
                     <button onclick="insertTextTop()" class="bg-yellow-600 hover:bg-yellow-500 text-white px-2 py-1 md:px-3 md:py-2 rounded-lg text-[10px] font-black uppercase shadow border border-yellow-500 mr-1">TXT INI</button>
@@ -380,14 +455,17 @@
         }
 
         /* CORE */
-        function normalizeText(text) { return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+        function normalizeText(text) { if(typeof text !== 'string') return ""; return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
         function hasContent(html) { if(!html) return false; return html.replace(/<[^>]*>/g, '').trim().length > 0 || html.includes('<img'); }
 
         function renderList(filter = '') {
             const list = document.getElementById('countryList'); list.innerHTML = '';
             const filterNorm = normalizeText(filter);
-            Object.keys(countries).sort((a,b) => countries[a].nombre.localeCompare(countries[b].nombre)).forEach(id => {
-                const c = countries[id]; if(normalizeText(c.nombre).includes(filterNorm)) {
+            const keys = Object.keys(countries).sort((a,b) => { const nameA = countries[a].nombre || ""; const nameB = countries[b].nombre || ""; return nameA.localeCompare(nameB); });
+            keys.forEach(id => {
+                const c = countries[id]; if(!c.nombre) return;
+                const nameNorm = normalizeText(c.nombre);
+                if(nameNorm.includes(filterNorm)) {
                     const hasData = c.datos && Object.values(c.datos).some(d => hasContent(d));
                     const btn = document.createElement('button');
                     btn.className = `sidebar-item transition-all ${activeId === id ? 'active' : (hasData ? 'country-has-data' : 'country-empty')}`;
@@ -403,164 +481,45 @@
             document.getElementById('contentSection').classList.remove('hidden'); 
             document.getElementById('countryName').innerText = countries[activeId].nombre; 
             loadContent(); renderList(); updateTabsState(); 
-            // AUTO SCROLL EN MOVIL PARA VER CONTENIDO
-            if(window.innerWidth < 768) {
-                setTimeout(() => {
-                    document.getElementById('contentSection').scrollIntoView({behavior: 'smooth', block: 'start'});
-                }, 100);
-            }
+            if(window.innerWidth < 768) { setTimeout(() => { document.getElementById('contentSection').scrollIntoView({behavior: 'smooth', block: 'start'}); }, 100); }
         }
-        
-        function loadContent() { 
-            document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<p class='text-slate-400 italic'>Sin datos registrados en esta sección.</p>"; 
-            historyStack = []; 
-        }
-        
-        function updateTabsState() { 
-            if(!activeId) return; 
-            ['permiso','itv','seguro','personales','otros'].forEach(tab => { 
-                const el = document.getElementById('tab-'+tab); 
-                if(el) { 
-                    el.classList.remove('has-data'); 
-                    if(activeTab !== tab && hasContent(countries[activeId].datos?.[tab])) el.classList.add('has-data'); 
-                } 
-            }); 
-        }
-        
-        function switchTab(t) { 
-            activeTab = t; 
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
-            document.getElementById('tab-'+t).classList.add('active'); 
-            loadContent(); updateTabsState(); 
-        }
+        function loadContent() { document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<p class='text-slate-400 italic'>Sin datos registrados en esta sección.</p>"; historyStack = []; }
+        function updateTabsState() { if(!activeId) return; ['permiso','itv','seguro','personales','otros'].forEach(tab => { const el = document.getElementById('tab-'+tab); if(el) { el.classList.remove('has-data'); if(activeTab !== tab && hasContent(countries[activeId].datos?.[tab])) el.classList.add('has-data'); } }); }
+        function switchTab(t) { activeTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); loadContent(); updateTabsState(); }
 
         /* EDITOR LOGIC */
         function toggleEdit() {
-            isEdit = !isEdit; 
-            const btn = document.getElementById('btnMode'), toolbar = document.getElementById('toolbar'), editor = document.getElementById('mainEditor');
+            isEdit = !isEdit; const btn = document.getElementById('btnMode'), toolbar = document.getElementById('toolbar'), editor = document.getElementById('mainEditor');
             if(isEdit) {
-                document.body.classList.add('editing-mode'); 
-                btn.classList.replace('bg-amber-500', 'bg-green-600'); 
-                document.getElementById('iconStatus').className = "fas fa-save"; 
-                document.getElementById('textStatus').innerText = "VOLVER A MODO CONSULTA";
-                toolbar.classList.remove('hidden'); 
-                editor.contentEditable = "true"; 
-                editor.parentElement.classList.add('editing'); 
-                document.querySelectorAll('.edit-ui').forEach(el => el.classList.remove('hidden')); 
-                cleanUpOldRows(); makeDraggable(); pushHistory();
+                document.body.classList.add('editing-mode'); btn.classList.replace('bg-amber-500', 'bg-green-600'); document.getElementById('iconStatus').className = "fas fa-save"; document.getElementById('textStatus').innerText = "VOLVER A MODO CONSULTA";
+                toolbar.classList.remove('hidden'); editor.contentEditable = "true"; editor.parentElement.classList.add('editing'); document.querySelectorAll('.edit-ui').forEach(el => el.classList.remove('hidden')); cleanUpOldRows(); makeDraggable(); pushHistory();
             } else {
-                document.body.classList.remove('editing-mode'); 
-                btn.classList.replace('bg-green-600', 'bg-amber-500'); 
-                document.getElementById('iconStatus').className = "fas fa-lock"; 
-                document.getElementById('textStatus').innerText = "ENTRAR A MODO EDICIÓN";
-                toolbar.classList.add('hidden'); 
-                editor.contentEditable = "false"; 
-                editor.parentElement.classList.remove('editing'); 
-                document.querySelectorAll('.edit-ui').forEach(el => el.classList.add('hidden'));
+                document.body.classList.remove('editing-mode'); btn.classList.replace('bg-green-600', 'bg-amber-500'); document.getElementById('iconStatus').className = "fas fa-lock"; document.getElementById('textStatus').innerText = "ENTRAR A MODO EDICIÓN";
+                toolbar.classList.add('hidden'); editor.contentEditable = "false"; editor.parentElement.classList.remove('editing'); document.querySelectorAll('.edit-ui').forEach(el => el.classList.add('hidden'));
             }
         }
         
-        /* DRAG, INSERT, TOOLS */
         const mainEditor = document.getElementById('mainEditor');
-        
-        mainEditor.addEventListener('dragstart', (e) => { 
-            if(isEdit && e.target.closest('.img-block')) { 
-                e.dataTransfer.setData("text", e.target.closest('.img-block').id); 
-                e.target.closest('.img-block').classList.add('dragging'); 
-            }
-        });
-        
-        mainEditor.addEventListener('dragend', () => { 
-            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging')); 
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); 
-        });
-        
-        mainEditor.addEventListener('dragover', (e) => { 
-            if(isEdit) { 
-                e.preventDefault(); 
-                const c = e.target.closest('.grid-cell'); 
-                if(c) c.classList.add('drag-over'); 
-            }
-        });
-        
-        mainEditor.addEventListener('dragleave', (e) => { 
-            const c = e.target.closest('.grid-cell'); 
-            if(c) c.classList.remove('drag-over'); 
-        });
-        
+        mainEditor.addEventListener('dragstart', (e) => { if(isEdit && e.target.closest('.img-block')) { e.dataTransfer.setData("text", e.target.closest('.img-block').id); e.target.closest('.img-block').classList.add('dragging'); }});
+        mainEditor.addEventListener('dragend', () => { document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging')); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); });
+        mainEditor.addEventListener('dragover', (e) => { if(isEdit) { e.preventDefault(); const c = e.target.closest('.grid-cell'); if(c) c.classList.add('drag-over'); }});
+        mainEditor.addEventListener('dragleave', (e) => { const c = e.target.closest('.grid-cell'); if(c) c.classList.remove('drag-over'); });
         mainEditor.addEventListener('drop', (e) => {
-            if(!isEdit) return; 
-            e.preventDefault(); 
-            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            if(!isEdit) return; e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
             const dragged = document.getElementById(e.dataTransfer.getData("text"));
             const targetCell = e.target.closest('.grid-cell');
             if(dragged && targetCell && !targetCell.contains(dragged)) {
-                pushHistory(); 
-                const exist = targetCell.querySelector('.img-block'); 
-                const srcCell = dragged.parentElement;
-                if(exist) { 
-                    srcCell.appendChild(exist); 
-                    targetCell.appendChild(dragged); 
-                } else { 
-                    targetCell.innerHTML = ''; 
-                    targetCell.appendChild(dragged); 
-                }
+                pushHistory(); const exist = targetCell.querySelector('.img-block'); const srcCell = dragged.parentElement;
+                if(exist) { srcCell.appendChild(exist); targetCell.appendChild(dragged); } else { targetCell.innerHTML = ''; targetCell.appendChild(dragged); }
                 cleanUpOldRows();
             }
         });
 
-        function cleanUpOldRows() { 
-            document.querySelectorAll('.grid-cell').forEach(c => { 
-                if(c.querySelector('.img-block') && c.querySelector('.placeholder-btn')) c.querySelector('.placeholder-btn').remove(); 
-                if(!c.innerHTML.trim()) c.innerHTML=`<div class="placeholder-btn" onclick="replaceWithImg(this)"><i class="fas fa-plus mr-2 text-lg"></i> AÑADIR IMAGEN</div>`; 
-            }); 
-        }
-        
-        function makeDraggable() { 
-            document.querySelectorAll('.img-block').forEach(b => { 
-                b.contentEditable="false"; 
-                b.draggable=true; 
-                if(!b.id) b.id='img_'+Math.random().toString(36).substr(2,9); 
-            }); 
-        }
-        
-        function createImgBlock(url) { 
-            return `<div id="img_${Date.now()}" class="img-block" draggable="true" style="width:450px" contenteditable="false">
-                <div class="img-tools">
-                    <button onclick="imgAlign(this,'left')" class="tool-btn btn-gray"><i class="fas fa-align-left"></i></button>
-                    <button onclick="imgAlign(this,'center')" class="tool-btn btn-gray"><i class="fas fa-align-center"></i></button>
-                    <button onclick="imgAlign(this,'right')" class="tool-btn btn-gray"><i class="fas fa-align-right"></i></button>
-                    <div class="separator"></div>
-                    <button onclick="imgResize(this,0.9)" class="tool-btn btn-gray"><i class="fas fa-minus"></i></button>
-                    <button onclick="imgResize(this,1.1)" class="tool-btn btn-gray"><i class="fas fa-plus"></i></button>
-                    <div class="separator"></div>
-                    <button onclick="swapUrl(this)" class="tool-btn btn-blue"><i class="fas fa-pen"></i></button>
-                    <button onclick="deleteImage(this)" class="tool-btn btn-red"><i class="fas fa-trash"></i></button>
-                </div>
-                <img src="${url}">
-            </div>`; 
-        }
-        
-        function insertGrid(cols) { 
-            pushHistory(); 
-            let c=''; 
-            for(let i=0;i<cols;i++) c+=`<div class="grid-cell"><div class="placeholder-btn" onclick="replaceWithImg(this)"><i class="fas fa-plus mr-2 text-lg"></i> AÑADIR IMAGEN</div></div>`; 
-            insertHTML(`<div class="grid-container" contenteditable="false"><div class="row-tools-header"><div class="row-delete-btn" onclick="if(confirm('¿Borrar fila?')){pushHistory();this.closest('.grid-container').remove();}"><i class="fas fa-trash-alt"></i> ELIMINAR FILA</div></div><div class="grid-row-${cols}">${c}</div></div><p><br></p>`); 
-            makeDraggable(); 
-        }
-        
-        function replaceWithImg(btn) { 
-            const u=prompt("URL Imagen:"); 
-            if(u) { 
-                pushHistory(); 
-                const d=document.createElement('div'); 
-                d.innerHTML=createImgBlock(u); 
-                btn.parentElement.innerHTML=''; 
-                btn.parentElement.appendChild(d.firstChild); 
-                makeDraggable(); 
-            } 
-        }
-        
+        function cleanUpOldRows() { document.querySelectorAll('.grid-cell').forEach(c => { if(c.querySelector('.img-block') && c.querySelector('.placeholder-btn')) c.querySelector('.placeholder-btn').remove(); if(!c.innerHTML.trim()) c.innerHTML=`<div class="placeholder-btn" onclick="replaceWithImg(this)"><i class="fas fa-plus mr-2 text-lg"></i> AÑADIR IMAGEN</div>`; }); }
+        function makeDraggable() { document.querySelectorAll('.img-block').forEach(b => { b.contentEditable="false"; b.draggable=true; if(!b.id) b.id='img_'+Math.random().toString(36).substr(2,9); }); }
+        function createImgBlock(url) { return `<div id="img_${Date.now()}" class="img-block" draggable="true" style="width:450px" contenteditable="false"><div class="img-tools"><button onclick="imgAlign(this,'left')" class="tool-btn btn-gray"><i class="fas fa-align-left"></i></button><button onclick="imgAlign(this,'center')" class="tool-btn btn-gray"><i class="fas fa-align-center"></i></button><button onclick="imgAlign(this,'right')" class="tool-btn btn-gray"><i class="fas fa-align-right"></i></button><div class="separator"></div><button onclick="imgResize(this,0.9)" class="tool-btn btn-gray"><i class="fas fa-minus"></i></button><button onclick="imgResize(this,1.1)" class="tool-btn btn-gray"><i class="fas fa-plus"></i></button><div class="separator"></div><button onclick="swapUrl(this)" class="tool-btn btn-blue"><i class="fas fa-pen"></i></button><button onclick="deleteImage(this)" class="tool-btn btn-red"><i class="fas fa-trash"></i></button></div><img src="${url}"></div>`; }
+        function insertGrid(cols) { pushHistory(); let c=''; for(let i=0;i<cols;i++) c+=`<div class="grid-cell"><div class="placeholder-btn" onclick="replaceWithImg(this)"><i class="fas fa-plus mr-2 text-lg"></i> AÑADIR IMAGEN</div></div>`; insertHTML(`<div class="grid-container" contenteditable="false"><div class="row-tools-header"><div class="row-delete-btn" onclick="if(confirm('¿Borrar fila?')){pushHistory();this.closest('.grid-container').remove();}"><i class="fas fa-trash-alt"></i> ELIMINAR FILA</div></div><div class="grid-row-${cols}">${c}</div></div><p><br></p>`); makeDraggable(); }
+        function replaceWithImg(btn) { const u=prompt("URL Imagen:"); if(u) { pushHistory(); const d=document.createElement('div'); d.innerHTML=createImgBlock(u); btn.parentElement.innerHTML=''; btn.parentElement.appendChild(d.firstChild); makeDraggable(); } }
         function imgAlign(b,a) { pushHistory(); const bl=b.closest('.img-block'); bl.style.marginLeft=(a==='left'?'0':'auto'); bl.style.marginRight=(a==='right'?'0':'auto'); }
         function imgResize(b,f) { pushHistory(); const bl=b.closest('.img-block'); let w=Math.round(bl.clientWidth*f); if(w>bl.parentElement.clientWidth) w=bl.parentElement.clientWidth-20; if(w<100) w=100; bl.style.width=w+'px'; }
         function deleteImage(b) { pushHistory(); const c=b.closest('.grid-cell'); b.closest('.img-block').remove(); cleanUpOldRows(); }
@@ -570,154 +529,32 @@
         function insertHTML(h) { const e=document.getElementById('mainEditor'); e.focus(); const s=window.getSelection(); if(s.rangeCount>0 && e.contains(s.getRangeAt(0).commonAncestorContainer)) document.execCommand('insertHTML',false,h); else e.insertAdjacentHTML('beforeend',h); }
         function exec(c,v=null) { pushHistory(); document.execCommand(c,false,v); }
 
-        /* VISOR DE IMÁGENES AVANZADO */
         let zoomState = { scale: 1, pX: 0, pY: 0, sX: 0, sY: 0, isDragging: false, imgs: [], index: 0 };
-        const zoomImg = document.getElementById('zoomImg'); 
-        const zoomOverlay = document.getElementById('zoomOverlay');
-
-        document.addEventListener('DOMContentLoaded', () => {
-            ref.on('value', s => { countries = s.val() || {}; renderList(); if(activeId) updateTabsState(); });
-            mainEditor.addEventListener('click', e => { if(!isEdit && e.target.tagName==='IMG' && e.target.closest('.img-block')) openZoom(e.target.src); });
-            
-            zoomImg.addEventListener('mousedown', startDrag);
-            zoomImg.addEventListener('touchstart', startDrag, {passive: false});
-            window.addEventListener('mousemove', drag);
-            window.addEventListener('touchmove', drag, {passive: false});
-            window.addEventListener('mouseup', endDrag);
-            window.addEventListener('touchend', endDrag);
-            zoomImg.addEventListener('wheel', handleWheel, {passive: false});
-            document.addEventListener('keydown', handleKeys);
-        });
-
-        function openZoom(src) {
-            const allImgs = document.querySelectorAll('#mainEditor img');
-            zoomState.imgs = Array.from(allImgs).map(i => i.src);
-            zoomState.index = zoomState.imgs.indexOf(src);
-            updateZoomImage();
-            zoomOverlay.style.display = 'flex';
-        }
-
+        const zoomImg = document.getElementById('zoomImg'); const zoomOverlay = document.getElementById('zoomOverlay');
+        document.addEventListener('DOMContentLoaded', () => { ref.on('value', s => { countries = s.val() || {}; renderList(); if(activeId) updateTabsState(); }); document.getElementById('search').addEventListener('input', e => renderList(e.target.value)); mainEditor.addEventListener('click', e => { if(!isEdit && e.target.tagName==='IMG' && e.target.closest('.img-block')) openZoom(e.target.src); }); zoomImg.addEventListener('mousedown', startDrag); zoomImg.addEventListener('touchstart', startDrag, {passive: false}); window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, {passive: false}); window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag); zoomImg.addEventListener('wheel', handleWheel, {passive: false}); document.addEventListener('keydown', handleKeys); });
+        function openZoom(src) { const allImgs = document.querySelectorAll('#mainEditor img'); zoomState.imgs = Array.from(allImgs).map(i => i.src); zoomState.index = zoomState.imgs.indexOf(src); updateZoomImage(); zoomOverlay.style.display = 'flex'; }
         function closeZoom(force) { if(force || zoomState.scale === 1) zoomOverlay.style.display = 'none'; }
+        function updateZoomImage() { zoomImg.src = zoomState.imgs[zoomState.index]; document.getElementById('zoomCounter').innerText = `${zoomState.index+1} / ${zoomState.imgs.length}`; resetZoom(); }
+        function navigateZoom(dir) { zoomState.index += dir; if(zoomState.index < 0) zoomState.index = zoomState.imgs.length - 1; if(zoomState.index >= zoomState.imgs.length) zoomState.index = 0; updateZoomImage(); }
+        function resetZoom() { zoomState.scale = 1; zoomState.pX = 0; zoomState.pY = 0; updateTransform(); }
+        function updateTransform() { zoomImg.style.transform = `translate(${zoomState.pX}px, ${zoomState.pY}px) scale(${zoomState.scale})`; }
+        function handleWheel(e) { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; zoomState.scale *= delta; if(zoomState.scale < 1) zoomState.scale = 1; updateTransform(); }
+        let clickStartTime = 0; let startTouchesDistance = 0;
+        function startDrag(e) { if(e.type === 'touchstart' && e.touches.length === 2) { startTouchesDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); return; } clickStartTime = Date.now(); zoomState.isDragging = true; const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.sX = c.clientX - zoomState.pX; zoomState.sY = c.clientY - zoomState.pY; }
+        function drag(e) { if(e.type === 'touchmove' && e.touches.length === 2) { e.preventDefault(); const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); zoomState.scale *= (dist / startTouchesDistance); startTouchesDistance = dist; if(zoomState.scale < 1) zoomState.scale = 1; updateTransform(); return; } if(!zoomState.isDragging) return; e.preventDefault(); const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.pX = c.clientX - zoomState.sX; zoomState.pY = c.clientY - zoomState.sY; updateTransform(); }
+        function endDrag(e) { zoomState.isDragging = false; if(zoomState.scale === 1) { if(Math.abs(zoomState.pX) > 50) { navigateZoom(zoomState.pX > 0 ? -1 : 1); } else if(Date.now() - clickStartTime < 200 && Math.abs(zoomState.pX) < 5) { closeZoom(true); } else { resetZoom(); } } }
+        function handleKeys(e) { if(zoomOverlay.style.display === 'flex') { if(e.key === 'ArrowRight') navigateZoom(1); if(e.key === 'ArrowLeft') navigateZoom(-1); if(e.key === 'Escape') closeZoom(true); } }
 
-        function updateZoomImage() {
-            zoomImg.src = zoomState.imgs[zoomState.index];
-            document.getElementById('zoomCounter').innerText = `${zoomState.index+1} / ${zoomState.imgs.length}`;
-            resetZoom();
-        }
-
-        function navigateZoom(dir) {
-            zoomState.index += dir;
-            if(zoomState.index < 0) zoomState.index = zoomState.imgs.length - 1;
-            if(zoomState.index >= zoomState.imgs.length) zoomState.index = 0;
-            updateZoomImage();
-        }
-
-        function resetZoom() {
-            zoomState.scale = 1; zoomState.pX = 0; zoomState.pY = 0;
-            updateTransform();
-        }
-
-        function updateTransform() {
-            zoomImg.style.transform = `translate(${zoomState.pX}px, ${zoomState.pY}px) scale(${zoomState.scale})`;
-        }
-
-        function handleWheel(e) {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            zoomState.scale *= delta;
-            if(zoomState.scale < 1) zoomState.scale = 1;
-            updateTransform();
-        }
-
-        let clickStartTime = 0; 
-        let startTouchesDistance = 0;
-
-        function startDrag(e) {
-            if(e.type === 'touchstart' && e.touches.length === 2) {
-                startTouchesDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                return;
-            }
-            clickStartTime = Date.now();
-            zoomState.isDragging = true;
-            const c = e.type.includes('touch') ? e.touches[0] : e;
-            zoomState.sX = c.clientX - zoomState.pX;
-            zoomState.sY = c.clientY - zoomState.pY;
-        }
-
-        function drag(e) {
-            if(e.type === 'touchmove' && e.touches.length === 2) {
-                e.preventDefault();
-                const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
-                zoomState.scale *= (dist / startTouchesDistance);
-                startTouchesDistance = dist;
-                if(zoomState.scale < 1) zoomState.scale = 1;
-                updateTransform();
-                return;
-            }
-            if(!zoomState.isDragging) return;
-            e.preventDefault();
-            const c = e.type.includes('touch') ? e.touches[0] : e;
-            zoomState.pX = c.clientX - zoomState.sX;
-            zoomState.pY = c.clientY - zoomState.sY;
-            updateTransform();
-        }
-
-        function endDrag(e) {
-            zoomState.isDragging = false;
-            // Si no hay zoom, detectar swipe o click
-            if(zoomState.scale === 1) {
-                if(Math.abs(zoomState.pX) > 50) { 
-                    navigateZoom(zoomState.pX > 0 ? -1 : 1); 
-                } else if(Date.now() - clickStartTime < 200 && Math.abs(zoomState.pX) < 5) {
-                    closeZoom(true); // Click para cerrar
-                } else {
-                    resetZoom();
-                }
-            }
-        }
-
-        function handleKeys(e) {
-            if(zoomOverlay.style.display === 'flex') {
-                if(e.key === 'ArrowRight') navigateZoom(1);
-                if(e.key === 'ArrowLeft') navigateZoom(-1);
-                if(e.key === 'Escape') closeZoom(true);
-            }
-        }
-
-        /* GUARDADO */
         function save() {
-            if(!activeId) return; 
-            const clone = document.getElementById('mainEditor').cloneNode(true);
+            if(!activeId) return; const clone = document.getElementById('mainEditor').cloneNode(true);
             clone.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-            clone.querySelectorAll('.img-block').forEach(el => { 
-                el.removeAttribute('id'); 
-                el.removeAttribute('draggable'); 
-                el.contentEditable="false"; 
-                el.classList.remove('dragging'); 
-            });
+            clone.querySelectorAll('.img-block').forEach(el => { el.removeAttribute('id'); el.removeAttribute('draggable'); el.contentEditable="false"; el.classList.remove('dragging'); });
             if(!countries[activeId].datos) countries[activeId].datos = {};
             countries[activeId].datos[activeTab] = clone.innerHTML;
-            ref.child(activeId).child('datos').child(activeTab).set(clone.innerHTML).then(() => { 
-                alert("✅ GUARDADO"); 
-                updateTabsState(); 
-            });
+            ref.child(activeId).child('datos').child(activeTab).set(clone.innerHTML).then(() => { alert("✅ GUARDADO"); updateTabsState(); });
         }
-        
-        function nuevoPaisManual() { 
-            const n = prompt("Nombre del País:"); 
-            if(!n) return; 
-            const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
-            ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", personales: "", otros: "" } }); 
-        }
-        
-        function eliminarPais() { 
-            const name = countries[activeId].nombre; 
-            if(prompt(`⚠️ Escribe el nombre EXACTO para eliminar ${name}:`) === name) { 
-                ref.child(activeId).remove().then(() => location.reload()); 
-            } else { 
-                alert("❌ Nombre incorrecto."); 
-            } 
-        }
+        function nuevoPaisManual() { const n = prompt("Nombre del País:"); if(!n) return; const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", personales: "", otros: "" } }); }
+        function eliminarPais() { const name = countries[activeId].nombre; if(prompt(`⚠️ Escribe el nombre EXACTO para eliminar ${name}:`) === name) { ref.child(activeId).remove().then(() => location.reload()); } else { alert("❌ Nombre incorrecto."); } }
     </script>
 </body>
 </html>
