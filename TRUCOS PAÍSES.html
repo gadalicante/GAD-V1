@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GAD - Ayuda Países v18.2 (Full Readable)</title>
+    <title>GAD - Ayuda Países v18.3 (Mobile Image Fit)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -36,14 +36,13 @@
             }
         }
 
-        /* Títulos Responsivos */
         .header-title {
-            font-size: 1.25rem; /* Móvil */
+            font-size: 1.25rem; 
             line-height: 1.2;
         }
         @media (min-width: 768px) {
             .header-title {
-                font-size: 2.25rem; /* PC */
+                font-size: 2.25rem; 
             }
         }
 
@@ -135,11 +134,11 @@
             text-transform: uppercase; display: flex; align-items: center; gap: 6px; 
             padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.5); 
         }
-        .row-delete-btn:hover { background: #fee2e2; color: #b91c1c; }
-
+        
         .grid-row-2, .grid-row-1 { display: grid; gap: 1rem; align-items: start; width: 100%; }
-        .grid-row-2 { grid-template-columns: 1fr; } /* 1 col en móvil */
+        .grid-row-2 { grid-template-columns: 1fr; } 
         .grid-row-1 { grid-template-columns: 1fr; }
+        
         @media (min-width: 768px) { 
             .grid-row-2 { grid-template-columns: 1fr 1fr; gap: 1.5rem; } 
         }
@@ -147,6 +146,7 @@
         .grid-cell { 
             min-height: 120px; padding: 10px; border-radius: 12px; 
             display: flex; flex-direction: column; height: 100%; 
+            overflow: hidden; /* Evita desbordamiento */
         }
         
         .editing .grid-container { background: #f8fafc; }
@@ -167,18 +167,28 @@
             color: #94a3b8; font-weight: 700; font-size: 12px; background: #f8fafc; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; 
         }
-        .placeholder-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #3b82f6; }
         body:not(.editing-mode) .placeholder-btn { display: none !important; }
 
-        /* --- IMÁGENES --- */
+        /* --- IMÁGENES (CORRECCIÓN DE CORTE EN MÓVIL) --- */
         .img-block { 
-            position: relative; display: block; max-width: 100%; margin: 0; 
+            position: relative; display: block; 
+            max-width: 100%; /* Base */
+            margin: 0; 
             opacity: 1 !important; filter: none !important; mix-blend-mode: normal !important; 
         }
         .img-block img { 
             display: block; width: 100%; height: auto; 
             border-radius: 12px; border: 2px solid #cbd5e1; pointer-events: auto; 
         }
+        
+        /* ¡ESTO ES LO NUEVO PARA ARREGLAR LAS IMÁGENES CORTADAS! */
+        @media (max-width: 768px) {
+            .img-block {
+                width: 100% !important; /* Fuerza a ocupar el ancho de la celda en móvil */
+                height: auto !important;
+            }
+        }
+
         .img-block.dragging { opacity: 0.5 !important; border: 2px dashed #3b82f6; }
 
         .img-tools { 
@@ -192,7 +202,6 @@
             border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent; 
         }
         .editing .img-block:hover .img-tools { display: flex; }
-        .editing .img-block { cursor: grab; border: 2px solid transparent; }
         
         .tool-btn { 
             width: 32px; height: 32px; color: white; border-radius: 6px; 
@@ -354,7 +363,6 @@
         let isEdit = false, activeId = null, activeTab = 'permiso', countries = {};
         const flagCodes = { "ALBANIA": "al", "ALEMANIA": "de", "ANDORRA": "ad", "ARGELIA": "dz", "ARMENIA": "am", "AUSTRIA": "at", "AZERBAIYAN": "az", "BELGICA": "be", "BIELORRUSIA": "by", "BOSNIA Y HERZEGOVINA": "ba", "BULGARIA": "bg", "CHIPRE": "cy", "CIUDAD DEL VATICANO": "va", "CROACIA": "hr", "DINAMARCA": "dk", "ESLOVAQUIA": "sk", "ESLOVENIA": "si", "ESPANA": "es", "ESTONIA": "ee", "FINLANDIA": "fi", "FRANCIA": "fr", "GEORGIA": "ge", "GRECIA": "gr", "HUNGRIA": "hu", "IRLANDA": "ie", "ISLANDIA": "is", "ITALIA": "it", "KAZAJISTAN": "kz", "LETONIA": "lv", "LIECHTENSTEIN": "li", "LITUANIA": "lt", "LUXEMBURGO": "lu", "MALTA": "mt", "MARRUECOS": "ma", "MOLDAVIA": "md", "MONACO": "mc", "MONTENEGRO": "me", "NORUEGA": "no", "PAISES BAJOS": "nl", "POLONIA": "pl", "PORTUGAL": "pt", "REINO UNIDO": "gb", "REPUBLICA CHECA": "cz", "MACEDONIA DEL NORTE": "mk", "RUMANIA": "ro", "RUSIA": "ru", "SAN MARINO": "sm", "SERBIA": "rs", "SUECIA": "se", "SUIZA": "ch", "TURQUIA": "tr", "UCRANIA": "ua", "LIBIA": "ly", "TUNEZ": "tn", "EGIPTO": "eg" };
 
-        /* UNDO */
         let historyStack = []; const MAX_HISTORY = 50;
         function pushHistory() { 
             const c = document.getElementById('mainEditor').innerHTML; 
