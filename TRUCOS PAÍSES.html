@@ -33,25 +33,30 @@
             .main-container { height: calc(100vh - 140px); }
         }
 
-        /* --- MEJORA PARA MÓVIL (PANTALLA PRINCIPAL) --- */
+        /* --- SOLUCIÓN PANTALLA MÓVIL (SELECTORES CORTADOS) --- */
         @media (max-width: 1023px) {
             .main-container { 
                 flex-direction: column; 
-                height: auto; 
+                height: auto; /* Permitimos que crezca según el contenido */
                 min-height: calc(100vh - 80px);
                 overflow: visible;
             }
             aside { 
-                max-height: none !important; 
+                max-height: none !important; /* Eliminamos el límite que cortaba la lista */
                 height: auto !important;
                 width: 100% !important;
+                flex-grow: 1;
             }
             main {
                 height: auto !important;
                 overflow: visible !important;
             }
-            /* Si no hay país seleccionado, ocultamos el área de bienvenida en móvil para dar espacio a la lista */
-            #welcome.mobile-hide { display: none; }
+            /* Ocultamos el escudo de bienvenida en móvil si no hay país para dar prioridad a la lista */
+            #welcome:not(.hidden) {
+                display: flex;
+                min-height: 200px;
+                padding: 40px 0;
+            }
         }
 
         /* --- CABECERA --- */
@@ -105,7 +110,6 @@
             background-color: rgba(59, 130, 246, 0.05);
             border-color: #93c5fd;
         }
-        .global-btn.add-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
         
         body:not(.editing-mode) .global-btn.add-btn { display: none !important; }
 
@@ -123,7 +127,7 @@
         .sidebar-item.active { background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important; opacity: 1 !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
         .flag-img { width: 28px; height: auto; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); }
 
-        /* --- EDITOR (FORZADO ANCHO TOTAL) --- */
+        /* --- EDITOR (ANCHO COMPLETO FORZADO) --- */
         .editor-wrapper { 
             min-height: 500px; background: white; border-radius: 2rem; 
             border: 1px solid #e2e8f0; margin-bottom: 2rem; 
@@ -139,7 +143,7 @@
         }
         @media (min-width: 768px) { #mainEditor { padding: 3rem; font-size: 1.15rem; line-height: 1.8; } }
 
-        /* Regla para que todo ocupe el ancho total */
+        /* Todo contenido hijo directo del editor ocupará el 100% */
         #mainEditor > * { width: 100% !important; box-sizing: border-box !important; }
 
         /* --- TABS --- */
@@ -166,7 +170,7 @@
         .editing .grid-cell { border: 2px dashed #94a3b8; background-color: white; }
         .editing .grid-cell.drag-over { background-color: #dcfce7 !important; border-color: #16a34a !important; transform: scale(1.02); z-index: 50; }
 
-        /* --- TOOLBAR (STICKY Y VISIBILIDAD) --- */
+        /* --- TOOLBAR (STICKY Y VISIBILIDAD CONTROLADA) --- */
         #toolbar {
             position: sticky;
             top: 0;
@@ -174,7 +178,7 @@
             background: #0f172a;
             padding: 0.75rem;
             border-radius: 1rem 1rem 0 0;
-            display: none; 
+            display: none; /* Oculto por defecto, se activa en modo edición */
             align-items: center;
             gap: 2px;
             flex-wrap: wrap;
@@ -194,8 +198,6 @@
         .img-block img { display: block; width: 100%; height: auto; border-radius: 12px; border: 2px solid #cbd5e1; pointer-events: auto; }
         .img-block.dragging { opacity: 0.5 !important; border: 2px dashed #3b82f6; pointer-events: none !important; z-index: 0 !important; }
         .img-tools { position: absolute; top: -45px; left: 50%; transform: translateX(-50%); display: none; gap: 4px; z-index: 9999; background: #1e293b; padding: 6px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); white-space: nowrap; }
-        .img-tools::after { content: ''; position: absolute; bottom: -5px; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent; }
-        .editing .img-block:hover { z-index: 100; }
         .editing .img-block:hover .img-tools { display: flex; }
         .editing .img-block { cursor: grab; border: 2px solid transparent; }
         .tool-btn { width: 32px; height: 32px; color: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -328,7 +330,6 @@
 
         function renderList(filter = '') {
             const list = document.getElementById('countryList'); list.innerHTML = '';
-            const filterNorm = normalizeText(filter);
             const keys = Object.keys(countries).filter(k => k !== '_GLOBAL_LINKS').sort((a,b) => countries[a].nombre.localeCompare(countries[b].nombre));
             keys.forEach(id => {
                 const c = countries[id]; if(!c.nombre) return;
@@ -366,18 +367,12 @@
             else ref.child('_GLOBAL_LINKS').child(key).set({ name: newName, url: newUrl });
         }
         
-        function selectCountry() { 
-            document.getElementById('welcome').classList.add('hidden'); 
-            document.getElementById('welcome').classList.add('mobile-hide'); // Ocultar para móvil
-            document.getElementById('contentSection').classList.remove('hidden'); 
-            document.getElementById('countryName').innerText = countries[activeId].nombre; 
-            loadContent(); renderList(); updateTabsState(); 
-            if(window.innerWidth < 768) { setTimeout(() => { document.getElementById('contentSection').scrollIntoView({behavior: 'smooth', block: 'start'}); }, 100); } 
-        }
+        function selectCountry() { document.getElementById('welcome').classList.add('hidden'); document.getElementById('contentSection').classList.remove('hidden'); document.getElementById('countryName').innerText = countries[activeId].nombre; loadContent(); renderList(); updateTabsState(); if(window.innerWidth < 768) { setTimeout(() => { document.getElementById('contentSection').scrollIntoView({behavior: 'smooth', block: 'start'}); }, 100); } }
         function loadContent() { document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<p>Sin datos registrados en esta sección.</p>"; if(isEdit) makeDraggable(); historyStack = []; }
         function updateTabsState() { if(!activeId) return; ['permiso','itv','seguro','personales','otros'].forEach(tab => { const el = document.getElementById('tab-'+tab); if(el) { el.classList.toggle('has-data', hasContent(countries[activeId].datos?.[tab])); } }); }
         function switchTab(t) { activeTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); loadContent(); }
 
+        /* EDITOR LOGIC CON MEJORA DE VISIBILIDAD DE TOOLBAR */
         function toggleEdit() {
             isEdit = !isEdit; const btn = document.getElementById('btnMode'), toolbar = document.getElementById('toolbar'), editor = document.getElementById('mainEditor');
             if(isEdit) {
@@ -411,7 +406,7 @@
             }
         });
 
-        /* --- MEJORA: EVENTOS TÁCTILES PARA ARRASTRAR EN MÓVIL --- */
+        /* --- MEJORA: EVENTOS TÁCTILES PARA ARRASTRAR EN MÓVIL (SWAP) --- */
         let touchTarget = null;
         mainEditor.addEventListener('touchstart', (e) => {
             if(!isEdit) return;
@@ -466,6 +461,7 @@
             makeDraggable(); 
         }
 
+        /* MEJORA INSERCIÓN: Asegura que la imagen se adjunte correctamente */
         function replaceWithImg(btn) { 
             const u=prompt("URL Imagen:"); 
             if(u) { 
@@ -516,7 +512,7 @@
             ref.child(activeId).child('datos').child(activeTab).set(clone.innerHTML).then(() => { alert("✅ GUARDADO"); updateTabsState(); });
         }
         function nuevoPaisManual() { const n = prompt("Nombre:"); if(!n) return; const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", personales: "", otros: "" } }); }
-        function eliminarPais() { const name = countries[activeId].nombre; if(prompt(`⚠️ Escribe el nombre EXACTO para eliminar ${name}:`) === name) { ref.child(activeId).remove().then(() => location.reload()); } }
+        function eliminarPais() { const name = countries[activeId].nombre; if(prompt(`⚠️ Escribe el nombre EXACTO para eliminar ${name}:`) === name) { ref.child(activeId).remove().then(() => location.reload()); } else { alert("❌ Nombre incorrecto."); } }
     </script>
 </body>
 </html>
