@@ -25,12 +25,33 @@
             width: 98%; 
             margin: 0 auto; 
             max-width: 100vw; 
-            /* Altura ajustada para que el scroll sea interno */
-            height: calc(100vh - 80px); /* Aproximado segun header */
+            height: calc(100vh - 80px); 
+            display: flex;
         }
         
         @media (min-width: 768px) {
             .main-container { height: calc(100vh - 140px); }
+        }
+
+        /* --- MEJORA PARA MÓVIL (PANTALLA PRINCIPAL) --- */
+        @media (max-width: 1023px) {
+            .main-container { 
+                flex-direction: column; 
+                height: auto; 
+                overflow: visible;
+            }
+            aside { 
+                max-height: none !important; 
+                height: auto !important;
+            }
+            main {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            #top-bar {
+                position: relative !important;
+                top: 0 !important;
+            }
         }
 
         /* --- CABECERA --- */
@@ -47,12 +68,12 @@
         .header-title { font-size: 1.25rem; line-height: 1.2; }
         @media (min-width: 768px) { .header-title { font-size: 2.25rem; } }
 
-        /* --- BARRA DE MARCADORES (NUEVO) --- */
+        /* --- BARRA DE MARCADORES --- */
         #top-bar {
             position: sticky;
             top: 0;
             z-index: 30;
-            background-color: #f8fafc; /* Slate-50 aprox */
+            background-color: #f8fafc; 
             border-bottom: 1px solid #e2e8f0;
             padding: 0.75rem 1rem;
             display: flex;
@@ -86,10 +107,9 @@
         }
         .global-btn.add-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
         
-        /* Ocultar botón añadir si no es edición */
         body:not(.editing-mode) .global-btn.add-btn { display: none !important; }
 
-        /* --- SIDEBAR (MEJORADO PARA MÓVIL) --- */
+        /* --- SIDEBAR --- */
         .sidebar-item { 
             font-size: 13px; font-weight: 700; text-transform: uppercase;
             margin-bottom: 6px; border-radius: 12px; transition: all 0.3s;
@@ -103,7 +123,7 @@
         .sidebar-item.active { background-color: #2563eb !important; color: white !important; border-color: #1d4ed8 !important; opacity: 1 !important; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
         .flag-img { width: 28px; height: auto; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); }
 
-        /* --- EDITOR (MEJORA ANCHO TOTAL) --- */
+        /* --- EDITOR (FORZADO ANCHO TOTAL) --- */
         .editor-wrapper { 
             min-height: 500px; background: white; border-radius: 2rem; 
             border: 1px solid #e2e8f0; margin-bottom: 2rem; 
@@ -119,7 +139,6 @@
         }
         @media (min-width: 768px) { #mainEditor { padding: 3rem; font-size: 1.15rem; line-height: 1.8; } }
 
-        /* MEJORA: Forzar que todo contenido directo ocupe el ancho completo */
         #mainEditor > * { width: 100% !important; box-sizing: border-box !important; }
 
         /* --- TABS --- */
@@ -146,7 +165,7 @@
         .editing .grid-cell { border: 2px dashed #94a3b8; background-color: white; }
         .editing .grid-cell.drag-over { background-color: #dcfce7 !important; border-color: #16a34a !important; transform: scale(1.02); z-index: 50; }
 
-        /* --- TOOLBAR (STICKY FIJA) --- */
+        /* --- TOOLBAR (STICKY Y VISIBILIDAD) --- */
         #toolbar {
             position: sticky;
             top: 0;
@@ -154,7 +173,7 @@
             background: #0f172a;
             padding: 0.75rem;
             border-radius: 1rem 1rem 0 0;
-            display: flex;
+            display: none; 
             align-items: center;
             gap: 2px;
             flex-wrap: wrap;
@@ -210,13 +229,14 @@
         </div>
         
         <div class="hidden md:flex items-center gap-4">
+            <button onclick="downloadBackup()" class="bg-indigo-600 hover:bg-indigo-500 px-4 py-3 rounded-xl text-[10px] font-black border border-indigo-400 transition-all shadow-lg uppercase"><i class="fas fa-download mr-2"></i> BACKUP GAD</button>
             <button onclick="nuevoPaisManual()" class="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-xl text-[10px] font-black border border-slate-600 transition-all shadow-lg uppercase"><i class="fas fa-plus mr-2"></i> AÑADIR PAÍS</button>
             <button id="btnMode" onclick="toggleEdit()" class="bg-amber-500 hover:bg-amber-400 text-blue-950 px-8 py-3 rounded-2xl text-sm font-black shadow-2xl transition-all flex items-center gap-3"><i class="fas fa-lock" id="iconStatus"></i> <span id="textStatus">ENTRAR A MODO EDICIÓN</span></button>
         </div>
     </header>
 
     <div class="flex flex-grow flex-col lg:flex-row overflow-hidden main-container">
-        <aside class="w-full lg:w-80 lg:flex-shrink-0 bg-white border-r border-slate-200 flex flex-col shadow-inner z-10 max-h-[60vh] lg:max-h-full overflow-y-auto">
+        <aside class="w-full lg:w-80 lg:flex-shrink-0 bg-white border-r border-slate-200 flex flex-col shadow-inner z-10 lg:max-h-full overflow-y-auto">
             <div class="p-3 bg-slate-50 sticky top-0 z-10 border-b">
                 <input type="text" id="search" placeholder=" Buscar País..." class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-4 focus:ring-blue-100 transition-all">
             </div>
@@ -245,7 +265,7 @@
                         <button onclick="switchTab('otros')" id="tab-otros" class="tab-btn">Otros / Notas</button>
                     </div>
                     
-                    <div id="toolbar" class="hidden">
+                    <div id="toolbar" class="hidden bg-slate-900 p-3 rounded-t-2xl flex items-center gap-2 flex-wrap border-b border-slate-700 sticky top-0 z-20 shadow-2xl">
                         <div class="toolbar-group"><button onclick="undo()" class="tool-icon-btn bg-slate-600 hover:bg-slate-500" title="Deshacer"><i class="fas fa-undo"></i></button></div>
                         <div class="toolbar-group">
                             <button onmousedown="event.preventDefault(); exec('bold')" class="tool-icon-btn"><i class="fas fa-bold"></i></button>
@@ -347,20 +367,23 @@
         }
         
         function selectCountry() { document.getElementById('welcome').classList.add('hidden'); document.getElementById('contentSection').classList.remove('hidden'); document.getElementById('countryName').innerText = countries[activeId].nombre; loadContent(); renderList(); updateTabsState(); if(window.innerWidth < 768) { setTimeout(() => { document.getElementById('contentSection').scrollIntoView({behavior: 'smooth', block: 'start'}); }, 100); } }
-        function loadContent() { document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<p>Sin datos.</p>"; if(isEdit) makeDraggable(); historyStack = []; }
-        function updateTabsState() { if(!activeId) return; ['permiso','itv','itv','seguro','personales','otros'].forEach(tab => { const el = document.getElementById('tab-'+tab); if(el) { el.classList.toggle('has-data', hasContent(countries[activeId].datos?.[tab])); } }); }
+        function loadContent() { document.getElementById('mainEditor').innerHTML = countries[activeId].datos?.[activeTab] || "<p>Sin datos registrados en esta sección.</p>"; if(isEdit) makeDraggable(); historyStack = []; }
+        function updateTabsState() { if(!activeId) return; ['permiso','itv','seguro','personales','otros'].forEach(tab => { const el = document.getElementById('tab-'+tab); if(el) { el.classList.toggle('has-data', hasContent(countries[activeId].datos?.[tab])); } }); }
         function switchTab(t) { activeTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); loadContent(); }
 
         function toggleEdit() {
             isEdit = !isEdit; const btn = document.getElementById('btnMode'), toolbar = document.getElementById('toolbar'), editor = document.getElementById('mainEditor');
             if(isEdit) {
                 document.body.classList.add('editing-mode'); btn.classList.replace('bg-amber-500', 'bg-green-600'); document.getElementById('iconStatus').className = "fas fa-save"; document.getElementById('textStatus').innerText = "VOLVER A MODO CONSULTA";
-                toolbar.classList.remove('hidden'); editor.contentEditable = "true"; editor.parentElement.classList.add('editing'); document.querySelectorAll('.edit-ui').forEach(el => el.classList.remove('hidden')); 
+                toolbar.style.display = 'flex'; 
+                editor.contentEditable = "true"; editor.parentElement.classList.add('editing'); document.querySelectorAll('.edit-ui').forEach(el => el.classList.remove('hidden')); 
                 document.execCommand('styleWithCSS', false, true); document.execCommand('defaultParagraphSeparator', false, 'p');
                 cleanUpOldRows(); makeDraggable(); pushHistory(); renderGlobalButtons();
             } else {
                 save(); document.body.classList.remove('editing-mode'); btn.classList.replace('bg-green-600', 'bg-amber-500'); document.getElementById('iconStatus').className = "fas fa-lock"; document.getElementById('textStatus').innerText = "ENTRAR A MODO EDICIÓN";
-                toolbar.classList.add('hidden'); editor.contentEditable = "false"; editor.parentElement.classList.remove('editing'); renderGlobalButtons();
+                toolbar.style.display = 'none'; 
+                editor.contentEditable = "false"; editor.parentElement.classList.remove('editing'); document.querySelectorAll('.edit-ui').forEach(el => el.classList.add('hidden'));
+                renderGlobalButtons();
             }
         }
         
@@ -379,6 +402,42 @@
                 if(exist) { srcCell.appendChild(exist); targetCell.appendChild(dragged); } else { targetCell.innerHTML = ''; targetCell.appendChild(dragged); }
                 cleanUpOldRows();
             }
+        });
+
+        /* --- MEJORA: EVENTOS TÁCTILES PARA ARRASTRAR EN MÓVIL --- */
+        let touchTarget = null;
+        mainEditor.addEventListener('touchstart', (e) => {
+            if(!isEdit) return;
+            const imgBlock = e.target.closest('.img-block');
+            if(imgBlock) { touchTarget = imgBlock; imgBlock.classList.add('dragging'); }
+        }, {passive: true});
+
+        mainEditor.addEventListener('touchmove', (e) => {
+            if(!isEdit || !touchTarget) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            const cell = targetEl ? targetEl.closest('.grid-cell') : null;
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            if(cell) cell.classList.add('drag-over');
+        }, {passive: false});
+
+        mainEditor.addEventListener('touchend', (e) => {
+            if(!isEdit || !touchTarget) return;
+            const touch = e.changedTouches[0];
+            const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+            const targetCell = targetEl ? targetEl.closest('.grid-cell') : null;
+            touchTarget.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            if(targetCell && !targetCell.contains(touchTarget)) {
+                pushHistory();
+                const exist = targetCell.querySelector('.img-block');
+                const srcCell = touchTarget.parentElement;
+                if(exist) { srcCell.appendChild(exist); targetCell.appendChild(touchTarget); } 
+                else { targetCell.innerHTML = ''; targetCell.appendChild(touchTarget); }
+                cleanUpOldRows();
+            }
+            touchTarget = null;
         });
 
         function cleanUpOldRows() { document.querySelectorAll('.grid-cell').forEach(c => { if(c.querySelector('.img-block') && c.querySelector('.placeholder-btn')) c.querySelector('.placeholder-btn').remove(); if(!c.innerHTML.trim() || c.innerHTML === '<br>') c.innerHTML=`<div class="placeholder-btn" onclick="replaceWithImg(this)"><i class="fas fa-plus"></i> AÑADIR IMAGEN</div>`; }); }
@@ -400,7 +459,7 @@
             makeDraggable(); 
         }
 
-        /* MEJORA INSERCIÓN: Asegura que la imagen se adjunte correctamente al pulsar el botón azul */
+        /* MEJORA INSERCIÓN: Asegura que la imagen se adjunte correctamente usando innerHTML */
         function replaceWithImg(btn) { 
             const u=prompt("URL Imagen:"); 
             if(u) { 
@@ -421,13 +480,26 @@
         function insertHTML(h) { document.execCommand('insertHTML',false,h); }
         function exec(c,v=null) { pushHistory(); document.execCommand(c,false,v); }
 
+        function downloadBackup() {
+            const opt = confirm("¿Descargar copia de TODOS los países?");
+            if (opt) {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(countries, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "BACKUP_GAD_PAISES_" + new Date().toLocaleDateString() + ".json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
+        }
+
         let zoomState = { scale: 1, pX: 0, pY: 0, sX: 0, sY: 0, isDragging: false, imgs: [], index: 0 };
         const zoomImg = document.getElementById('zoomImg'); const zoomOverlay = document.getElementById('zoomOverlay');
         document.addEventListener('DOMContentLoaded', () => { 
             ref.on('value', s => { const val = s.val() || {}; globalLinks = val._GLOBAL_LINKS || {}; countries = val; renderList(); renderGlobalButtons(); if(activeId) updateTabsState(); }); 
             document.getElementById('search').addEventListener('input', e => renderList(e.target.value)); 
             mainEditor.addEventListener('click', e => { if(!isEdit && e.target.tagName==='IMG' && e.target.closest('.img-block')) openZoom(e.target.src); }); 
-            zoomImg.addEventListener('mousedown', startDrag); zoomImg.addEventListener('touchstart', startDrag, {passive: false}); window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, {passive: false}); window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag); 
+            zoomImg.addEventListener('mousedown', startDrag); zoomImg.addEventListener('touchstart', startDrag, {passive: false}); window.addEventListener('mousemove', drag); window.addEventListener('touchmove', drag, {passive: false}); window.addEventListener('mouseup', endDrag); window.addEventListener('touchend', endDrag); zoomImg.addEventListener('wheel', handleWheel, {passive: false}); document.addEventListener('keydown', handleKeys); 
         });
         function openZoom(src) { zoomState.imgs = Array.from(document.querySelectorAll('#mainEditor img')).map(i => i.src); zoomState.index = zoomState.imgs.indexOf(src); updateZoomImage(); zoomOverlay.style.display = 'flex'; }
         function closeZoom(force) { if(force || zoomState.scale === 1) zoomOverlay.style.display = 'none'; }
@@ -435,9 +507,12 @@
         function navigateZoom(dir) { zoomState.index = (zoomState.index+dir+zoomState.imgs.length)%zoomState.imgs.length; updateZoomImage(); }
         function resetZoom() { zoomState.scale = 1; zoomState.pX = 0; zoomState.pY = 0; updateTransform(); }
         function updateTransform() { zoomImg.style.transform = `translate(${zoomState.pX}px, ${zoomState.pY}px) scale(${zoomState.scale})`; }
-        function startDrag(e) { e.preventDefault(); zoomState.isDragging = true; const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.sX = c.clientX - zoomState.pX; zoomState.sY = c.clientY - zoomState.pY; }
-        function drag(e) { if(!zoomState.isDragging) return; const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.pX = c.clientX - zoomState.sX; zoomState.pY = c.clientY - zoomState.sY; updateTransform(); }
-        function endDrag() { zoomState.isDragging = false; }
+        function handleWheel(e) { e.preventDefault(); const delta = e.deltaY > 0 ? 0.9 : 1.1; zoomState.scale *= delta; if(zoomState.scale < 1) zoomState.scale = 1; updateTransform(); }
+        let clickStartTime = 0; let startTouchesDistance = 0;
+        function startDrag(e) { if(e.type === 'touchstart' && e.touches.length === 2) { startTouchesDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); return; } clickStartTime = Date.now(); zoomState.isDragging = true; const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.sX = c.clientX - zoomState.pX; zoomState.sY = c.clientY - zoomState.pY; }
+        function drag(e) { if(e.type === 'touchmove' && e.touches.length === 2) { e.preventDefault(); const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); zoomState.scale *= (dist / startTouchesDistance); startTouchesDistance = dist; if(zoomState.scale < 1) zoomState.scale = 1; updateTransform(); return; } if(!zoomState.isDragging) return; e.preventDefault(); const c = e.type.includes('touch') ? e.touches[0] : e; zoomState.pX = c.clientX - zoomState.sX; zoomState.pY = c.clientY - zoomState.sY; updateTransform(); }
+        function endDrag(e) { zoomState.isDragging = false; if(zoomState.scale === 1) { if(Math.abs(zoomState.pX) > 50) { navigateZoom(zoomState.pX > 0 ? -1 : 1); } else if(Date.now() - clickStartTime < 200 && Math.abs(zoomState.pX) < 5) { closeZoom(true); } else { resetZoom(); } } }
+        function handleKeys(e) { if(zoomOverlay.style.display === 'flex') { if(e.key === 'ArrowRight') navigateZoom(1); if(e.key === 'ArrowLeft') navigateZoom(-1); if(e.key === 'Escape') closeZoom(true); } }
 
         function save() {
             if(!activeId) return; const clone = document.getElementById('mainEditor').cloneNode(true);
@@ -447,8 +522,8 @@
             countries[activeId].datos[activeTab] = clone.innerHTML;
             ref.child(activeId).child('datos').child(activeTab).set(clone.innerHTML).then(() => { alert("✅ GUARDADO"); updateTabsState(); });
         }
-        function nuevoPaisManual() { const n = prompt("Nombre:"); if(!n) return; const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", personales: "", otros: "" } }); }
-        function eliminarPais() { const name = countries[activeId].nombre; if(prompt(`⚠️ Escribe ${name} para eliminar:`) === name) { ref.child(activeId).remove().then(() => location.reload()); } }
+        function nuevoPaisManual() { const n = prompt("Nombre del País:"); if(!n) return; const id = n.toUpperCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, ""); ref.child(id).set({ nombre: n, datos: { permiso: "", itv: "", seguro: "", personales: "", otros: "" } }); }
+        function eliminarPais() { const name = countries[activeId].nombre; if(prompt(`⚠️ Escribe el nombre EXACTO para eliminar ${name}:`) === name) { ref.child(activeId).remove().then(() => location.reload()); } else { alert("❌ Nombre incorrecto."); } }
     </script>
 </body>
 </html>
