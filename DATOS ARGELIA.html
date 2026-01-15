@@ -61,18 +61,21 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
     
     <script>
-        const firebaseConfig = {
-apiKey: "AIzaSyCY8V_P7m8lZUvGbMVlGaa-GVhbmyikmag",
-  authDomain: "gad-alicante-v4.firebaseapp.com",
-  databaseURL: "https://gad-alicante-v4-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "gad-alicante-v4",
-  storageBucket: "gad-alicante-v4.firebasestorage.app",
-  messagingSenderId: "119727545224",
-  appId: "1:119727545224:web:36880c50d196c456cdb83d"
-};
+        
+    const firebaseConfig = {
+        apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
+        authDomain: "gad-alicante-v1.firebaseapp.com",
+        databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "gad-alicante-v1",
+        storageBucket: "gad-alicante-v1.appspot.com",
+        messagingSenderId: "545835357966",
+        appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f"
+    }
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const licenciasRef = database.ref('licencias_argelia_nuevas');
