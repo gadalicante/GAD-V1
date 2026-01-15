@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GAD | Gestión de Denuncias RADAR</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50; --accent: #3498db; --bg: #f4f6f8;
+            --success: #2ecc71; --warning: #f1c40f; --danger: #e74c3c;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        body {
+            font-family: 'Roboto', sans-serif; background-color: var(--bg); color: #333;
+            margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        /* CABECERA */
+        .title-panel-blue {
+            background-color: #3b82f6;
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+            padding: 15px 30px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        .title-panel-blue h1 {
+            color: white; margin: 0; font-size: 1.5em; flex-grow: 1; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+        }
+        
+        .header-logo-50 {
+            width: 50px; height: 50px; border: 5px solid #e74c3c; background-color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: black; font-weight: 900; font-size: 20px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); flex-shrink: 0;
+        }
+        .header-logo-container { width: 60px; height: 60px; flex-shrink: 0; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 5px; }
+        .header-logo-container img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* LAYOUT */
+        main { flex: 1; padding: 20px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .dashboard-grid { display: grid; grid-template-columns: 320px 1fr; gap: 25px; align-items: start; }
+
+        /* PANELES */
+        .panel { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eaecf0; }
+        .panel h3 { margin-top: 0; font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+
+        /* CONTROLES */
+        .control-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 5px; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #dfe6e9; border-radius: 6px; }
+        
+        .filter-buttons-container { display: flex; flex-direction: column; gap: 10px; }
+
+        #drop-zone {
+            border: 2px dashed #cbd5e0; border-radius: 8px; padding: 25px 20px; text-align: center;
+            background: #f8fafc; cursor: pointer; transition: all 0.2s;
+        }
+        #drop-zone.dragover { border-color: var(--accent); background: #ebf8ff; transform: scale(1.02); }
+
+        /* BOTONES */
+        .btn {
+            border: none; padding: 12px 15px; border-radius: 6px; font-weight: 700; cursor: pointer;
+            font-size: 0.85em; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; transition: all 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-transform: uppercase; letter-spacing: 0.5px; margin: 0;
+        }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn:active { transform: translateY(1px); }
+        
+        .btn-primary { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
+        .btn-success { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
+        .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        .btn-warning { background: linear-gradient(135deg, #f1c40f, #f39c12); color: #333; }
+        .btn-dark { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; }
+        .btn-purple { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; }
+        .btn-eurocop { background: linear-gradient(135deg, #fbc531, #e1b12c); color: #333; }
+        
+        /* ESTADO ACTIVO ORDENACIÓN */
+        .btn.active-sort { box-shadow: inset 0 3px 5px rgba(0,0,0,0.2); filter: brightness(0.8); border: 2px solid #3498db; }
+
+        /* TARJETAS */
+        .vehicle-list { display: flex; flex-direction: column; gap: 10px; }
+        
+        .vehicle-card {
+            background: white; border: 1px solid #e1e4e8; border-radius: 8px; overflow: hidden;
+            transition: all 0.2s;
+        }
+        .vehicle-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+        .card-header {
+            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; background: #fff;
+        }
+        
+        .left-col {
+            display: grid; 
+            grid-template-columns: 40px 240px 100px 1fr; 
+            gap: 10px; align-items: center;
+        }
+
+        .btn-copy-mini {
+            background: #e8f5e9; color: #2ecc71; border: 1px solid #2ecc71;
+            width: 32px; height: 32px; border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .btn-copy-mini:hover { background: #2ecc71; color: white; }
+
+        .btn-trash-mini {
+            background: transparent; color: #e74c3c; border: none;
+            width: 30px; height: 30px; cursor: pointer; font-size: 1.1em;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 10px; opacity: 0.6;
+        }
+        .btn-trash-mini:hover { opacity: 1; transform: scale(1.1); }
+
+        .plate-number {
+            font-family: 'Roboto', monospace; font-size: 1.3em; font-weight: 900; color: #2d3436;
+            background: #f1f2f6; padding: 5px 0; border-radius: 6px; border: 1px solid #ced6e0;
+            text-align: center; width: 100%; display: block; letter-spacing: 1px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        
+        .count-badge {
+            background: #dfe6e9; color: #636e72; font-size: 0.8em; font-weight: 700;
+            padding: 6px 0; border-radius: 20px; text-align: center; width: 100%; display: block;
+        }
+        .count-badge.reincident { background: #e74c3c; color: white; box-shadow: 0 2px 5px rgba(231, 76, 60, 0.4); }
+
+        .last-date-info {
+            font-size: 0.85em; color: #7f8c8d; font-weight: 600; text-align: left;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* CHIPS */
+        .status-actions { display: flex; align-items: center; gap: 8px; }
+        .status-chip {
+            padding: 6px 15px; border-radius: 20px; font-size: 0.75em; font-weight: 700; text-transform: uppercase;
+            border: 2px solid transparent; cursor: pointer; opacity: 0.4; filter: grayscale(100%); transition: all 0.2s;
+            background: #eee; color: #555;
+        }
+        .status-chip:hover { opacity: 0.7; filter: grayscale(0%); transform: scale(1.05); }
+        .status-chip.active { opacity: 1; filter: grayscale(0%); box-shadow: 0 2px 8px rgba(0,0,0,0.15); transform: scale(1.05); }
+        .chip-eurocop.active { background: #ffeb3b; color: #000; border-color: #fbc531; }
+        .chip-notified.active { background: #4CAF50; color: white; border-color: #2e7d32; }
+
+        /* DETALLES */
+        .card-details { background: #f8fafc; border-top: 1px solid #eee; padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .card-details.open { max-height: 600px; overflow-y: auto; padding: 15px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9em; }
+
+        /* MODALES */
+        #legend-panel {
+            position: fixed; top: 0; left: 0; width: 100%; max-height: 80vh; background: rgba(255,255,255,0.99);
+            border-bottom: 5px solid #8e44ad; z-index: 3000; display: none; overflow-y: auto; box-shadow: 0 10px 100px rgba(0,0,0,0.5);
+        }
+        #modal-overlay-bg {
+            display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000;
+        }
+        #notification-modal {
+            display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
+            z-index: 2001; width: 90%; max-width: 450px;
+        }
+
+        .help-step { margin-bottom: 20px; border-left: 4px solid #ddd; padding-left: 15px; }
+        .help-step h4 { margin: 0 0 5px 0; color: #2c3e50; }
+
+        @media (max-width: 1100px) { 
+            .dashboard-grid { grid-template-columns: 1fr; } 
+            .left-col { grid-template-columns: 40px 1fr 100px 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title-panel-blue">
+        <div class="header-logo-50">50</div>
+        <h1><i class="fas fa-tachometer-alt"></i> GESTIÓN DE DENUNCIAS RADAR</h1>
+        <div class="header-logo-container"><img src="logogad.png" onerror="this.style.display='none'"></div>
+    </div>
+
+    <main>
+        <div class="dashboard-grid">
+            <aside class="panel">
+                <h3><i class="fas fa-sliders-h"></i> Panel de Control</h3>
+                
+                <div class="control-group">
+                    <label>Buscador Rápido</label>
+                    <input type="text" id="search-input" placeholder="Escribe matrícula...">
+                </div>
+
+                <div class="control-group filter-buttons-container">
+                    <button id="undo-btn" class="btn btn-dark"><i class="fas fa-undo"></i> Deshacer Última</button>
+                    <button id="toggle-help-btn" class="btn btn-purple"><i class="fas fa-book"></i> Ver Manual de Ayuda</button>
+                </div>
+
+                <div class="control-group" style="border-top: 1px solid #eee; padding-top: 15px;">
+                    <label>Filtros de Estado</label>
+                    <div class="filter-buttons-container">
+                        <button id="filter-all-btn" class="btn btn-primary" style="opacity:0.9"><i class="fas fa-list"></i> Ver Todos</button>
+                        <button id="filter-pending-btn" class="btn btn-warning"><i class="fas fa-hourglass-half"></i> Pendientes</button>
+                        <button id="filter-eurocop-btn" class="btn btn-eurocop"><i class="fas fa-check"></i> Sin Datos Eurocop</button>
+                        <button id="filter-notified-btn" class="btn btn-success"><i class="fas fa-paper-plane"></i> Notificados</button>
+
+                        <div style="font-size:0.8em; color:#999; margin:15px 0 5px 0; border-top:1px solid #eee; padding-top:10px;">ORDENAR VISTA POR:</div>
+                        <button id="sort-date-btn" class="btn btn-dark active-sort"><i class="fas fa-clock"></i> Fecha (Más reciente)</button>
+                        <button id="sort-plate-btn" class="btn btn-dark"><i class="fas fa-sort-alpha-down"></i> Matrícula (A-Z)</button>
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin-top: 20px;">
+                    <div id="drop-zone">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2em; color: #a0aec0;"></i>
+                        <p style="margin:5px 0; font-weight:bold; color:#555;">IMPORTAR ARCHIVO</p>
+                        <p style="margin:0; font-size:0.8em; color:#999;">Excel, PDF, Imágenes, JSON</p>
+                        <p style="margin:5px 0 0 0; font-size:0.7em; color:#e74c3c;">*Ignora españolas y duplicados</p>
+                    </div>
+                    <input type="file" id="file-input" accept=".xls, .xlsx, .pdf, .jpg, .png, .jpeg, .json" style="display: none;">
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button id="delete-all-btn" class="btn btn-danger" style="opacity: 0.6; font-size: 0.75em;">🗑️ Borrar Base de Datos</button>
+                </div>
+            </aside>
+
+            <section class="panel" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span id="record-count" style="font-weight:bold; color:#666;">Cargando sistema...</span>
+                    <span id="current-filter-label" style="font-size:0.85em; background:#eee; padding:2px 8px; border-radius:4px;">Vista: Todos</span>
+                </div>
+                <div id="vehicle-list" class="vehicle-list"></div>
+            </section>
+        </div>
+    </main>
+
+    <div id="modal-overlay-bg"></div>
+    <div id="notification-modal">
+        <div class="modal-header" style="background: #f1f1f1; padding: 10px; margin: -20px -20px 15px -20px; border-bottom: 1px solid #e0e0e0;">
+            <h2 style="margin:0;"><i class="fas fa-paper-plane"></i> Notificar Datos Radar</h2>
+        </div>
+        
+        <div class="modal-content" style="display: grid; gap: 10px;">
+            <label>Nombre:</label> <input type="text" id="modal-nombre" placeholder="Nombre completo...">
+            <label>DOI:</label> <input type="text" id="modal-doi" placeholder="Nº de identificación NIE, DNI, otros">
+            <label>Dirección:</label> <input type="text" id="modal-direccion" placeholder="Dirección...">
+            <label>Localidad:</label> <input type="text" id="modal-localidad" placeholder="Localidad...">
+            <label>Fecha de Nacimiento:</label> <input type="date" id="modal-fecha-nacimiento">
+            <label>Teléfono:</label> <input type="text" id="modal-telefono" placeholder="Teléfono...">
+        </div>
+
+        <div class="modal-buttons" style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button id="modal-cancel-btn" style="padding:10px; cursor:pointer;">Cancelar</button>
+            <button id="modal-accept-btn" style="background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 5px; cursor:pointer;">Aceptar y Enviar</button>
+        </div>
+    </div>
+
+    <div id="legend-panel">
+        <div style="padding: 15px 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; position:sticky; top:0; z-index:10;">
+            <h4 style="margin:0; color:#8E24AA; font-size: 1.2em;"><i class="fas fa-book-open"></i> Manual Radar</h4>
+            <button id="close-help-btn" class="btn btn-danger" style="width:auto; padding: 5px 15px; margin:0;">Cerrar</button>
+        </div>
+        <div id="legend-content-area" style="padding: 30px; line-height: 1.6; font-size: 1.0em; color: #444;"></div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DE CORREO (RADAR)
+        const CORREO_SANCIONES = "unidad.sanciones@alicante.es";
+
+        // FIREBASE DE RADAR
+        const firebaseConfig = {
+            apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
+            authDomain: "gad-alicante-v1.firebaseapp.com",
+            databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gad-alicante-v1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+    const db = firebase.database();
+        const DB_REF = 'denuncias_radar';
+
+        // Configuración PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let allDenuncias = [];
+        let historyStack = [];
+        let currentFilter = 'all'; 
+        let currentSort = 'date'; 
+
+        const REGEX_PLATE = /([A-Z]{1,2}\d{4}[A-Z]{1,2})|(\d{4}[A-Z]{3})|([A-Z]{2}\d{3}[A-Z]{3})|([A-Z]{2}\d{6})/g;
+        const REGEX_DATE = /\b(\d{1,2}[-./]\d{1,2}[-./]\d{2,4})\b/g;
+
+        // --- FUNCIONES AUXILIARES ---
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try { document.execCommand('copy'); document.body.removeChild(textArea); } catch (e) {}
+                return Promise.resolve();
+            }
+        }
+
+        function formatJustDate(dateObj) {
+            if (!dateObj || isNaN(dateObj)) return 'Sin fecha';
+            return dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function formatDate(isoStr) {
+            if(!isoStr) return '-';
+            const d = new Date(isoStr);
+            if(isNaN(d)) return isoStr;
+            return formatJustDate(d) + ' ' + d.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+        }
+
+        // =======================================================
+        // LÓGICA DE EXTRACCIÓN Y LIMPIEZA DE DATOS
+        // =======================================================
+
+        function sanitizeKey(key) {
+            if (!key) return '';
+            return key.trim().toLowerCase()
+                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                      .replace(/[.$#\[\]\/]/g, '_') 
+                      .replace(/\s/g, '_'); 
+        }
+
+        function getCanonicalKey(sanitizedKey) {
+            if (sanitizedKey.includes('matricula') || sanitizedKey.includes('placa') || sanitizedKey.includes('dominio')) return 'matricula';
+            if (sanitizedKey.includes('fecha') || sanitizedKey.includes('hora') || sanitizedKey.includes('date')) return 'fecha';
+            if (sanitizedKey.includes('marca')) return 'marca';
+            if (sanitizedKey.includes('modelo')) return 'modelo';
+            if (sanitizedKey.includes('calle') || sanitizedKey.includes('lugar') || sanitizedKey.includes('ubicacion')) return 'lugar';
+            return null; 
+        }
+
+        // --- NUEVA FUNCIÓN: PARSEO INTELIGENTE DE FECHAS ---
+        function parseFlexibleDate(value) {
+            if (!value) return new Date().toISOString();
+
+            // 1. Si ya es un objeto Date
+            if (value instanceof Date) return value.toISOString();
+
+            // 2. Si es un número (formato serial de Excel)
+            if (typeof value === 'number') {
+                return new Date(Math.round((value - 25569) * 86400 * 1000)).toISOString();
+            }
+
+            // 3. Si es String (Texto)
+            if (typeof value === 'string') {
+                const str = value.trim();
+                
+                // Caso Europeo: "20/12/2025 9:41"
+                if (str.includes('/')) {
+                    try {
+                        const [datePart, timePart] = str.split(' ');
+                        const parts = datePart.split('/'); // [20, 12, 2025]
+                        
+                        if (parts.length === 3) {
+                            // Construir formato ISO (YYYY-MM-DD)
+                            let isoString = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                            if (timePart) isoString += `T${timePart}`;
+                            
+                            const d = new Date(isoString);
+                            if (!isNaN(d)) return d.toISOString();
+                        }
+                    } catch (e) { console.warn("Error parseando fecha string europea", e); }
+                }
+
+                // Intento estándar JS
+                const d = new Date(str);
+                if (!isNaN(d)) return d.toISOString();
+            }
+
+            // Fallback: Fecha actual si todo falla
+            return new Date().toISOString();
+        }
+
+        function extraerDatosExcel(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const wb = XLSX.read(e.target.result, { type: 'array', cellDates: true });
+                        const jsonData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                        if (jsonData.length === 0) { reject("Excel vacío."); return; }
+
+                        const sanitized = jsonData.map(row => {
+                            const newRow = {};
+                            Object.keys(row).forEach(k => {
+                                const ck = getCanonicalKey(sanitizeKey(k));
+                                if (ck) {
+                                    let v = row[k];
+                                    if (ck === 'fecha') {
+                                        newRow[ck] = parseFlexibleDate(v);
+                                    } else {
+                                        newRow[ck] = v;
+                                    }
+                                }
+                            });
+                            // Asegurar campos mínimos
+                            if(!newRow.fecha) newRow.fecha = new Date().toISOString();
+                            if(!newRow.lugar) newRow.lugar = "Desconocido (Excel)";
+                            return newRow;
+                        });
+
+                        // FILTRADO DE MATRÍCULAS ESPAÑOLAS
+                        const final = sanitized.filter(row => {
+                            if (!row.matricula) return false;
+                            const p = String(row.matricula).toUpperCase().replace(/[^A-Z0-9]/g, '');
+                            // Regex Española Moderna (1234BBB) y Antigua (A1234BC)
+                            const esEspanola = /^\d{4}[BCDFGHJKLMNPRSTVWXYZ]{3}$/.test(p) || /^[A-Z]{1,2}\d{4}[A-Z]{0,2}$/.test(p);
+                            if (esEspanola) return false;
+                            row.matricula = p;
+                            return true;
+                        });
+                        resolve(final);
+                    } catch (err) { reject(err); }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // =======================================================
+        // GESTIÓN DE ARCHIVOS Y GUARDADO
+        // =======================================================
+
+        async function handleFile(file) {
+            pushHistory();
+            const name = file.name.toLowerCase();
+            let nuevosDatos = [];
+
+            try {
+                if (name.endsWith('.xlsx') || name.endsWith('.xls')) {
+                    nuevosDatos = await extraerDatosExcel(file);
+                    procesarYGuardar(nuevosDatos, "Excel");
+                } 
+                else if (name.endsWith('.pdf')) {
+                    const reader = new FileReader();
+                    reader.onload = async function() {
+                        const pdf = await pdfjsLib.getDocument({data: new Uint8Array(this.result)}).promise;
+                        let text = "";
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const content = await page.getTextContent();
+                            text += content.items.map(item => item.str).join(" ");
+                        }
+                        extraerDeTexto(text, "PDF");
+                    };
+                    reader.readAsArrayBuffer(file);
+                } 
+                else if (file.type.startsWith('image/')) {
+                    const { data: { text } } = await Tesseract.recognize(file, 'spa');
+                    extraerDeTexto(text, "Imagen OCR");
+                } 
+                else if (name.endsWith('.json')) {
+                    const reader = new FileReader();
+                    reader.onload = e => procesarYGuardar(JSON.parse(e.target.result), "JSON");
+                    reader.readAsText(file);
+                }
+            } catch (error) {
+                alert("Error procesando archivo: " + error);
+                console.error(error);
+            }
+        }
+
+        function extraerDeTexto(text, source) {
+            const cleanTxt = text.toUpperCase();
+            const cleanForMat = cleanTxt.replace(/[- \s]/g,''); 
+            const matchesMat = cleanForMat.match(REGEX_PLATE) || [];
+            const uniquePlates = [...new Set(matchesMat)]; 
+
+            let foundDate = new Date().toISOString();
+            const matchesDate = text.match(REGEX_DATE);
+            if(matchesDate && matchesDate.length > 0) {
+                const parts = matchesDate[0].split(/[-./]/);
+                if(parts.length === 3) {
+                    const d = new Date(`${parts[1]}/${parts[0]}/${parts[2]}`);
+                    if(!isNaN(d)) foundDate = d.toISOString();
+                }
+            }
+
+            const data = uniquePlates.map(m => ({
+                matricula: m.replace(/[^A-Z0-9]/g, ''),
+                fecha: foundDate,
+                lugar: `Importado de ${source} (Texto)`,
+                marca: '', modelo: ''
+            }));
+
+            const filtered = data.filter(d => {
+                const p = d.matricula;
+                return !(/^\d{4}[BCDFGHJKLMNPRSTVWXYZ]{3}$/.test(p) || /^[A-Z]{1,2}\d{4}[A-Z]{0,2}$/.test(p));
+            });
+
+            procesarYGuardar(filtered, source);
+        }
+
+        function procesarYGuardar(newRows, source) {
+            let addedCount = 0;
+            let duplicateCount = 0;
+
+            newRows.forEach(n => {
+                const isExactDuplicate = allDenuncias.some(old => 
+                    old.matricula === n.matricula && 
+                    new Date(old.fecha).getTime() === new Date(n.fecha).getTime() &&
+                    (old.lugar || '') === (n.lugar || '')
+                );
+
+                if (isExactDuplicate) {
+                    duplicateCount++;
+                } else {
+                    const item = {
+                        id: Date.now() + Math.random(),
+                        matricula: n.matricula,
+                        fecha: n.fecha,
+                        lugar: n.lugar || "Desconocido",
+                        marca: n.marca || "",
+                        modelo: n.modelo || "",
+                        origen: source,
+                        eurocop: false,
+                        notificado: false,
+                        datos_notificacion: {}
+                    };
+
+                    const existingPlate = allDenuncias.find(old => old.matricula === n.matricula);
+                    if(existingPlate) {
+                        item.eurocop = existingPlate.eurocop || false;
+                        item.notificado = existingPlate.notificado || false;
+                        if(existingPlate.datos_notificacion) {
+                            item.datos_notificacion = existingPlate.datos_notificacion;
+                        } else {
+                            item.datos_notificacion = {};
+                        }
+                    }
+
+                    allDenuncias.push(item);
+                    addedCount++;
+                }
+            });
+
+            if (addedCount > 0) {
+                db.ref(DB_REF).set(allDenuncias).catch(err => {
+                    alert("Error grave al guardar en Firebase: " + err.message);
+                });
+                alert(`✅ Importación (${source}):\n- Añadidos: ${addedCount}\n- Duplicados ignorados: ${duplicateCount}`);
+            } else {
+                alert(`⚠️ No se añadieron datos nuevos.\n(Duplicados ignorados: ${duplicateCount})`);
+            }
+        }
+
+        // =======================================================
+        // GESTIÓN UI, FILTROS Y ORDENACIÓN
+        // =======================================================
+
+        function pushHistory() {
+            if(allDenuncias.length > 0) {
+                historyStack.push(JSON.parse(JSON.stringify(allDenuncias)));
+                if(historyStack.length > 20) historyStack.shift();
+            }
+        }
+
+        function loadData() {
+            db.ref(DB_REF).on('value', snap => {
+                const val = snap.val();
+                let rawData = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+                allDenuncias = rawData.map(d => {
+                    if(!d.datos_notificacion) d.datos_notificacion = {};
+                    if(d.eurocop === undefined) d.eurocop = false;
+                    if(d.notificado === undefined) d.notificado = false;
+                    if(!d.lugar) d.lugar = "Desconocido";
+                    
+                    d._dateObj = d.fecha ? new Date(d.fecha) : new Date(0);
+                    return d;
+                });
+                renderList();
+            });
+        }
+
+        function renderList() {
+            const container = document.getElementById('vehicle-list');
+            container.innerHTML = '';
+
+            const groups = {};
+            allDenuncias.forEach(d => {
+                const m = d.matricula;
+                if(!groups[m]) groups[m] = { matricula: m, items: [], eurocop: false, notificado: false };
+                groups[m].items.push(d);
+            });
+
+            Object.values(groups).forEach(g => {
+                g.eurocop = g.items.every(i => i.eurocop); 
+                g.notificado = g.items.some(i => i.notificado); 
+                const dates = g.items.map(i => i._dateObj);
+                g.maxDate = new Date(Math.max(...dates));
+            });
+
+            let result = Object.values(groups);
+            const term = document.getElementById('search-input').value.toUpperCase().trim();
+
+            if (term) {
+                result = result.filter(g => g.matricula.includes(term));
+                document.getElementById('current-filter-label').innerText = "Búsqueda: " + term;
+            } else {
+                let label = "Todos";
+                if(currentFilter === 'pending') { 
+                    result = result.filter(g => !g.eurocop && !g.notificado); 
+                    label = "Pendientes"; 
+                }
+                if(currentFilter === 'eurocop') { 
+                    result = result.filter(g => g.eurocop && !g.notificado); 
+                    label = "Sin Datos"; 
+                }
+                if(currentFilter === 'notified') { 
+                    result = result.filter(g => g.notificado); 
+                    label = "Notificados"; 
+                }
+                document.getElementById('current-filter-label').innerText = "Vista: " + label;
+            }
+
+            if(currentSort === 'plate') {
+                result.sort((a,b) => a.matricula.localeCompare(b.matricula));
+            } else {
+                result.sort((a,b) => b.maxDate - a.maxDate);
+            }
+
+            document.getElementById('record-count').innerText = `Vehículos: ${result.length} | Denuncias: ${allDenuncias.length}`;
+
+            result.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'vehicle-card';
+                const dateStr = formatJustDate(g.maxDate);
+
+                card.innerHTML = `
+                    <div class="card-header" onclick="this.nextElementSibling.classList.toggle('open')">
+                        <div class="left-col">
+                            <button class="btn-copy-mini" onclick="event.stopPropagation(); copyMat('${g.matricula}')"><i class="fas fa-copy"></i></button>
+                            <div class="plate-number">${g.matricula}</div>
+                            <div class="count-badge ${g.items.length > 1 ? 'reincident' : ''}">${g.items.length} Exp.</div>
+                            <div class="last-date-info"><i class="far fa-clock"></i> ${dateStr}</div>
+                        </div>
+                        <div class="status-actions" onclick="event.stopPropagation()">
+                            <button class="status-chip chip-eurocop ${g.eurocop ? 'active' : ''}" onclick="toggleState('${g.matricula}', 'eurocop')">Sin Datos</button>
+                            <button class="status-chip chip-notified ${g.notificado ? 'active' : ''}" onclick="openNotifModal('${g.matricula}')">Notificado</button>
+                            <button class="btn-trash-mini" onclick="deleteVehicle('${g.matricula}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-details">
+                        ${g.items.map(i => `
+                            <div class="detail-row">
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    <span><i class="far fa-calendar"></i> ${formatDate(i.fecha)}</span>
+                                    <span style="font-size:0.85em; color:#666;"><i class="fas fa-map-marker-alt" style="color:#e74c3c;"></i> ${i.lugar}</span>
+                                </div>
+                                <span style="font-weight:bold; color:#555;">${i.marca || ''} ${i.modelo || ''}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- ACCIONES UI ---
+        window.copyMat = (m) => copyToClipboard(m);
+        
+        window.deleteVehicle = (m) => {
+            if(confirm("¿Borrar vehículo y sus denuncias?")) {
+                pushHistory();
+                const filtered = allDenuncias.filter(d => d.matricula !== m);
+                db.ref(DB_REF).set(filtered);
+            }
+        };
+
+        window.toggleState = (m, type) => {
+            pushHistory();
+            allDenuncias.forEach(d => {
+                if(d.matricula === m) {
+                    if(type === 'eurocop') {
+                        d.eurocop = !d.eurocop;
+                        if(d.eurocop) d.notificado = false;
+                    }
+                }
+            });
+            db.ref(DB_REF).set(allDenuncias);
+        };
+
+        // --- MODAL NOTIFICAR ---
+        let targetMat = null;
+        window.openNotifModal = (m) => {
+            targetMat = m;
+            document.getElementById('notification-modal').style.display='block';
+            document.getElementById('modal-overlay-bg').style.display='block';
+            
+            const existing = allDenuncias.find(d => d.matricula === m && d.datos_notificacion.nombre);
+            if(existing) {
+                const dn = existing.datos_notificacion;
+                document.getElementById('modal-nombre').value = dn.nombre || "";
+                document.getElementById('modal-doi').value = dn.doi || "";
+                document.getElementById('modal-direccion').value = dn.direccion || "";
+                document.getElementById('modal-localidad').value = dn.localidad || "";
+                document.getElementById('modal-fecha-nacimiento').value = dn.fechaNac || "";
+                document.getElementById('modal-telefono').value = dn.telefono || "";
+            } else {
+                document.querySelectorAll('#notification-modal input').forEach(i => i.value = "");
+            }
+        };
+
+        function closeModal() {
+            document.getElementById('notification-modal').style.display='none';
+            document.getElementById('modal-overlay-bg').style.display='none';
+        }
+        document.getElementById('modal-cancel-btn').onclick = closeModal;
+
+        document.getElementById('modal-accept-btn').onclick = () => {
+            pushHistory();
+            const dp = {
+                nombre: document.getElementById('modal-nombre').value,
+                doi: document.getElementById('modal-doi').value,
+                direccion: document.getElementById('modal-direccion').value,
+                localidad: document.getElementById('modal-localidad').value,
+                fechaNac: document.getElementById('modal-fecha-nacimiento').value,
+                telefono: document.getElementById('modal-telefono').value
+            };
+
+            allDenuncias.forEach(d => {
+                if(d.matricula === targetMat) {
+                    d.notificado = true;
+                    d.eurocop = false;
+                    d.datos_notificacion = dp;
+                }
+            });
+            db.ref(DB_REF).set(allDenuncias);
+
+            const denunciaRef = allDenuncias.find(d => d.matricula === targetMat);
+            const cuerpo = `
+GRUPO DE ANÁLISIS DOCUMENTAL (RADAR)
+Datos obtenidos para vehículo con matrícula: ${targetMat}
+
+--- DETALLES DENUNCIA ---
+Fecha: ${formatDate(denunciaRef.fecha)}
+Lugar: ${denunciaRef.lugar}
+Marca/Modelo: ${denunciaRef.marca || ''} ${denunciaRef.modelo || ''}
+
+--- DATOS TITULAR/CONDUCTOR ---
+Nombre: ${dp.nombre}
+DOI: ${dp.doi}
+Dirección: ${dp.direccion}
+Localidad: ${dp.localidad}
+F. Nacimiento: ${dp.fechaNac}
+Teléfono: ${dp.telefono}
+            `.trim();
+
+            const asunto = `DATOS RADAR - Matrícula: ${targetMat}`;
+            const url = `https://outlook.office.com/mail/policia.gad@alicante.es/deeplink/compose?to=${CORREO_SANCIONES}&subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+            
+            copyToClipboard(cuerpo);
+            window.open(url, '_blank');
+            closeModal();
+        };
+
+        // EVENTOS
+        document.getElementById('search-input').addEventListener('input', renderList);
+        document.getElementById('undo-btn').onclick = () => {
+            if(historyStack.length > 0) {
+                if(confirm("¿Deshacer?")) db.ref(DB_REF).set(historyStack.pop());
+            } else alert("No hay historial.");
+        };
+        document.getElementById('delete-all-btn').onclick = () => { if(prompt("Escribe BORRAR")==="BORRAR") db.ref(DB_REF).set([]); };
+        
+        document.getElementById('filter-all-btn').onclick = () => { currentFilter='all'; renderList(); };
+        document.getElementById('filter-pending-btn').onclick = () => { currentFilter='pending'; renderList(); };
+        document.getElementById('filter-eurocop-btn').onclick = () => { currentFilter='eurocop'; renderList(); };
+        document.getElementById('filter-notified-btn').onclick = () => { currentFilter='notified'; renderList(); };
+        
+        document.getElementById('sort-date-btn').onclick = function() { 
+            currentSort='date'; 
+            this.classList.add('active-sort');
+            document.getElementById('sort-plate-btn').classList.remove('active-sort');
+            renderList(); 
+        };
+        document.getElementById('sort-plate-btn').onclick = function() { 
+            currentSort='plate'; 
+            this.classList.add('active-sort');
+            document.getElementById('sort-date-btn').classList.remove('active-sort');
+            renderList(); 
+        };
+
+        document.getElementById('toggle-help-btn').onclick = () => document.getElementById('legend-panel').style.display='block';
+        document.getElementById('close-help-btn').onclick = () => document.getElementById('legend-panel').style.display='none';
+
+        const dz = document.getElementById('drop-zone');
+        const fi = document.getElementById('file-input');
+        dz.onclick = () => fi.click();
+        fi.onchange = e => { if(e.target.files[0]) handleFile(e.target.files[0]); };
+        dz.ondragover = e => e.preventDefault();
+        dz.ondrop = e => { e.preventDefault(); if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); };
+
+        window.onload = () => {
+            loadData();
+            document.getElementById('legend-content-area').innerHTML = `
+            <h2 style="color:#2980b9;">📖 Manual GAD - Radar</h2>
+            <div class="help-step" style="border-left-color: #3498db;">
+                <h4>1. Importación Excel ORA</h4>
+                <p>El sistema ahora lee correctamente fechas en formato texto (20/12/2025) y numérico.</p>
+                <p><strong>Filtro Automático:</strong> Las matrículas españolas se descartan automáticamente.</p>
+            </div>`;
+        };
+    </script>
+</body>
+</html>
