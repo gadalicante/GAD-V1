@@ -39,9 +39,8 @@
     .reference-card {
         background: white; border-radius: 1rem; overflow: hidden;
         border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* Sin efecto hover de escala */
     }
-    .reference-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 
     /* DROP ZONE */
     .drop-zone {
@@ -112,6 +111,16 @@
           <h2 class="text-2xl font-extrabold text-blue-800 mb-6 border-b pb-2">Manual de Usuario y Ayuda</h2>
           
           <div class="space-y-4 text-gray-700 text-sm leading-relaxed">
+              
+              <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 shadow-sm">
+                  <h3 class="font-bold text-yellow-800 mb-2 text-base flex items-center gap-2">⚙️ Configuración API Gemini</h3>
+                  <p class="mb-2">Para el correcto funcionamiento del análisis de imagen:</p>
+                  <ul class="list-disc ml-5 space-y-2">
+                      <li><strong>Modelo obligatorio:</strong> Debes usar siempre <code>gemini-2.5-flash</code>. Es el único probado y funcional para esta tarea.</li>
+                      <li><strong>Si falla la API:</strong> Si cambias de navegador o la IA deja de responder (error de cuota o clave inválida), pulsa el botón <strong>OBTENER CLAVE API</strong> en los ajustes para ir a tu listado privado, copia una nueva y pégala en el campo correspondiente.</li>
+                  </ul>
+              </div>
+
               <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
                   <h3 class="font-bold text-blue-900 mb-2 text-base">🔢 Introducción Manual</h3>
                   <p>Puedes escribir el número de serie en el buscador principal:</p>
@@ -157,19 +166,26 @@
 
   <div id="settingsPanel" class="hidden absolute top-28 right-4 w-80 bg-white border border-gray-200 shadow-2xl rounded-xl p-6 z-50 fade-in">
       <h4 class="font-bold text-gray-800 mb-4 border-b pb-2">Configuración Gemini API</h4>
+      
       <label class="block text-xs font-bold text-gray-500 mb-1">API KEY</label>
-      <input type="password" id="apiKeyInput" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+      <div class="relative mb-4">
+          <input type="password" id="apiKeyInput" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none pr-10">
+          <button onclick="toggleVisibility()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" title="Mostrar/Ocultar Clave">
+              <span id="eyeIcon">👁️</span>
+          </button>
+      </div>
+
       <label class="block text-xs font-bold text-gray-500 mb-1">MODELO</label>
-      <input type="text" id="modelInput" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs mb-4" placeholder="gemini-1.5-flash">
+      <input type="text" id="modelInput" class="w-full bg-gray-50 border border-gray-300 rounded p-2 text-xs mb-4" placeholder="gemini-2.5-flash">
       
       <button onclick="saveSettings()" class="w-full bg-blue-600 text-white font-bold text-xs py-3 rounded-lg hover:bg-blue-700 transition mb-4">GUARDAR Y CERRAR</button>
       
       <hr class="border-gray-200 mb-4">
-      <h4 class="font-bold text-gray-800 mb-2 border-b pb-1 text-xs">MANTENIMIENTO BASE DE DATOS</h4>
-      <button onclick="migrarBaseDeDatos()" class="w-full bg-red-500 text-white font-bold text-xs py-3 rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2">
-        🛠️ MIGRAR DATOS ANTIGUOS
-      </button>
-      <p class="text-[10px] text-gray-400 mt-2 text-center">Pulsa esto una vez para ordenar alfabéticamente los registros antiguos.</p>
+      
+      <a href="CLAVES API.html" target="_blank" class="block w-full bg-gray-800 text-white text-center font-bold text-xs py-3 rounded-lg hover:bg-black transition flex items-center justify-center gap-2 no-underline">
+        🔑 OBTENER CLAVE API
+      </a>
+      <p class="text-[10px] text-gray-400 mt-2 text-center">Abre el listado privado de claves.</p>
   </div>
 
   <header class="header-pro py-8 shadow-lg relative z-10">
@@ -191,12 +207,12 @@
                 GUÍA DE REFERENCIA
             </div>
             <div class="w-full h-full overflow-hidden rounded-lg flex items-center justify-center bg-gray-50">
-                <img src="logoargelia2.jpg" alt="Ejemplo Permiso Argelia" class="max-w-full max-h-[350px] object-contain transition-transform duration-500 group-hover:scale-105">
+                <img src="logoargelia2.jpg" alt="Ejemplo Permiso Argelia" class="max-w-full max-h-[350px] object-contain">
             </div>
             <p class="text-xs text-gray-400 mt-2 font-medium text-center pb-2">Verifica la ubicación del Número de Soporte y Wilaya</p>
         </div>
 
-        <div id="mainDropZone" class="drop-zone p-8 text-center relative cursor-pointer group bg-white shadow-sm hover:shadow-md">
+        <div id="mainDropZone" class="drop-zone p-4 md:p-8 text-center relative cursor-pointer group bg-white shadow-sm hover:shadow-md">
             <div class="pointer-events-none mb-6">
                 <div class="inline-block p-4 rounded-full bg-blue-50 text-blue-500 mb-4 group-hover:scale-110 transition-transform duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -209,10 +225,10 @@
 
             <div class="w-full border-t border-gray-100 pt-6 pointer-events-auto">
                 <p class="text-xs text-gray-400 font-bold uppercase mb-2 tracking-wide text-left pl-1">Búsqueda Rápida</p>
-                <div class="flex shadow-sm rounded-lg ring-1 ring-gray-200 overflow-hidden">
+                <div class="flex shadow-sm rounded-lg ring-1 ring-gray-200 overflow-hidden w-full">
                     <input type="text" id="numero" placeholder="Ej: A12345 o L98765" 
-                           class="flex-1 p-3 border-none outline-none uppercase font-mono text-lg text-center bg-gray-50 focus:bg-white transition-colors">
-                    <button onclick="buscarFechaManual()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 transition flex items-center gap-2">
+                           class="flex-1 min-w-0 p-3 border-none outline-none uppercase font-mono text-lg text-center bg-gray-50 focus:bg-white transition-colors">
+                    <button onclick="buscarFechaManual()" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 md:px-6 transition flex items-center gap-2">
                         🔍 <span class="hidden sm:inline">BUSCAR</span>
                     </button>
                 </div>
@@ -253,7 +269,7 @@
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-10">
         <div class="p-5 border-b border-gray-100 flex flex-wrap justify-between items-center bg-gray-50 gap-4">
             <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                🗄️ BASE DE DATOS <span id="dbCounter" class="text-xs font-normal text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">Cargando...</span>
+                🗄️ BASE DE DATOS <span id="dbCounter" class="text-xs font-bold text-white bg-blue-600 px-3 py-1 rounded-full shadow-sm">Cargando...</span>
             </h3>
             <div class="flex gap-2">
                 <button onclick="prepararNuevoManual()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-bold rounded-lg shadow-sm hover:bg-gray-50 transition flex items-center gap-2">
@@ -346,6 +362,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
   <script>
     // --- 1. CONFIG FIREBASE ---
+// --- 1. CONFIG FIREBASE (CORREGIDA A V3) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
         authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -574,61 +591,9 @@
         return `${y}-${m}-${d}`;
     }
 
-    // --- 6. MIGRACIÓN BASE DE DATOS ---
-    async function migrarBaseDeDatos() {
-        if(!confirm("⚠️ ATENCIÓN: Esto reestructurará la base de datos para usar el Número de Serie como índice y corregir el orden.\n\n¿Estás seguro de continuar?")) return;
-
-        const migrarRef = async (ref, nombreRef) => {
-            const snap = await ref.once('value');
-            if(!snap.exists()) return;
-
-            const updates = {};
-            const deletes = {};
-            let count = 0;
-
-            snap.forEach(child => {
-                const key = child.key;
-                const val = child.val();
-                const numero = val.numero ? val.numero.trim().toUpperCase() : null;
-
-                // Si la clave NO es el número (es decir, es un ID antiguo tipo -OZ...)
-                // Y tenemos un número válido para usar de clave
-                if (numero && key !== numero) {
-                    updates[numero] = val; // Preparamos la nueva entrada
-                    deletes[key] = null;   // Preparamos borrar la vieja
-                    count++;
-                }
-            });
-
-            if(count > 0) {
-                // Primero escribimos los nuevos
-                await ref.update(updates);
-                // Luego borramos los viejos uno a uno para asegurar
-                for (const oldKey in deletes) {
-                   await ref.child(oldKey).remove();
-                }
-                showToast(`Migrados ${count} registros en ${nombreRef}.`);
-            } else {
-                console.log(`Nada que migrar en ${nombreRef}.`);
-            }
-        };
-
-        document.getElementById('loadingOverlay').classList.remove('hidden');
-        try {
-            await migrarRef(refOld, "Series A");
-            await migrarRef(refNew, "Series L");
-            showToast("Migración completa. Recargando...", "success");
-            setTimeout(() => location.reload(), 2000);
-        } catch(e) {
-            showToast("Error en migración: " + e.message, "error");
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-    }
-
-
-    // --- 7. BÚSQUEDA Y AI ---
+    // --- 6. BÚSQUEDA Y AI ---
     let geminiApiKey = localStorage.getItem('ai_api_key') || '';
-    let geminiModelName = localStorage.getItem('gemini_model_name') || 'gemini-1.5-flash';
+    let geminiModelName = localStorage.getItem('gemini_model_name') || 'gemini-2.5-flash';
 
     function buscarFechaManual() {
         const input = document.getElementById('numero').value.trim().toUpperCase();
@@ -801,6 +766,18 @@
         const modal = document.getElementById('helpModal');
         const display = modal.style.display;
         modal.style.display = (display === 'flex') ? 'none' : 'flex';
+    }
+
+    function toggleVisibility() {
+        const input = document.getElementById('apiKeyInput');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            icon.textContent = '👁️';
+        }
     }
 
     function toggleView(v) { 
