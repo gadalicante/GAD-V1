@@ -342,6 +342,7 @@
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
   <script>
     // --- 1. CONFIG FIREBASE ---
@@ -355,6 +356,7 @@
         appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f"
     };
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
     const refOld = db.ref('licencias_argelia_nuevas'); 
     const refNew = db.ref('licencias_argelia_L');      
