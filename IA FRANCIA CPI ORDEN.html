@@ -43,6 +43,44 @@
     #aiResultBox { animation: slideDown 0.5s ease-out; }
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script>
+    // 1. Asegurar configuración
+    if (typeof firebaseConfig === 'undefined') {
+        
+    var firebaseConfig = {
+        apiKey: "PON_AQUI_TU_API_KEY",
+        authDomain: "TU_PROYECTO.firebaseapp.com",
+        databaseURL: "https://TU_PROYECTO.firebaseio.com",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_BUCKET.appspot.com",
+        messagingSenderId: "TU_ID",
+        appId: "TU_APP_ID"
+    };
+    
+    }
+    // 2. Inicializar si no está hecho
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    
+    // 3. EL PORTERO
+    const auth_guard = firebase.auth();
+    auth_guard.onAuthStateChanged(user => {
+        if (!user) {
+            console.warn("⛔ No hay sesión. Redirigiendo al Login...");
+            // Guardamos la URL actual para volver después si quieres
+            sessionStorage.setItem('redirect_after_login', window.location.href);
+            window.location.replace('index.html'); 
+        } else {
+            console.log("✅ Acceso autorizado: " + user.email);
+            // Aquí Firebase restaura la sesión y tus gráficas/tablas deberían cargar
+        }
+    });
+    </script>
+    
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col pb-16 relative">
 
