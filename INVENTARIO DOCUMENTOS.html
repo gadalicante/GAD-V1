@@ -187,7 +187,7 @@
             justify-content: center; 
             align-items: center;
             backdrop-filter: blur(3px); 
-            padding: 15px; /* Espacio alrededor para que no toque bordes */
+            padding: 15px;
         }
 
         .modal-content {
@@ -198,15 +198,13 @@
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
-            
-            /* FIX SCROLL Y ALTURA */
             max-height: 85vh; 
             overflow-y: auto; 
             display: flex;
             flex-direction: column;
         }
 
-        /* Botón Cerrar: Posicionado dentro del padding para no cortarse */
+        /* Botón Cerrar (Posición segura) */
         .modal-close {
             position: absolute; 
             top: 10px; 
@@ -260,7 +258,7 @@
             border: none; padding: 12px 30px; border-radius: 30px;
             font-size: 16px; font-weight: 600; cursor: pointer;
             margin-top: 20px; width: 100%; max-width: 200px;
-            margin-bottom: 5px; /* Margen final para asegurar visibilidad en scroll */
+            margin-bottom: 5px;
         }
 
         /* RESPONSIVE */
@@ -433,21 +431,21 @@
         }
 
         // ===============================================
-        // 🚀 APERTURA INTELIGENTE (MISMA VENTANA)
+        // 🚀 APERTURA INTELIGENTE (VERSIÓN SEGURA)
         // ===============================================
         function abrirDocumentoInteligente(urlOriginal) {
             let email = obtenerCuenta();
 
             // 1. Pedir cuenta si no existe
             if (!email) {
-                let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL para evitar que Google te pregunte cada vez:");
+                let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL para agilizar el acceso a los documentos:");
                 if (input) {
                     email = input.trim();
                     guardarCuenta(email);
                 }
             }
 
-            // 2. Preparar URL para MISMA VENTANA (_self)
+            // 2. Preparar URL (LIMPIA DE PARÁMETROS TÓXICOS)
             let finalUrl = urlOriginal;
             
             // Asegurar modo web
@@ -455,14 +453,15 @@
                 finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'usp=drive_web';
             }
 
-            // Inyectar credenciales
+            // Inyectar SOLO login_hint (Sugerencia de usuario)
+            // ELIMINADO: authuser y prompt=none (Causaban el bloqueo de seguridad)
             if (email) {
-                finalUrl += `&login_hint=${encodeURIComponent(email)}&authuser=${encodeURIComponent(email)}`;
+                finalUrl += `&login_hint=${encodeURIComponent(email)}`;
             }
 
-            // 3. NAVEGAR EN LA MISMA VENTANA
-            // Esto evita que el móvil abra la App de Drive y pierda el contexto
-            window.location.href = finalUrl;
+            // 3. NAVEGAR EN PESTAÑA NUEVA (_blank)
+            // Es necesario para que Google maneje correctamente las cookies de sesión
+            window.open(finalUrl, '_blank');
         }
 
         // Inicializar vista de cuenta al cargar
@@ -593,7 +592,7 @@
             const modal = document.getElementById('modalAyuda');
             if (mostrar) {
                 modal.style.display = 'flex';
-                // Reset scroll posición al abrir
+                // Reset scroll
                 modal.querySelector('.modal-content').scrollTop = 0;
             } else {
                 modal.style.display = 'none';
