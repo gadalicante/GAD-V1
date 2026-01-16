@@ -208,6 +208,8 @@
         .btn-users { background-color: #3b82f6; } .btn-users:hover { background-color: #2563eb; }
         .btn-log { background-color: #10b981; } .btn-log:hover { background-color: #059669; }
         .btn-backup { background-color: #8b5cf6; } .btn-backup:hover { background-color: #7c3aed; }
+        /* NUEVO ESTILO BOTÓN PROMPTS */
+        .btn-prompts { background-color: #6366f1; } .btn-prompts:hover { background-color: #4f46e5; }
         .btn-logout-modern { background-color: #ef4444; width: 100%; margin-top: 5px; } .btn-logout-modern:hover { background-color: #dc2626; }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(5px); }
@@ -303,6 +305,7 @@
                     <button id="show-edit-menu-modal" class="btn-modern btn-edit"><i class="fas fa-pencil-alt"></i> Editar Menú</button>
                     <button id="show-manage-users-modal" class="btn-modern btn-users"><i class="fas fa-users-cog"></i> Usuarios</button>
                     <button id="show-full-log-modal" class="btn-modern btn-log"><i class="fas fa-list-alt"></i> Registro Global</button>
+                    <button id="goto-promts" class="btn-modern btn-prompts" onclick="window.location.href='PROMTS.html'"><i class="fas fa-robot"></i> Prompts</button>
                     <button id="backup-button" class="btn-modern btn-backup" onclick="window.open('COPIA SEGURIDAD FIREBASE.html', '_blank')"><i class="fas fa-cloud-download-alt"></i> Backup</button>
                 </div>
                 <button id="btn-logout" class="btn-modern btn-logout-modern"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
@@ -421,6 +424,7 @@
   messagingSenderId: "545835357966",
   appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
   measurementId: "G-QG8KDLCWQS"
+};asurementId: "G-Q0E3H1996K"
 };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -428,7 +432,7 @@
     
     const BUTTONS_NODE = 'menuButtons';
     const TITLE_NODE = 'pageTitle';
-    const ADMIN_EMAIL = 'gadalicante@gmail.com';
+    const ADMIN_EMAIL = 'copg279@gmail.com';
     const USERS_NODE = 'usuarios_google'; 
 
     // UI Refs
@@ -521,14 +525,11 @@
         renderMenuButtons();
     }
 
-// ACCIÓN "ATRÁS" UNIFICADA Y MÁS ROBUSTA
+ // --- ACCION NAVEGAR ATRÁS (MODIFICADA PARA SOPORTAR NAVEGADOR) ---
 function goBack() {
     // Si estamos en modo visualización (Iframe), forzamos la salida al menú, sin depender de window.history.back()
     if (isViewingContent) {
-        // En lugar de llamar a history.back(), forzamos la salida y reemplazamos el estado.
-        // Esto elimina el estado '#view' del historial sin que el navegador tenga que procesar 'back'.
         showMenuArea();
-        // Opcional: Reemplazamos el estado para que la URL vuelva a la carpeta actual (si existe)
         const currentMenuId = currentMenuPath.length > 0 ? currentMenuPath[currentMenuPath.length - 1] : '';
         history.replaceState(null, '', currentMenuId ? '#folder=' + currentMenuId : '#');
         return;
@@ -560,8 +561,6 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         goBack();
     }
 });
-
-    sidebarBackBtn.onclick = () => { goBack(); closeSidebar(); };
 
     // --- UTILS ---
     async function getClientIP() {
