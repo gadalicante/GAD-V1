@@ -33,7 +33,7 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* --- CABECERA (Logo integrado sin borde) --- */
+        /* --- CABECERA --- */
         .header-main { 
             display: flex; 
             justify-content: space-between; 
@@ -67,8 +67,11 @@
 
         .header-logo-container { 
             width: 70px; height: 70px; 
+            background: rgba(255,255,255,0.15); 
+            border-radius: 12px; 
+            padding: 6px; 
             display: flex; align-items: center; justify-content: center; 
-            /* Eliminado fondo blanco y blur para integración total */
+            backdrop-filter: blur(5px);
         }
         .header-logo-container img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -195,7 +198,7 @@
 
         /* MODALES */
         #modal-overlay { display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(2px); }
-        .custom-modal { display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 166px; z-index: 2001; width: 95%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .custom-modal { display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 16px; z-index: 2001; width: 95%; max-width: 550px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .modal-content-scrollable { padding: 30px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 0.85em; font-weight: 700; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -213,10 +216,6 @@
         .help-icon { font-size: 1.5em; width: 40px; text-align: center; }
         .help-list li { margin-bottom: 10px; line-height: 1.6; }
         code { background: #f1f1f1; padding: 2px 5px; border-radius: 4px; font-family: monospace; color: #c7254e; }
-
-        /* PIE DE PÁGINA GAD (ESTILO INDEX) */
-        footer { width: 100%; padding: 1.5rem 0; background: #e5e7eb; text-align: center; margin-top: auto; border-top: 1px solid #d1d5db; }
-        footer p { font-weight: bold; color: #1f2937; margin: 0; text-transform: uppercase; }
     </style>
 </head>
 <body class="mode-ora">
@@ -283,12 +282,6 @@
         </div>
     </main>
 
-    <footer>
-        <p>GRUPO DE ANÁLISIS DOCUMENTAL</p>
-        <p>POLICÍA LOCAL DE ALICANTE</p>
-        <p style="font-size: 0.7rem; color: #6b7280; margin-top: 5px;">&copy; GAD - Todos los derechos reservados</p>
-    </footer>
-
     <div id="legend-panel">
         <div style="background: white; padding: 20px 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: sticky; top:0; z-index:10; display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin:0; color: #1e3a8a;"><i class="fas fa-book-open"></i> Guía de Usuario GAD</h2>
@@ -298,7 +291,9 @@
                 <button onclick="document.getElementById('legend-panel').classList.remove('visible')" class="btn btn-danger" style="width:auto; margin:0;">Cerrar Ayuda</button>
             </div>
         </div>
-        <div id="legend-content-area" class="help-container"></div>
+        
+        <div id="legend-content-area" class="help-container">
+            </div>
     </div>
 
     <div id="modal-overlay"></div>
@@ -328,9 +323,19 @@
             <p style="font-size:0.9em; color:#666; margin-bottom:20px; background:#eff6ff; padding:10px; border-radius:6px; border-left:4px solid #3498db;">
                 <i class="fas fa-info-circle"></i> Los cambios en Marca/Modelo se aplicarán a <strong>todo el historial</strong> de esta matrícula.
             </p>
-            <div class="form-group"><label>Matrícula</label><input type="text" id="v-matricula" readonly style="background:#f3f4f6; font-weight:900; letter-spacing:2px; text-align:center; color:#374151;"></div>
-            <div class="form-group"><label>Marca</label><input type="text" id="v-marca" placeholder="Ej: SEAT, FORD..."></div>
-            <div class="form-group"><label>Modelo</label><input type="text" id="v-modelo" placeholder="Ej: IBIZA, FOCUS..."></div>
+            <div class="form-group">
+                <label>Matrícula</label>
+                <input type="text" id="v-matricula" readonly style="background:#f3f4f6; font-weight:900; letter-spacing:2px; text-align:center; color:#374151;">
+            </div>
+            <div class="form-group">
+                <label>Marca</label>
+                <input type="text" id="v-marca" placeholder="Ej: SEAT, FORD...">
+            </div>
+            <div class="form-group">
+                <label>Modelo</label>
+                <input type="text" id="v-modelo" placeholder="Ej: IBIZA, FOCUS...">
+            </div>
+            
             <div style="margin-top:30px; display:flex; justify-content:flex-end; gap:10px; padding-top:20px; border-top:1px solid #eee;">
                 <button onclick="closeModal('edit-vehicle-modal')" class="btn btn-dark" style="width:auto; margin:0">Cancelar</button>
                 <button onclick="saveVehicleData()" class="btn btn-success" style="width:auto; margin:0"><i class="fas fa-save"></i> Actualizar Vehículo</button>
@@ -342,6 +347,7 @@
         const DB_REF = 'denuncias_global_ORA-RADAR';
         const CORREO_SANCIONES = "unidad.sanciones@alicante.es";
         
+        // --- AYUDA COMPLETA ---
         const DEFAULT_HELP_HTML = `
             <div class="help-section" style="border-left-color: #3b82f6;">
                 <h3><span class="help-icon">🚀</span> 1. Primeros Pasos e Importación</h3>
@@ -385,6 +391,7 @@
             </div>
         `;
 
+        // CONFIGURACIÓN ACTUALIZADA CON DATOS DEL INDEX
         const firebaseConfig = {
             apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
             authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -404,18 +411,16 @@
         let filter = 'all';
         let sort = 'date';
 
-        // --- LÓGICA DE EL PORTERO (SEGURIDAD Y COMPATIBILIDAD DESARROLLO) ---
+        // --- LÓGICA DE EL PORTERO (SEGURIDAD) ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 console.log("Acceso autorizado:", user.email);
                 document.getElementById('auth-loading').style.display = 'none';
-                iniciarEscuchaDatos(); 
+                iniciarEscuchaDatos(); // Solo activa Firebase si hay usuario
             } else {
-                console.warn("Sin sesión. Intentando re-validar antes de redirigir...");
-                // Delay para permitir que el login en localhost se mantenga estable
-                setTimeout(() => {
-                    if (!auth.currentUser) window.location.href = "index.html";
-                }, 2000); 
+                console.warn("Sin sesión. Redirigiendo...");
+                // Intentamos redirigir al index.html si no hay sesión
+                window.location.href = "index.html";
             }
         });
 
@@ -446,14 +451,18 @@
             document.body.className = m === 'ORA' ? 'mode-ora' : 'mode-radar';
             document.getElementById('b-ora').classList.toggle('active', m === 'ORA');
             document.getElementById('b-radar').classList.toggle('active', m === 'RADAR');
+            
             const title = document.getElementById('main-t');
+            
             if(m === 'ORA') {
                 title.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Listado de denuncias ORA';
             } else {
                 title.innerHTML = '<i class="fas fa-tachometer-alt"></i> Gestión de denuncias RADAR';
             }
+            
             if(m === 'RADAR') sort = 'plate';
             else sort = 'date';
+            
             render();
         }
 
@@ -489,18 +498,26 @@
             else if(sort === 'plate') list.sort((a,b) => a.matricula.localeCompare(b.matricula));
             else list.sort((a,b) => Math.max(...b.items.map(i=>new Date(i.fecha))) - Math.max(...a.items.map(i=>new Date(i.fecha))));
 
-            let countLabel = "Resultados";
+            let countLabel = "Total";
+            if(search) countLabel = "Búsqueda";
+            else if(filter === 'pending') countLabel = "Pendientes";
+            else if(filter === 'reincident') countLabel = "Reincidentes";
+            
             const icon = mode === 'ORA' ? '<i class="fas fa-file-invoice-dollar"></i>' : '<i class="fas fa-tachometer-alt"></i>';
             document.getElementById('stats').innerHTML = `<span>${icon} ${countLabel}:</span> <span style="background:${mode==='ORA'?'#3b82f6':'#10b981'}; color:white; padding:4px 15px; border-radius:20px; font-weight:800;">${list.length}</span>`;
 
             list.forEach(g => {
-                const relevant = g.items.filter(i => i.tipo === mode);
-                const isSD = relevant.every(i => i.eurocop);
-                const isAL = relevant.some(i => i.alerta);
-                const isNO = relevant.some(i => i.notificado);
+                const isSD = g.items.every(i => i.eurocop);
+                const isAL = g.items.some(i => i.alerta);
+                const isNO = g.items.some(i => i.notificado);
+                
                 const totalGlobalCount = g.items.length;
                 const isGlobalReincident = totalGlobalCount > 1;
-                const maxDate = new Date(Math.max(...relevant.map(i=>new Date(i.fecha))));
+
+                const maxDate = new Date(Math.max(...g.items.map(i=>new Date(i.fecha))));
+                let badgeText = `${g.items.length} Exp.`;
+
+                const displayMatricula = g.matricula;
 
                 const card = document.createElement('div');
                 card.className = 'vehicle-card';
@@ -509,8 +526,8 @@
                         <div class="left-col">
                             <button class="btn-primary header-btn-small" onclick="event.stopPropagation(); copyM('${g.matricula}')"><i class="fas fa-copy"></i></button>
                             <button class="btn-warning header-btn-small" onclick="event.stopPropagation(); openEditVehicleModal('${g.matricula}')" title="Editar Vehículo"><i class="fas fa-pen"></i></button>
-                            <div class="plate-box ${isGlobalReincident ? 'reincident' : ''}">${g.matricula}</div>
-                            <div class="count-badge ${isGlobalReincident ? 'reincident' : ''}">${g.items.length} Exp.</div>
+                            <div class="plate-box ${isGlobalReincident ? 'reincident' : ''}">${displayMatricula}</div>
+                            <div class="count-badge ${isGlobalReincident ? 'reincident' : ''}">${badgeText}</div>
                             <div style="font-size:0.8em; color:#6b7280; font-weight:600;"><i class="far fa-clock"></i> ${formatDate(maxDate)}</div>
                         </div>
                         <div style="display:flex; gap:6px" onclick="event.stopPropagation()">
@@ -521,7 +538,7 @@
                         </div>
                     </div>
                     <div class="card-details">
-                        ${relevant.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).map(i => `
+                        ${g.items.sort((a,b)=>new Date(b.fecha)-new Date(a.fecha)).map(i => `
                             <div class="detail-row">
                                 <span>
                                     <b style="margin-right:10px;">${formatDate(i.fecha)}</b>
@@ -684,7 +701,7 @@
         function copyM(t) { navigator.clipboard.writeText(t); }
         function toggleS(m, type) {
             pushHistory();
-            const targets = allData.filter(d => d.matricula === m && d.tipo === mode);
+            const targets = allData.filter(d => d.matricula === m);
             const val = !targets.some(d => d[type]);
             targets.forEach(d => { 
                 d[type] = val; 
@@ -756,6 +773,7 @@
         
         function saveHelp() { localStorage.setItem('gadHelpText_V2025', document.getElementById('legend-content-area').innerHTML); alert("Guardado"); }
         
+        // El modo inicial se llama ahora desde onAuthStateChanged
         window.onload = () => { 
             setMode('ORA'); 
             document.getElementById('legend-content-area').innerHTML = localStorage.getItem('gadHelpText_V2025') || DEFAULT_HELP_HTML; 
