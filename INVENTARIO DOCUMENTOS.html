@@ -45,7 +45,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            transition: height 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         /* TÍTULO */
@@ -168,7 +168,7 @@
             outline: none;
             transition: border-color 0.3s;
             box-sizing: border-box;
-            -webkit-appearance: none; /* Fix iOS */
+            -webkit-appearance: none; /* Mejora visual en iOS */
         }
 
         .search-input:focus {
@@ -197,7 +197,7 @@
             transition: background 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center; /* Centrado */
+            justify-content: center;
             gap: 8px;
             white-space: nowrap;
         }
@@ -249,6 +249,7 @@
             margin: 0 auto;
             width: 100%;
             padding: 0 20px 40px 20px;
+            box-sizing: border-box;
         }
 
         .grid {
@@ -308,7 +309,7 @@
             text-overflow: ellipsis;
         }
 
-        /* BOTÓN VIEW (OJO VERDE) - MODIFICADO A BUTTON PARA CONTROL JS */
+        /* Botón Ojo Verde */
         .btn-view {
             color: var(--eye-color);
             font-size: 22px;
@@ -319,9 +320,9 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            cursor: pointer;
             border: none;
-            background: none;
+            background: transparent;
+            cursor: pointer;
         }
 
         .btn-view:hover {
@@ -408,66 +409,41 @@
         }
         .warning-box strong { display: block; margin-bottom: 8px; }
 
-        /* ==========================================================================
-           DISEÑO RESPONSIVE (MÓVIL) - OPTIMIZADO PARA NO AMONTONARSE
-           ========================================================================== */
-        @media (max-width: 768px) {
+        /* ====================================================================
+           MEJORA RESPONSIVE (SOLUCIÓN AL AMONTONAMIENTO EN MÓVIL)
+           ==================================================================== */
+        @media screen and (max-width: 768px) {
             header {
                 height: auto;
                 flex-direction: column;
-                padding: 15px 20px;
+                padding: 15px;
                 gap: 15px;
             }
-
             .header-left, .header-center, .header-right {
                 width: 100%;
                 text-align: center;
                 justify-content: center;
-                flex: none; /* Reset flex grow */
             }
-
-            /* Orden: 1. Logo, 2. Título, 3. Botones */
+            /* Reordenamos visualmente: Logo primero, Titulo despues, Botones final */
             .header-center { order: 1; margin-bottom: 5px; }
-            .header-left { order: 2; margin-bottom: 5px; }
-            .header-right { order: 3; justify-content: space-around; }
-
-            .logo { height: 80px; } /* Un poco más pequeño en móvil */
-
+            .header-left { order: 2; margin-bottom: 10px; }
+            .header-right { order: 3; justify-content: space-evenly; }
+            
             .header-title {
-                white-space: normal;
                 font-size: 20px;
-                line-height: 1.2;
+                white-space: normal; /* Permite que el titulo largo baje de linea */
             }
-            
-            /* Buscador y botones apilados */
-            .search-wrapper {
-                flex-direction: column;
-            }
-            
-            .search-input-container, .btn-clear {
-                width: 100%;
-            }
-            
-            .btn-clear {
-                margin-top: 5px;
-                padding: 12px;
-                justify-content: center;
-            }
+            .logo { height: 80px; }
 
-            /* Filtros mejor distribuidos */
-            .filters-chips {
-                gap: 8px;
-            }
-            
-            .chip {
-                flex: 1 1 auto; /* Crecer para llenar huecos */
-                text-align: center;
-                padding: 10px;
-                justify-content: center;
-                display: flex;
-            }
-            
-            .divider { display: none; } /* Ocultar barra vertical en móvil */
+            /* Ajuste del buscador apilado */
+            .search-wrapper { flex-direction: column; gap: 10px; }
+            .search-input-container { width: 100%; }
+            .btn-clear { width: 100%; }
+
+            /* Chips más amigables al dedo */
+            .filters-chips { gap: 8px; }
+            .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
+            .divider { display: none; }
         }
     </style>
 </head>
@@ -496,7 +472,7 @@
             <div class="search-input-container">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" id="buscador" class="search-input" 
-                       placeholder="Ej: España DNI... (Ignora tildes)"
+                       placeholder="Ej: España DNI 2025 (Busca sin acentos: Rumania = Rumanía)"
                        onkeyup="aplicarFiltrosInteligentes()">
             </div>
             <button class="btn-clear" onclick="limpiarBusqueda()">
@@ -538,10 +514,10 @@
                 Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original.
             </div>
 
-            <div class="help-item" style="background:#e8f5e9; padding:10px; border-radius:5px; border:1px solid #c8e6c9;">
-                 <strong><i class="fa-solid fa-user-gear help-icon"></i> Cuenta de Google Configurada:</strong><br>
-                 <span id="cuenta-configurada-texto" style="font-size:13px; color:#2e7d32;">-- No configurada --</span><br>
-                 <button onclick="resetearCuenta()" style="margin-top:5px; background:white; border:1px solid #ccc; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Cambiar Cuenta</button>
+            <div class="help-item" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
+                <strong><i class="fa-solid fa-user-shield help-icon"></i> Configuración de Cuenta:</strong><br>
+                <span id="estado-cuenta" style="font-size:13px;">Comprobando...</span><br>
+                <a href="#" onclick="resetearCuenta()" style="color:var(--danger-color); font-size:12px; text-decoration:underline;">Cambiar/Borrar cuenta guardada</a>
             </div>
 
             <div class="warning-box">
@@ -596,68 +572,81 @@
         }
 
         // ===============================================
-        // 🛠️ GESTIÓN DE CUENTA GOOGLE (SOLUCIÓN DEFINITIVA ACCOUNTCHOOSER)
+        // 🛠️ GESTIÓN DE CUENTA: SOLUCIÓN 'LOGIN_HINT'
         // ===============================================
-        function obtenerCuentaGuardada() {
-            return localStorage.getItem('gad_google_account');
+        function obtenerCuenta() {
+            return localStorage.getItem('gad_user_email');
         }
 
         function guardarCuenta(email) {
             if(email && email.includes('@')) {
-                localStorage.setItem('gad_google_account', email.trim());
-                actualizarTextoCuentaAyuda();
+                localStorage.setItem('gad_user_email', email.trim());
+                actualizarEstadoCuenta();
             }
         }
 
         function resetearCuenta() {
-            localStorage.removeItem('gad_google_account');
-            actualizarTextoCuentaAyuda();
-            alert("Cuenta eliminada. La próxima vez se te pedirá de nuevo.");
-        }
-
-        function actualizarTextoCuentaAyuda() {
-            const el = document.getElementById('cuenta-configurada-texto');
-            const mail = obtenerCuentaGuardada();
-            if(mail) {
-                el.innerText = "Abriendo siempre con: " + mail;
-            } else {
-                el.innerText = "No configurada. Se te pedirá al abrir un documento.";
+            if(confirm("¿Quieres borrar la cuenta de Google guardada?")) {
+                localStorage.removeItem('gad_user_email');
+                actualizarEstadoCuenta();
             }
         }
 
-        // FUNCIÓN PRINCIPAL DE APERTURA MODIFICADA
-        function abrirDocumento(urlOriginal) {
-            let email = obtenerCuentaGuardada();
+        function actualizarEstadoCuenta() {
+            const el = document.getElementById('estado-cuenta');
+            const email = obtenerCuenta();
+            if(email) {
+                el.innerText = "Usando cuenta: " + email;
+                el.style.color = "var(--eye-color)";
+            } else {
+                el.innerText = "No hay cuenta guardada (Se pedirá al abrir).";
+                el.style.color = "#666";
+            }
+        }
 
-            // Si no tiene cuenta, preguntar una vez y guardar
+        // ===============================================
+        // 🚀 APERTURA DEL DOCUMENTO (FIX DEFINITIVO)
+        // ===============================================
+        function abrirDocumentoInteligente(urlOriginal) {
+            let email = obtenerCuenta();
+
+            // 1. Pedir cuenta si no existe
             if (!email) {
-                const input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo Gmail (Ej: policia@gmail.com) para que Google no te pregunte cada vez qué cuenta usar.");
-                
+                let input = prompt("⚠️ CONFIGURACIÓN MÓVIL:\n\nIntroduce tu correo GMAIL para evitar que Google te lo pregunte cada vez:");
                 if (input) {
                     email = input.trim();
                     guardarCuenta(email);
                 }
             }
 
-            // Preparar destino forzando vista web
-            let destino = urlOriginal;
-            if (!destino.includes('usp=')) {
-                const sep = destino.includes('?') ? '&' : '?';
-                destino += sep + "usp=drive_web";
+            // 2. Construir la URL manipulando los parámetros
+            // El objetivo es añadir 'login_hint' que es la instrucción directa a Google
+            let nuevaUrl = urlOriginal;
+
+            // Asegurarnos de que tenemos el separador correcto
+            const separador = nuevaUrl.includes("?") ? "&" : "?";
+            
+            // Añadimos USP=drive_web para preferir visualización web
+            if (!nuevaUrl.includes("usp=")) {
+                nuevaUrl += separador + "usp=drive_web";
             }
 
+            // Si tenemos email, añadimos el parametro MÁGICO 'login_hint'
+            // Este parámetro obliga a Google a usar esa cuenta específica
             if (email) {
-                // TRUCO SUPREMO: Usar AccountChooser para forzar la cuenta antes de llegar a Drive
-                // Esto suele evitar que la App nativa intercepte y pregunte de nuevo
-                const urlMagica = `https://accounts.google.com/AccountChooser?Email=${encodeURIComponent(email)}&continue=${encodeURIComponent(destino)}`;
-                window.open(urlMagica, '_blank');
-            } else {
-                // Si el usuario canceló, abrir normal
-                window.open(destino, '_blank');
+                // Usamos & siempre porque ya hemos asegurado ? arriba o venía de serie
+                nuevaUrl += "&login_hint=" + encodeURIComponent(email);
+                
+                // También añadimos authuser por si acaso el navegador lo prefiere
+                nuevaUrl += "&authuser=" + encodeURIComponent(email);
             }
+
+            // Abrimos directamente
+            window.open(nuevaUrl, '_blank');
         }
 
-        document.addEventListener('DOMContentLoaded', actualizarTextoCuentaAyuda);
+        document.addEventListener("DOMContentLoaded", actualizarEstadoCuenta);
+
 
         // ===============================================
         // CARGA DE DATOS
@@ -746,7 +735,7 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
-                // USAMOS ONCLICK PARA LA NUEVA FUNCIÓN
+                // IMPORTANTE: El botón llama a la función inteligente
                 const html = `
                     <div class="card">
                         <div class="card-content">
@@ -758,7 +747,7 @@
                                 ${doc.NombreDocumento}
                             </div>
                         </div>
-                        <button class="btn-view" onclick="abrirDocumento('${doc.Enlace}')" title="Ver Documento">
+                        <button class="btn-view" onclick="abrirDocumentoInteligente('${doc.Enlace}')" title="Ver Documento">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
