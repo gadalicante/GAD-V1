@@ -177,33 +177,50 @@
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODAL AYUDA (REPARADO Y MEJORADO) === */
+        /* === 5. MODAL AYUDA (AJUSTADO PARA MÓVIL Y CENTRADO) === */
         .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-            z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); padding: 10px;
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(3px); 
+            padding: 15px; /* Espacio alrededor para que no toque bordes */
         }
 
         .modal-content {
-            background: white; padding: 25px; border-radius: 10px;
-            max-width: 550px; width: 100%;
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px;
+            max-width: 550px; 
+            width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
             
-            /* CORRECCIÓN SCROLL */
-            max-height: 85vh; /* Altura máxima para dejar ver el fondo */
-            overflow-y: auto; /* Permite deslizar si el contenido es largo */
+            /* FIX SCROLL Y ALTURA */
+            max-height: 85vh; 
+            overflow-y: auto; 
             display: flex;
             flex-direction: column;
         }
 
+        /* Botón Cerrar: Posicionado dentro del padding para no cortarse */
         .modal-close {
-            position: absolute; top: 15px; right: 15px;
-            font-size: 26px; cursor: pointer; color: #888;
-            background: white; width: 30px; height: 30px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: absolute; 
+            top: 10px; 
+            right: 10px;
+            font-size: 24px; 
+            cursor: pointer; 
+            color: #888;
+            background: white; 
+            width: 32px; 
+            height: 32px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border-radius: 50%; 
             z-index: 10;
         }
 
@@ -211,20 +228,20 @@
             font-size: 20px; color: var(--primary-color);
             margin-bottom: 20px; border-bottom: 2px solid #eee;
             padding-bottom: 10px; margin-top: 0;
-            padding-right: 30px; /* Espacio para que la X no tape el texto */
+            padding-right: 35px; /* Espacio para la X */
         }
 
         .help-item { margin-bottom: 15px; line-height: 1.5; color: #444; }
         .help-icon { color: var(--primary-color); margin-right: 8px; width: 20px; text-align: center; }
         
-        /* ESTILOS ESPECÍFICOS PARA CONFIGURACIÓN DE CUENTA (IMAGEN) */
+        /* ESTILOS ESPECÍFICOS PARA CONFIGURACIÓN DE CUENTA */
         .account-config-box {
             border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 15px;
         }
         .account-status {
             color: var(--eye-color); font-weight: 500; font-size: 14px;
             display: block; margin-top: 5px; margin-bottom: 5px;
-            word-break: break-all; /* Evita que el correo rompa el diseño */
+            word-break: break-all;
         }
         .account-action {
             color: var(--danger-color); text-decoration: underline;
@@ -240,9 +257,10 @@
 
         .btn-modal-ok {
             background-color: var(--primary-color); color: white;
-            border: none; padding: 10px 30px; border-radius: 30px;
+            border: none; padding: 12px 30px; border-radius: 30px;
             font-size: 16px; font-weight: 600; cursor: pointer;
             margin-top: 20px; width: 100%; max-width: 200px;
+            margin-bottom: 5px; /* Margen final para asegurar visibilidad en scroll */
         }
 
         /* RESPONSIVE */
@@ -259,9 +277,6 @@
             .filters-chips { gap: 8px; }
             .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
             .divider { display: none; }
-            
-            /* Ajuste Modal Móvil */
-            .modal-content { padding: 20px; max-height: 80vh; }
         }
     </style>
 </head>
@@ -387,7 +402,7 @@
         }
 
         // ===============================================
-        // 🛠️ GESTIÓN DE CUENTA (LÓGICA MEJORADA)
+        // 🛠️ GESTIÓN DE CUENTA
         // ===============================================
         function obtenerCuenta() {
             return localStorage.getItem('gad_user_email');
@@ -396,7 +411,7 @@
         function guardarCuenta(email) {
             if(email && email.trim().length > 0) {
                 localStorage.setItem('gad_user_email', email.trim());
-                actualizarVistaCuenta(); // Actualizar el modal al momento
+                actualizarVistaCuenta(); 
             }
         }
 
@@ -404,7 +419,6 @@
             if(confirm("¿Quieres borrar la cuenta guardada? El sistema te volverá a preguntar la próxima vez.")) {
                 localStorage.removeItem('gad_user_email');
                 actualizarVistaCuenta();
-                alert("Cuenta borrada. Cierra esta ventana.");
             }
         }
 
@@ -419,12 +433,12 @@
         }
 
         // ===============================================
-        // 🚀 APERTURA INTELIGENTE (FIX DEFINITIVO)
+        // 🚀 APERTURA INTELIGENTE (MISMA VENTANA)
         // ===============================================
         function abrirDocumentoInteligente(urlOriginal) {
             let email = obtenerCuenta();
 
-            // 1. Si no hay cuenta, PEDIRLA y GUARDARLA
+            // 1. Pedir cuenta si no existe
             if (!email) {
                 let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL para evitar que Google te pregunte cada vez:");
                 if (input) {
@@ -433,22 +447,22 @@
                 }
             }
 
-            // 2. Construcción de URL "A prueba de balas"
+            // 2. Preparar URL para MISMA VENTANA (_self)
             let finalUrl = urlOriginal;
-
-            // Asegurar usp=drive_web (fuerza vista web, menos propensa a abrir la App confusa)
+            
+            // Asegurar modo web
             if (!finalUrl.includes('usp=')) {
                 finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'usp=drive_web';
             }
 
+            // Inyectar credenciales
             if (email) {
-                // Añadimos login_hint (Pista de usuario) y authuser (Usuario autenticado)
-                // Usamos '&' porque usp=drive_web o parámetros previos ya existen casi seguro
                 finalUrl += `&login_hint=${encodeURIComponent(email)}&authuser=${encodeURIComponent(email)}`;
             }
 
-            // 3. Abrir en nueva pestaña
-            window.open(finalUrl, '_blank');
+            // 3. NAVEGAR EN LA MISMA VENTANA
+            // Esto evita que el móvil abra la App de Drive y pierda el contexto
+            window.location.href = finalUrl;
         }
 
         // Inicializar vista de cuenta al cargar
@@ -577,7 +591,13 @@
 
         function toggleModal(mostrar) {
             const modal = document.getElementById('modalAyuda');
-            modal.style.display = mostrar ? 'flex' : 'none';
+            if (mostrar) {
+                modal.style.display = 'flex';
+                // Reset scroll posición al abrir
+                modal.querySelector('.modal-content').scrollTop = 0;
+            } else {
+                modal.style.display = 'none';
+            }
         }
 
         cargarInventario();
