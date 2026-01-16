@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventario Documentos GAD</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -18,6 +20,8 @@
             --eye-color: #28a745; /* Verde Ojo */
             --danger-color: #dc3545; /* Rojo Limpiar */
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -43,403 +47,221 @@
             z-index: 1000;
         }
 
-        /* TÍTULO */
-        .header-left {
-            flex: 1;
-            text-align: left;
-            white-space: nowrap;
-        }
-
+        .header-left { flex: 1; text-align: left; white-space: nowrap; }
         .header-title {
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0;
+            color: white; font-size: 24px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px; margin: 0;
         }
 
-        /* LOGO */
-        .header-center {
-            flex: 0 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-        }
+        .header-center { flex: 0 0 auto; display: flex; justify-content: center; align-items: center; height: 100%; }
+        .logo { height: 100px; width: auto; object-fit: contain; background: transparent; }
 
-        .logo {
-            height: 100px;
-            width: auto;
-            object-fit: contain;
-            background: transparent;
-        }
+        .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 25px; }
 
-        /* DERECHA */
-        .header-right {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 25px;
-        }
-
-        /* BOTÓN AYUDA PREMIUM */
+        /* Botón Ayuda */
         .btn-help-premium {
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-transform: uppercase;
-            text-decoration: none;
+            color: white; padding: 8px 18px; border-radius: 30px;
+            cursor: pointer; font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-transform: uppercase; text-decoration: none;
         }
-
-        .btn-help-premium:hover {
-            background: white;
-            color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
+        .btn-help-premium:hover { background: white; color: var(--primary-color); }
 
         /* Contador */
-        .stats-group {
-            text-align: right;
-            border-left: 1px solid rgba(255,255,255,0.3);
-            padding-left: 20px;
-        }
+        .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; }
+        .stats-counter { color: white; font-size: 32px; font-weight: 900; line-height: 1; display: block; }
+        .stats-label { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8); display: block; }
 
-        .stats-counter {
-            color: white;
-            font-size: 32px;
-            font-weight: 900;
-            line-height: 1;
-            display: block;
-        }
-        
-        .stats-label {
-            font-size: 12px;
-            font-weight: 400;
-            color: rgba(255,255,255,0.8);
-            display: block;
-        }
-
-        /* === 2. BUSCADOR Y FILTROS === */
+        /* === 2. CONTROLES === */
         .controls-container {
-            background: white;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            background: white; padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
 
-        /* WRAPPER FLEXIBLE */
         .search-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            display: flex;
-            gap: 10px;
-            align-items: center; /* Alineación vertical centrada */
+            max-width: 1200px; margin: 0 auto; position: relative;
+            display: flex; gap: 10px; align-items: center;
         }
 
-        .search-input-container {
-            position: relative;
-            flex: 1;
-        }
+        .search-input-container { position: relative; flex: 1; }
 
         .search-input {
-            width: 100%;
-            padding: 15px 20px 15px 50px;
-            font-size: 16px;
-            border: 2px solid #ddd;
-            border-radius: 50px;
-            outline: none;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-            height: 54px; /* Altura forzada para consistencia */
+            width: 100%; padding: 15px 20px 15px 50px; font-size: 16px;
+            border: 2px solid #ddd; border-radius: 50px; outline: none;
+            transition: border-color 0.3s; box-sizing: border-box; height: 54px;
         }
-
-        .search-input:focus {
-            border-color: var(--primary-color);
-        }
-
+        .search-input:focus { border-color: var(--primary-color); }
+        
         .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #888;
-            font-size: 18px;
+            position: absolute; left: 20px; top: 50%;
+            transform: translateY(-50%); color: #888; font-size: 18px;
         }
 
-        /* BOTÓN LIMPIAR ROJO - CORREGIDO */
         .btn-clear {
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 0 30px; /* Padding lateral más generoso */
-            height: 54px;    /* Altura idéntica al input */
-            font-size: 16px; /* Texto un poco más grande */
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            white-space: nowrap;
-            box-sizing: border-box; /* Asegura que el padding no rompa el tamaño */
+            background-color: var(--danger-color); color: white;
+            border: none; border-radius: 50px; padding: 0 30px;
+            height: 54px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; white-space: nowrap;
         }
+        .btn-clear:hover { background-color: #c82333; }
 
-        .btn-clear:hover {
-            background-color: #c82333;
-        }
-
-        /* Chips Filtros */
         .filters-chips {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 10px;
+            margin-top: 15px; flex-wrap: wrap;
         }
 
         .chip {
-            padding: 8px 16px;
-            background: #e9ecef;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #555;
-            transition: all 0.2s;
+            padding: 8px 16px; background: #e9ecef; border: none;
+            border-radius: 20px; cursor: pointer; font-size: 14px;
+            font-weight: 500; color: #555; transition: all 0.2s;
         }
-
         .chip:hover { background: #dee2e6; }
-        
-        .chip.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3);
-        }
+        .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
+        .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        .divider {
-            width: 1px;
-            background: #ccc;
-            margin: 0 10px;
-            height: 30px;
-        }
-
-        /* === 3. GRID DE RESULTADOS === */
+        /* === 3. RESULTADOS === */
         .results-container {
-            flex: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 0 20px 40px 20px;
-            box-sizing: border-box;
+            flex: 1; max-width: 1400px; margin: 0 auto;
+            width: 100%; padding: 0 20px 40px 20px;
         }
 
         .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;
         }
 
         .card {
-            background: white;
-            border-radius: 8px;
-            padding: 12px 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border: 1px solid #eee;
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: white; border-radius: 8px; padding: 12px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border-color: var(--primary-color);
         }
 
-        .card-content {
-            flex: 1;
-            overflow: hidden;
-            padding-right: 10px;
-        }
-
-        .card-badges {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-
+        .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
+        .card-badges { display: flex; gap: 6px; margin-bottom: 6px; }
+        
         .badge {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 11px; font-weight: 700; padding: 3px 8px;
+            border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
         }
-
         .badge-loc { background: #e3f2fd; color: #1565c0; }
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
 
         .card-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 14px; font-weight: 500; color: #333;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        /* Botón Ojo Verde */
         .btn-view {
-            color: var(--eye-color);
-            font-size: 24px; /* Icono un poco más grande */
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.2s, transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            border: none;
-            background: transparent;
-            cursor: pointer;
+            color: var(--eye-color); font-size: 24px; padding: 8px;
+            border-radius: 50%; transition: background 0.2s, transform 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: none; background: transparent; cursor: pointer;
         }
-
-        .btn-view:hover {
-            background-color: rgba(40, 167, 69, 0.1);
-            transform: scale(1.1);
-        }
+        .btn-view:hover { background-color: rgba(40, 167, 69, 0.1); transform: scale(1.1); }
 
         /* === 4. PIE DE PÁGINA === */
         .pie-pagina {
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            margin-top: auto;
-            font-size: 14px;
-            width: 100%;
-            line-height: 1.6;
+            background-color: var(--primary-color); color: white;
+            text-align: center; padding: 15px 0; margin-top: auto;
+            font-size: 14px; width: 100%; line-height: 1.6;
         }
 
-        .loader-box {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
-        }
+        .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODAL AYUDA === */
+        /* === 5. MODAL AYUDA (REPARADO Y MEJORADO) === */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(3px);
-            padding: 20px;
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+            z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px); padding: 10px;
         }
 
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 550px;
-            width: 100%;
+            background: white; padding: 25px; border-radius: 10px;
+            max-width: 550px; width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
+            
+            /* CORRECCIÓN SCROLL */
+            max-height: 85vh; /* Altura máxima para dejar ver el fondo */
+            overflow-y: auto; /* Permite deslizar si el contenido es largo */
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-close {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #888;
+            position: absolute; top: 15px; right: 15px;
+            font-size: 26px; cursor: pointer; color: #888;
+            background: white; width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
         .modal-title {
-            font-size: 20px;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            font-size: 20px; color: var(--primary-color);
+            margin-bottom: 20px; border-bottom: 2px solid #eee;
+            padding-bottom: 10px; margin-top: 0;
+            padding-right: 30px; /* Espacio para que la X no tape el texto */
         }
 
-        .help-item {
-            margin-bottom: 15px;
-            line-height: 1.5;
-            color: #444;
-        }
+        .help-item { margin-bottom: 15px; line-height: 1.5; color: #444; }
         .help-icon { color: var(--primary-color); margin-right: 8px; width: 20px; text-align: center; }
         
+        /* ESTILOS ESPECÍFICOS PARA CONFIGURACIÓN DE CUENTA (IMAGEN) */
+        .account-config-box {
+            border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 15px;
+        }
+        .account-status {
+            color: var(--eye-color); font-weight: 500; font-size: 14px;
+            display: block; margin-top: 5px; margin-bottom: 5px;
+            word-break: break-all; /* Evita que el correo rompa el diseño */
+        }
+        .account-action {
+            color: var(--danger-color); text-decoration: underline;
+            font-size: 13px; cursor: pointer; display: inline-block;
+        }
+        
         .warning-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-size: 14px;
+            background-color: #fff3cd; border: 1px solid #ffeeba;
+            color: #856404; padding: 15px; border-radius: 6px;
+            margin-top: 20px; font-size: 14px;
         }
         .warning-box strong { display: block; margin-bottom: 8px; }
 
-        /* ====================================================================
-           MEJORA RESPONSIVE (SOLUCIÓN AL AMONTONAMIENTO EN MÓVIL)
-           ==================================================================== */
+        .btn-modal-ok {
+            background-color: var(--primary-color); color: white;
+            border: none; padding: 10px 30px; border-radius: 30px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            margin-top: 20px; width: 100%; max-width: 200px;
+        }
+
+        /* RESPONSIVE */
         @media screen and (max-width: 768px) {
-            header {
-                height: auto;
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
-            }
-            .header-left, .header-center, .header-right {
-                width: 100%;
-                text-align: center;
-                justify-content: center;
-            }
-            /* Reordenamos: Logo primero, Titulo, Botones */
+            header { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
+            .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; }
             .header-center { order: 1; margin-bottom: 5px; }
             .header-left { order: 2; margin-bottom: 10px; }
             .header-right { order: 3; justify-content: space-evenly; }
-            
-            .header-title {
-                font-size: 20px;
-                white-space: normal; 
-            }
+            .header-title { font-size: 20px; white-space: normal; }
             .logo { height: 80px; }
-
-            /* Ajuste del buscador apilado */
             .search-wrapper { flex-direction: column; gap: 10px; }
-            .search-input-container { width: 100%; }
-            .btn-clear { width: 100%; } /* Mantiene la altura de 54px definida arriba */
-
-            /* Chips más amigables al dedo */
+            .search-input-container, .btn-clear { width: 100%; }
             .filters-chips { gap: 8px; }
             .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
             .divider { display: none; }
+            
+            /* Ajuste Modal Móvil */
+            .modal-content { padding: 20px; max-height: 80vh; }
         }
     </style>
 </head>
@@ -497,7 +319,7 @@
     <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModal(false)">
         <div class="modal-content">
             <span class="modal-close" onclick="toggleModal(false)">&times;</span>
-            <h2 class="modal-title"><i class="fa-solid fa-info-circle"></i> Ayuda y Soporte</h2>
+            <h2 class="modal-title"><i class="fa-solid fa-circle-info"></i> Ayuda y Soporte</h2>
             
             <div class="help-item">
                 <strong><i class="fa-solid fa-magnifying-glass help-icon"></i> Búsqueda Inteligente:</strong><br>
@@ -507,7 +329,13 @@
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Ver Documento:</strong><br>
-                Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original. El sistema recordará tu cuenta para agilizar el acceso.
+                Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original.
+            </div>
+
+            <div class="help-item account-config-box">
+                <strong><i class="fa-solid fa-user-gear help-icon"></i> Configuración de Cuenta:</strong><br>
+                <span id="txt-cuenta-activa" class="account-status">Usando cuenta: -- No configurada --</span>
+                <span class="account-action" onclick="resetearCuenta()">Cambiar/Borrar cuenta guardada</span>
             </div>
 
             <div class="warning-box">
@@ -520,8 +348,8 @@
                 </ol>
             </div>
             
-            <div style="text-align:center; margin-top:20px;">
-                <button class="chip active" onclick="toggleModal(false)">Entendido</button>
+            <div style="text-align:center;">
+                <button class="btn-modal-ok" onclick="toggleModal(false)">Entendido</button>
             </div>
         </div>
     </div>
@@ -555,14 +383,11 @@
         // ===============================================
         function normalizarTexto(texto) {
             if (!texto) return "";
-            return texto.toString()
-                .toLowerCase() 
-                .normalize("NFD") 
-                .replace(/[\u0300-\u036f]/g, ""); 
+            return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
         // ===============================================
-        // 🛠️ GESTIÓN DE CUENTA: AGRESIVA PARA MÓVIL
+        // 🛠️ GESTIÓN DE CUENTA (LÓGICA MEJORADA)
         // ===============================================
         function obtenerCuenta() {
             return localStorage.getItem('gad_user_email');
@@ -571,47 +396,63 @@
         function guardarCuenta(email) {
             if(email && email.trim().length > 0) {
                 localStorage.setItem('gad_user_email', email.trim());
+                actualizarVistaCuenta(); // Actualizar el modal al momento
+            }
+        }
+
+        function resetearCuenta() {
+            if(confirm("¿Quieres borrar la cuenta guardada? El sistema te volverá a preguntar la próxima vez.")) {
+                localStorage.removeItem('gad_user_email');
+                actualizarVistaCuenta();
+                alert("Cuenta borrada. Cierra esta ventana.");
+            }
+        }
+
+        function actualizarVistaCuenta() {
+            const el = document.getElementById('txt-cuenta-activa');
+            const email = obtenerCuenta();
+            if(email) {
+                el.innerHTML = `Usando cuenta: <span style="color:var(--eye-color)">${email}</span>`;
+            } else {
+                el.innerHTML = `<span style="color:#666">-- No configurada (Se pedirá al abrir) --</span>`;
             }
         }
 
         // ===============================================
-        // 🚀 APERTURA DEL DOCUMENTO (FIX DEFINITIVO)
+        // 🚀 APERTURA INTELIGENTE (FIX DEFINITIVO)
         // ===============================================
         function abrirDocumentoInteligente(urlOriginal) {
             let email = obtenerCuenta();
 
-            // 1. Pedir cuenta si no existe en la memoria
+            // 1. Si no hay cuenta, PEDIRLA y GUARDARLA
             if (!email) {
-                let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL. Se guardará para no tener que elegir cuenta cada vez:");
+                let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL para evitar que Google te pregunte cada vez:");
                 if (input) {
                     email = input.trim();
                     guardarCuenta(email);
                 }
             }
 
-            // 2. Construir la URL con TODOS los parámetros de fuerza
-            let nuevaUrl = urlOriginal;
-            const separador = nuevaUrl.includes("?") ? "&" : "?";
-            
-            // Añadimos usp=drive_web (fuerza vista web)
-            if (!nuevaUrl.includes("usp=")) {
-                nuevaUrl += separador + "usp=drive_web";
-            } else {
-                // Si ya existe usp, nos aseguramos que se encadenen los siguientes con &
+            // 2. Construcción de URL "A prueba de balas"
+            let finalUrl = urlOriginal;
+
+            // Asegurar usp=drive_web (fuerza vista web, menos propensa a abrir la App confusa)
+            if (!finalUrl.includes('usp=')) {
+                finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'usp=drive_web';
             }
 
-            // Si tenemos email, inyectamos los parámetros de autenticación
             if (email) {
-                // login_hint: Le dice a Google QUÉ cuenta usar
-                // prompt=none: Le dice a Google NO me preguntes nada (falla si no estás logueado, pero aquí lo estamos)
-                // authuser: Refuerzo adicional
-                const params = `&login_hint=${encodeURIComponent(email)}&authuser=${encodeURIComponent(email)}&prompt=none`;
-                nuevaUrl += params;
+                // Añadimos login_hint (Pista de usuario) y authuser (Usuario autenticado)
+                // Usamos '&' porque usp=drive_web o parámetros previos ya existen casi seguro
+                finalUrl += `&login_hint=${encodeURIComponent(email)}&authuser=${encodeURIComponent(email)}`;
             }
 
-            // 3. Abrir
-            window.open(nuevaUrl, '_blank');
+            // 3. Abrir en nueva pestaña
+            window.open(finalUrl, '_blank');
         }
+
+        // Inicializar vista de cuenta al cargar
+        document.addEventListener("DOMContentLoaded", actualizarVistaCuenta);
 
         // ===============================================
         // CARGA DE DATOS
