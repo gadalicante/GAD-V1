@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventario Documentos GAD</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -20,8 +18,6 @@
             --eye-color: #28a745; /* Verde Ojo */
             --danger-color: #dc3545; /* Rojo Limpiar */
         }
-
-        * { box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -45,7 +41,6 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
         }
 
         /* TÍTULO */
@@ -152,6 +147,7 @@
             position: relative;
             display: flex;
             gap: 10px;
+            align-items: center; /* Alineación vertical centrada */
         }
 
         .search-input-container {
@@ -168,7 +164,7 @@
             outline: none;
             transition: border-color 0.3s;
             box-sizing: border-box;
-            -webkit-appearance: none; /* Mejora visual en iOS */
+            height: 54px; /* Altura forzada para consistencia */
         }
 
         .search-input:focus {
@@ -184,14 +180,15 @@
             font-size: 18px;
         }
 
-        /* BOTÓN LIMPIAR ROJO */
+        /* BOTÓN LIMPIAR ROJO - CORREGIDO */
         .btn-clear {
             background-color: var(--danger-color);
             color: white;
             border: none;
             border-radius: 50px;
-            padding: 0 25px;
-            font-size: 15px;
+            padding: 0 30px; /* Padding lateral más generoso */
+            height: 54px;    /* Altura idéntica al input */
+            font-size: 16px; /* Texto un poco más grande */
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
@@ -200,6 +197,7 @@
             justify-content: center;
             gap: 8px;
             white-space: nowrap;
+            box-sizing: border-box; /* Asegura que el padding no rompa el tamaño */
         }
 
         .btn-clear:hover {
@@ -312,7 +310,7 @@
         /* Botón Ojo Verde */
         .btn-view {
             color: var(--eye-color);
-            font-size: 22px;
+            font-size: 24px; /* Icono un poco más grande */
             padding: 8px;
             border-radius: 50%;
             transition: background 0.2s, transform 0.2s;
@@ -371,8 +369,6 @@
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
         .modal-close {
@@ -424,21 +420,21 @@
                 text-align: center;
                 justify-content: center;
             }
-            /* Reordenamos visualmente: Logo primero, Titulo despues, Botones final */
+            /* Reordenamos: Logo primero, Titulo, Botones */
             .header-center { order: 1; margin-bottom: 5px; }
             .header-left { order: 2; margin-bottom: 10px; }
             .header-right { order: 3; justify-content: space-evenly; }
             
             .header-title {
                 font-size: 20px;
-                white-space: normal; /* Permite que el titulo largo baje de linea */
+                white-space: normal; 
             }
             .logo { height: 80px; }
 
             /* Ajuste del buscador apilado */
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container { width: 100%; }
-            .btn-clear { width: 100%; }
+            .btn-clear { width: 100%; } /* Mantiene la altura de 54px definida arriba */
 
             /* Chips más amigables al dedo */
             .filters-chips { gap: 8px; }
@@ -511,13 +507,7 @@
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Ver Documento:</strong><br>
-                Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original.
-            </div>
-
-            <div class="help-item" style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
-                <strong><i class="fa-solid fa-user-shield help-icon"></i> Configuración de Cuenta:</strong><br>
-                <span id="estado-cuenta" style="font-size:13px;">Comprobando...</span><br>
-                <a href="#" onclick="resetearCuenta()" style="color:var(--danger-color); font-size:12px; text-decoration:underline;">Cambiar/Borrar cuenta guardada</a>
+                Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original. El sistema recordará tu cuenta para agilizar el acceso.
             </div>
 
             <div class="warning-box">
@@ -572,35 +562,15 @@
         }
 
         // ===============================================
-        // 🛠️ GESTIÓN DE CUENTA: SOLUCIÓN 'LOGIN_HINT'
+        // 🛠️ GESTIÓN DE CUENTA: AGRESIVA PARA MÓVIL
         // ===============================================
         function obtenerCuenta() {
             return localStorage.getItem('gad_user_email');
         }
 
         function guardarCuenta(email) {
-            if(email && email.includes('@')) {
+            if(email && email.trim().length > 0) {
                 localStorage.setItem('gad_user_email', email.trim());
-                actualizarEstadoCuenta();
-            }
-        }
-
-        function resetearCuenta() {
-            if(confirm("¿Quieres borrar la cuenta de Google guardada?")) {
-                localStorage.removeItem('gad_user_email');
-                actualizarEstadoCuenta();
-            }
-        }
-
-        function actualizarEstadoCuenta() {
-            const el = document.getElementById('estado-cuenta');
-            const email = obtenerCuenta();
-            if(email) {
-                el.innerText = "Usando cuenta: " + email;
-                el.style.color = "var(--eye-color)";
-            } else {
-                el.innerText = "No hay cuenta guardada (Se pedirá al abrir).";
-                el.style.color = "#666";
             }
         }
 
@@ -610,43 +580,38 @@
         function abrirDocumentoInteligente(urlOriginal) {
             let email = obtenerCuenta();
 
-            // 1. Pedir cuenta si no existe
+            // 1. Pedir cuenta si no existe en la memoria
             if (!email) {
-                let input = prompt("⚠️ CONFIGURACIÓN MÓVIL:\n\nIntroduce tu correo GMAIL para evitar que Google te lo pregunte cada vez:");
+                let input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo GMAIL. Se guardará para no tener que elegir cuenta cada vez:");
                 if (input) {
                     email = input.trim();
                     guardarCuenta(email);
                 }
             }
 
-            // 2. Construir la URL manipulando los parámetros
-            // El objetivo es añadir 'login_hint' que es la instrucción directa a Google
+            // 2. Construir la URL con TODOS los parámetros de fuerza
             let nuevaUrl = urlOriginal;
-
-            // Asegurarnos de que tenemos el separador correcto
             const separador = nuevaUrl.includes("?") ? "&" : "?";
             
-            // Añadimos USP=drive_web para preferir visualización web
+            // Añadimos usp=drive_web (fuerza vista web)
             if (!nuevaUrl.includes("usp=")) {
                 nuevaUrl += separador + "usp=drive_web";
+            } else {
+                // Si ya existe usp, nos aseguramos que se encadenen los siguientes con &
             }
 
-            // Si tenemos email, añadimos el parametro MÁGICO 'login_hint'
-            // Este parámetro obliga a Google a usar esa cuenta específica
+            // Si tenemos email, inyectamos los parámetros de autenticación
             if (email) {
-                // Usamos & siempre porque ya hemos asegurado ? arriba o venía de serie
-                nuevaUrl += "&login_hint=" + encodeURIComponent(email);
-                
-                // También añadimos authuser por si acaso el navegador lo prefiere
-                nuevaUrl += "&authuser=" + encodeURIComponent(email);
+                // login_hint: Le dice a Google QUÉ cuenta usar
+                // prompt=none: Le dice a Google NO me preguntes nada (falla si no estás logueado, pero aquí lo estamos)
+                // authuser: Refuerzo adicional
+                const params = `&login_hint=${encodeURIComponent(email)}&authuser=${encodeURIComponent(email)}&prompt=none`;
+                nuevaUrl += params;
             }
 
-            // Abrimos directamente
+            // 3. Abrir
             window.open(nuevaUrl, '_blank');
         }
-
-        document.addEventListener("DOMContentLoaded", actualizarEstadoCuenta);
-
 
         // ===============================================
         // CARGA DE DATOS
@@ -735,7 +700,6 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
-                // IMPORTANTE: El botón llama a la función inteligente
                 const html = `
                     <div class="card">
                         <div class="card-content">
