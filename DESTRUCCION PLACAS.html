@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Destrucción de Placas - GAD</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -56,6 +61,7 @@
             transition: background-color 0.15s ease;
             text-decoration: none; 
             height: 40px;
+            cursor: pointer;
         }
         @media (min-width: 640px) { 
             .quick-nav-button {
@@ -169,7 +175,7 @@
 
     <header class="bg-blue-600 w-full flex justify-center items-center py-4"> 
         <div class="gad-logo-header">
-            <img src="logogad.png" alt="Logo GAD" class="block">
+            <img src="logogad.png" alt="Logo GAD" class="block" onerror="this.style.display='none'">
         </div>
     </header>
 
@@ -193,9 +199,9 @@
                     <i class="fas fa-trash-restore hidden sm:inline mr-1"></i> Devolución (<span id="anuladasCount">0</span>)
                 </button>
                 
-                <a href="index.html" class="quick-nav-button button-yellow">
+                <button onclick="window.history.back()" class="quick-nav-button button-yellow">
                     <i class="fas fa-home hidden sm:inline mr-1"></i> Volver Menú
-                </a>
+                </button>
                 
             </div>
             
@@ -271,7 +277,7 @@
                     </tr>
                 </thead>
                 <tbody id="platesTableBody" class="divide-y divide-gray-200">
-                    <tr id="loadingRow"><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>
+                    <tr id="loadingRow"><td colspan="7" class="text-center py-4 text-gray-500"><i class="fas fa-spinner fa-spin"></i> Inicializando sistema...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -346,23 +352,26 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getDatabase, ref, get, update, push, remove, set } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    <script>
+        // CONFIGURACIÓN CENTRALIZADA (La misma que el Dashboard)
+        const firebaseConfig = {
+          apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
+          authDomain: "gad-alicante-v1.firebaseapp.com",
+          databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "gad-alicante-v1",
+          storageBucket: "gad-alicante-v1.firebasestorage.app",
+          messagingSenderId: "545835357966",
+          appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
+          measurementId: "G-QG8KDLCWQS"
+        };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
-  authDomain: "gad-alicante-v1.firebaseapp.com",
-  databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "gad-alicante-v1",
-  storageBucket: "gad-alicante-v1.firebasestorage.app",
-  messagingSenderId: "545835357966",
-  appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
-  measurementId: "G-QG8KDLCWQS"
-};
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        // INICIALIZACIÓN SEGURA DE FIREBASE
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const database = firebase.database();
+        const auth = firebase.auth();
         
         let allPlatesData = []; 
         let anuladasData = []; 
@@ -372,10 +381,25 @@ const firebaseConfig = {
         let currentPlatesInConsultedLot = [];
         let knownCountries = []; 
 
+        // --- SISTEMA DE SEGURIDAD Y CARGA ---
+        // Esperamos a que Firebase confirme el usuario antes de cargar nada
+        function iniciarSistemaSeguro() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    console.log(" Usuario autenticado:", user.email);
+                    loadPlates(); // Solo cargamos si hay usuario
+                } else {
+                    console.warn(" No hay usuario logueado. Esperando o redirigiendo...");
+                    // Si no hay usuario y se abre directo, podría redirigir al index
+                    // window.location.href = 'index.html'; 
+                    document.getElementById('platesTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Acceso denegado. Inicia sesión en el Dashboard.</td></tr>';
+                }
+            });
+        }
+
         async function loadLotMetadata() {
             try {
-                const dbRef = ref(database, 'lotes');
-                const snapshot = await get(dbRef);
+                const snapshot = await database.ref('lotes').once('value');
                 lotEurocopData = {}; 
 
                 if (snapshot.exists()) {
@@ -387,7 +411,7 @@ const firebaseConfig = {
                     });
                 }
             } catch (error) {
-                console.error("Error al cargar metadatos de lotes (EUROCOP):", error);
+                console.error("Error al cargar metadatos de lotes:", error);
             }
         }
         
@@ -402,8 +426,7 @@ const firebaseConfig = {
             lotEurocopData[lotNumber] = value;
             
             try {
-                const lotRef = ref(database, `lotes/${lotNumber}`);
-                await update(lotRef, { eurocop: value });
+                await database.ref(`lotes/${lotNumber}`).update({ eurocop: value });
                 
                 inputElement.style.borderColor = 'green';
                 setTimeout(() => {
@@ -412,7 +435,7 @@ const firebaseConfig = {
                 
             } catch (error) {
                 console.error(`Error al guardar EUROCOP para ${lotNumber}:`, error);
-                alert(`Error al guardar EUROCOP. Revisa la consola.`);
+                alert(`Error al guardar EUROCOP.`);
                 inputElement.style.borderColor = 'red';
             }
         }
@@ -426,8 +449,7 @@ const firebaseConfig = {
                 await loadLotMetadata(); 
                 await loadAnuladas(); 
                 
-                const dbRef = ref(database, 'placas_destruccion');
-                const snapshot = await get(dbRef);
+                const snapshot = await database.ref('placas_destruccion').once('value');
 
                 tableBody.innerHTML = ''; 
                 allPlatesData = []; 
@@ -455,15 +477,19 @@ const firebaseConfig = {
                     renderPlates(allPlatesData);
                     loadLotAdministrationPanel(); 
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-orange-500">❌ Base de datos vacía.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-orange-500"> Base de datos vacía o sin registros.</td></tr>';
                     document.getElementById('plateCounter').textContent = '0';
                     loadLotAdministrationPanel(); 
                 }
 
             } catch (error) {
-                console.error("🚨 ERROR CRÍTICO al cargar placas:", error);
-                alert("❌ ERROR: No se pudo conectar a Firebase.");
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Error al cargar datos.</td></tr>';
+                console.error(" ERROR CRÍTICO al cargar placas:", error);
+                // Si el error es de permisos, lo indicamos claro
+                if (error.code === 'PERMISSION_DENIED') {
+                     tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-600 font-bold">PERMISO DENEGADO: No estás autorizado.</td></tr>';
+                } else {
+                     tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-red-500">Error al cargar datos (' + error.message + ')</td></tr>';
+                }
             }
         }
 
@@ -489,8 +515,7 @@ const firebaseConfig = {
         
         async function loadAnuladas() {
             try {
-                const dbRef = ref(database, 'placas_anuladas');
-                const snapshot = await get(dbRef);
+                const snapshot = await database.ref('placas_anuladas').once('value');
                 anuladasData = []; 
                 if (snapshot.exists()) {
                     const data = snapshot.val(); 
@@ -753,8 +778,7 @@ const firebaseConfig = {
         
         async function updatePlateInDatabase(plateId, newPais, newPlaca) {
             try {
-                const plateRef = ref(database, `placas_destruccion/${plateId}`);
-                await update(plateRef, { PAIS: newPais, PLACA: newPlaca });
+                await database.ref(`placas_destruccion/${plateId}`).update({ PAIS: newPais, PLACA: newPlaca });
                 
                 document.getElementById(`pais-${plateId}`).textContent = newPais;
                 document.getElementById(`placa-${plateId}`).textContent = newPlaca;
@@ -787,15 +811,13 @@ const firebaseConfig = {
         
         async function anularPlate(plateId, plateData) {
             try {
-                const anuladasRef = ref(database, `placas_anuladas/${plateId}`);
-                await update(anuladasRef, {
+                await database.ref(`placas_anuladas/${plateId}`).update({
                     PAIS: plateData.PAIS,
                     PLACA: plateData.PLACA,
                     FECHA_ANULACION: new Date().toISOString()
                 });
                 
-                const plateRef = ref(database, `placas_destruccion/${plateId}`);
-                await remove(plateRef);
+                await database.ref(`placas_destruccion/${plateId}`).remove();
                 
                 await loadPlates(); 
                 await loadAnuladas(); 
@@ -824,15 +846,13 @@ const firebaseConfig = {
         
         async function restorePlate(plateId, plateData) {
             try {
-                const plateRef = ref(database, `placas_destruccion/${plateId}`);
-                await update(plateRef, {
+                await database.ref(`placas_destruccion/${plateId}`).update({
                     PAIS: plateData.PAIS,
                     PLACA: plateData.PLACA,
                     FECHA_AGREGADA: new Date().toISOString()
                 });
                 
-                const anuladasRef = ref(database, `placas_anuladas/${plateId}`);
-                await remove(anuladasRef);
+                await database.ref(`placas_anuladas/${plateId}`).remove();
                 
                 await loadPlates(); 
                 await loadAnuladas(); 
@@ -862,8 +882,7 @@ const firebaseConfig = {
         
         async function permanentDeletePlate(plateId) {
             try {
-                const anuladasRef = ref(database, `placas_anuladas/${plateId}`);
-                await remove(anuladasRef);
+                await database.ref(`placas_anuladas/${plateId}`).remove();
                 
                 await loadAnuladas(); 
                 renderAnuladasModal(); 
@@ -929,10 +948,9 @@ const firebaseConfig = {
                 });
                 
                 // ELIMINAR EL LOTE DE LA BASE DE DATOS
-                const lotRef = ref(database, `lotes/${lotName}`);
-                await remove(lotRef);
+                await database.ref(`lotes/${lotName}`).remove();
                 
-                await update(ref(database), updates);
+                await database.ref().update(updates);
                 
                 alert(`Lote ${lotName} deshecho. ${plateIds.length} placas marcadas como PENDIENTES.`);
                 await loadPlates(); 
@@ -982,7 +1000,7 @@ const firebaseConfig = {
                     eurocop: "" // Inicializar vacío
                 };
                 
-                await update(ref(database), updates);
+                await database.ref().update(updates);
                 
                 alert(`✅ ${lotName} generado correctamente con ${plateIds.length} placas.`);
                 await loadPlates(); 
@@ -1053,10 +1071,10 @@ const firebaseConfig = {
             }
             
             try {
-                const newPlateRef = push(ref(database, 'placas_destruccion'));
+                const newPlateRef = database.ref('placas_destruccion').push();
                 const fechaAgregada = new Date().toISOString();
                 
-                await update(newPlateRef, {
+                await newPlateRef.update({
                     PAIS: country,
                     PLACA: plateNumber,
                     FECHA_AGREGADA: fechaAgregada,
@@ -1102,8 +1120,11 @@ const firebaseConfig = {
             document.body.removeChild(link);
         }
 
+        // INIT
         document.addEventListener('DOMContentLoaded', function() {
-            loadPlates();
+            
+            // INICIAR ESCUCHA SEGURA (AUTH)
+            iniciarSistemaSeguro();
             
             document.querySelectorAll('.sort-header').forEach(header => {
                 header.addEventListener('click', () => {
