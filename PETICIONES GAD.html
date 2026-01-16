@@ -5,9 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tareas Pendientes GAD</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         body {
             font-family: sans-serif;
@@ -167,12 +171,26 @@
             word-break: break-word;
             width: 100%;
         }
+        
+        /* PANTALLA DE CARGA DE SEGURIDAD */
+        #auth-loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f3f4f6; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col pb-16">
+
+    <div id="auth-loading">
+        <i class="fas fa-shield-alt fa-3x text-blue-600 mb-4"></i>
+        <p class="text-gray-600 font-bold">Verificando credenciales GAD...</p>
+    </div>
+
     <header class="bg-blue-600 w-full flex justify-center items-center py-2">
         <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg">
-            <img src="logogad.png" alt="Logo GAD" class="w-full h-full object-cover block">
+            <img src="logogad.png" alt="Logo GAD" class="w-full h-full object-cover block" onerror="this.style.display='none'">
         </div>
     </header>
     <h1 class="text-black text-center mt-2 text-xl font-bold px-4">
@@ -190,60 +208,113 @@
             </form>
             <div id="task-list" class="flex flex-col gap-2">
                 </div>
-            <button id="main-menu-btn"
-                    class="mt-2 p-2.5 bg-yellow-400 text-black font-bold rounded-lg shadow-md transition hover:bg-yellow-500 text-base lg:text-xl">
-                MENÚ PRINCIPAL
-            </button>
+            
+            <div id="nav-buttons-container" class="mt-4 flex flex-col sm:flex-row justify-center gap-2">
+                 <button id="main-menu-btn"
+                        class="flex-1 p-2.5 bg-yellow-400 text-black font-bold rounded-lg shadow-md transition hover:bg-yellow-500 text-base lg:text-xl">
+                    MENÚ PRINCIPAL
+                </button>
+            </div>
         </div>
     </div>
+    
  <footer class="mt-auto text-center py-6 bg-gray-200">
     <hr class="border-t border-gray-400 w-11/12 max-w-md mx-auto mb-4">
     <p class="font-bold">GRUPO DE ANÁLISIS DOCUMENTAL</p>
     <p class="font-bold">POLICÍA LOCAL DE ALICANTE</p>
     <p>&copy; GAD - Todos los derechos reservados</p>
   </footer>
-    <script>
-       
-    const firebaseConfig = {
-        apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU", 
-        authDomain: "gad-alicante-v1.firebaseapp.com",
-        databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "gad-alicante-v1",
-        storageBucket: "gad-alicante-v1.appspot.com",
-        messagingSenderId: "545835357966",
-        appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f"
-    }
 
-        firebase.initializeApp(firebaseConfig);
+    <script>
+        // CONFIGURACIÓN CENTRALIZADA (Estándar GAD)
+        const firebaseConfig = {
+          apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
+          authDomain: "gad-alicante-v1.firebaseapp.com",
+          databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "gad-alicante-v1",
+          storageBucket: "gad-alicante-v1.firebasestorage.app",
+          messagingSenderId: "545835357966",
+          appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
+          measurementId: "G-QG8KDLCWQS"
+        };
+
+        // INICIALIZACIÓN SEGURA
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
         const auth = firebase.auth();
-    const db = firebase.database();
+        const db = firebase.database();
         const tasksRef = db.ref('tareas');
+        
         const taskList = document.getElementById('task-list');
         const addTaskForm = document.getElementById('add-task-form');
         const newTaskInput = document.getElementById('new-task-input');
         const mainMenuBtn = document.getElementById('main-menu-btn');
+        const loadingScreen = document.getElementById('auth-loading');
 
-        // Crea los botones de filtro
+        // BOTONES DE FILTRO
         const showAllBtn = document.createElement('button');
         showAllBtn.id = 'show-all-btn';
-        showAllBtn.textContent = 'Mostrar todas las tareas';
-        showAllBtn.className = 'mt-2 p-2.5 bg-gray-400 text-white font-bold rounded-lg shadow-md transition hover:bg-gray-500 text-base lg:text-xl';
+        showAllBtn.textContent = 'Mostrar todas';
+        showAllBtn.className = 'mt-2 p-2.5 bg-gray-400 text-white font-bold rounded-lg shadow-md transition hover:bg-gray-500 text-base lg:text-xl w-full sm:w-auto';
         
         const hideCompletedBtn = document.createElement('button');
         hideCompletedBtn.id = 'hide-completed-btn';
-        hideCompletedBtn.textContent = 'Ocultar tareas finalizadas';
-        hideCompletedBtn.className = 'mt-2 p-2.5 bg-green-500 text-white font-bold rounded-lg shadow-md transition hover:bg-green-600 text-base lg:text-xl';
+        hideCompletedBtn.textContent = 'Ocultar finalizadas';
+        hideCompletedBtn.className = 'mt-2 p-2.5 bg-green-500 text-white font-bold rounded-lg shadow-md transition hover:bg-green-600 text-base lg:text-xl w-full sm:w-auto';
         
-        // Inserta los botones de filtro en el grid-container, antes del botón de menú
+        // Insertar botones de filtro
         const gridContainer = document.querySelector('.grid-container');
-        gridContainer.insertBefore(showAllBtn, mainMenuBtn);
-        gridContainer.insertBefore(hideCompletedBtn, mainMenuBtn);
+        // Insertamos antes del contenedor de botones de navegacion para orden visual
+        const navContainer = document.getElementById('nav-buttons-container');
+        // Creamos un contenedor para los filtros
+        const filterContainer = document.createElement('div');
+        filterContainer.className = 'flex flex-col sm:flex-row gap-2 mb-2';
+        filterContainer.appendChild(showAllBtn);
+        filterContainer.appendChild(hideCompletedBtn);
+        
+        gridContainer.insertBefore(filterContainer, navContainer);
 
         let currentFilter = 'show-all';
+        let currentUser = null;
+
+        // --- SISTEMA DE SEGURIDAD (El Portero) ---
+        function iniciarSistema() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    console.log("Usuario autorizado:", user.email);
+                    currentUser = user;
+                    loadingScreen.style.display = 'none';
+                    
+                    // AHORA SÍ: Escuchamos los datos
+                    cargarTareas();
+                } else {
+                    console.warn("No hay sesión activa.");
+                    loadingScreen.innerHTML = '<p class="text-red-500 font-bold p-4 text-center">Acceso Denegado. <br>Por favor, inicia sesión en el Menú Principal.</p>';
+                    // Opcional: window.location.href = 'index.html';
+                }
+            });
+        }
+
+        const cargarTareas = () => {
+            tasksRef.on('value', (snapshot) => {
+                renderTask(snapshot);
+            }, (error) => {
+                console.error("Error de permisos:", error);
+                taskList.innerHTML = '<div class="text-red-500 p-4 font-bold text-center">Error de permisos: No autorizado.</div>';
+            });
+        };
         
         const renderTask = (snapshot) => {
             taskList.innerHTML = '';
             const tasks = [];
+            
+            if (!snapshot.exists()) {
+                taskList.innerHTML = '<div class="text-gray-500 p-4 text-center">No hay tareas pendientes.</div>';
+                return;
+            }
+
             snapshot.forEach(childSnapshot => {
                 tasks.push({
                     id: childSnapshot.key,
@@ -251,7 +322,7 @@
                 });
             });
 
-            // Ordena las tareas por fecha de creación de forma descendente (más reciente primero)
+            // Ordena las tareas por fecha de creación descendente
             tasks.sort((a, b) => b.createdAt - a.createdAt);
 
             const filteredTasks = tasks.filter(task => {
@@ -279,12 +350,10 @@
                     case 'Pendiente':
                         taskText.style.color = '#ef4444';
                         taskText.style.fontWeight = 'bold';
-                        taskText.style.textDecoration = 'none';
                         break;
                     case 'En trámite':
                         taskText.style.color = '#3b82f6';
                         taskText.style.fontWeight = 'bold';
-                        taskText.style.textDecoration = 'none';
                         break;
                     case 'Finalizada':
                         taskText.style.color = '#22c55e';
@@ -299,6 +368,7 @@
                 const statusContainer = document.createElement('div');
                 statusContainer.className = 'task-status-container';
                 
+                // Botón Editar
                 const editButton = document.createElement('button');
                 editButton.className = 'edit-btn';
                 editButton.textContent = '✏️';
@@ -315,7 +385,8 @@
                         if (newText && newText !== currentText) {
                             tasksRef.child(task.id).update({ description: newText });
                         }
-                        taskTextContainer.replaceChild(taskText, input);
+                        // Reemplazar input con texto (o esperar a que Firebase actualice)
+                        // Para fluidez inmediata, re-renderizamos al recibir evento de Firebase
                     };
                     
                     input.addEventListener('keydown', (e) => {
@@ -326,25 +397,22 @@
                     });
                     
                     input.addEventListener('blur', saveChanges);
-                    taskTextContainer.replaceChild(input, taskText);
+                    
+                    // Reemplazamos visualmente
+                    taskTextContainer.innerHTML = '';
+                    taskTextContainer.appendChild(input);
                     input.focus();
                 });
                 statusContainer.appendChild(editButton);
 
-                // Botón de eliminar
+                // Botón Eliminar
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'p-2.5 bg-yellow-300 text-white font-bold rounded-lg shadow-md transition hover:bg-red-600';
                 deleteButton.textContent = '🗑️';
                 deleteButton.title = 'Eliminar tarea';
                 deleteButton.addEventListener('click', () => {
                     if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-                        tasksRef.child(task.id).remove()
-                            .then(() => {
-                                console.log("Tarea eliminada correctamente.");
-                            })
-                            .catch((error) => {
-                                console.error("Error al eliminar la tarea: ", error);
-                            });
+                        tasksRef.child(task.id).remove().catch(console.error);
                     }
                 });
                 statusContainer.appendChild(deleteButton);
@@ -365,13 +433,6 @@
                     button.textContent = status.name;
                     button.addEventListener('click', () => {
                         tasksRef.child(task.id).update({ status: status.name });
-                        const allStatusButtons = statusContainer.querySelectorAll('.task-status-btn');
-                        allStatusButtons.forEach(btn => {
-                            btn.classList.remove('active');
-                            btn.classList.add('inactive');
-                        });
-                        button.classList.remove('inactive');
-                        button.classList.add('active');
                     });
                     statusContainer.appendChild(button);
                 });
@@ -381,29 +442,31 @@
             });
         };
 
-        // Escucha los cambios en Firebase y re-renderiza la lista
-        tasksRef.on('value', renderTask);
-
         addTaskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const description = newTaskInput.value.trim();
-            if (description) {
+            if (description && currentUser) {
                 try {
                     await tasksRef.push({
                         description: description,
                         status: 'Pendiente',
-                        createdAt: firebase.database.ServerValue.TIMESTAMP
+                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                        createdBy: currentUser.email // Opcional: Guardar quién la creó
                     });
                     newTaskInput.value = '';
                 } catch (error) {
                     console.error("Error al añadir la tarea: ", error);
+                    alert("Error: No tienes permiso para escribir.");
                 }
+            } else if (!currentUser) {
+                alert("Error: No hay sesión activa.");
             }
         });
 
         // Event listeners para los botones de filtrado
         showAllBtn.addEventListener('click', () => {
             currentFilter = 'show-all';
+            // Refrescamos la vista con los datos que ya tenemos o forzamos lectura
             tasksRef.once('value', renderTask);
         });
         
@@ -413,8 +476,13 @@
         });
         
         mainMenuBtn.addEventListener('click', () => {
-            window.location.href = 'index.html';
+            // Usa el historial del navegador para volver al dashboard sin recargar todo si es posible
+            window.history.back();
         });
+
+        // INICIAR
+        iniciarSistema();
+
     </script>
 </body>
 </html>
