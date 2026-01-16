@@ -208,7 +208,7 @@
         .btn-users { background-color: #3b82f6; } .btn-users:hover { background-color: #2563eb; }
         .btn-log { background-color: #10b981; } .btn-log:hover { background-color: #059669; }
         .btn-backup { background-color: #8b5cf6; } .btn-backup:hover { background-color: #7c3aed; }
-        /* NUEVO ESTILO BOTÓN PROMPTS */
+        /* NUEVO ESTILO BOTÓN PROMTS V1 */
         .btn-prompts { background-color: #6366f1; } .btn-prompts:hover { background-color: #4f46e5; }
         .btn-logout-modern { background-color: #ef4444; width: 100%; margin-top: 5px; } .btn-logout-modern:hover { background-color: #dc2626; }
         
@@ -305,7 +305,7 @@
                     <button id="show-edit-menu-modal" class="btn-modern btn-edit"><i class="fas fa-pencil-alt"></i> Editar Menú</button>
                     <button id="show-manage-users-modal" class="btn-modern btn-users"><i class="fas fa-users-cog"></i> Usuarios</button>
                     <button id="show-full-log-modal" class="btn-modern btn-log"><i class="fas fa-list-alt"></i> Registro Global</button>
-                    <button id="goto-promts" class="btn-modern btn-prompts" onclick="window.location.href='PROMTS.html'"><i class="fas fa-robot"></i> Prompts</button>
+                    <button id="btn-prompts-v1" class="btn-modern btn-prompts" onclick="window.location.href='PROMTS.html'"><i class="fas fa-robot"></i> Prompts</button>
                     <button id="backup-button" class="btn-modern btn-backup" onclick="window.open('COPIA SEGURIDAD FIREBASE.html', '_blank')"><i class="fas fa-cloud-download-alt"></i> Backup</button>
                 </div>
                 <button id="btn-logout" class="btn-modern btn-logout-modern"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
@@ -415,6 +415,7 @@
 </div>
 
 <script>
+  // CREDENCIALES V1 ORIGINALES
   const firebaseConfig = {
   apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
   authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -424,7 +425,6 @@
   messagingSenderId: "545835357966",
   appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
   measurementId: "G-QG8KDLCWQS"
-};asurementId: "G-Q0E3H1996K"
 };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -432,7 +432,7 @@
     
     const BUTTONS_NODE = 'menuButtons';
     const TITLE_NODE = 'pageTitle';
-    const ADMIN_EMAIL = 'copg279@gmail.com';
+    const ADMIN_EMAIL = 'gadalicante@gmail.com';
     const USERS_NODE = 'usuarios_google'; 
 
     // UI Refs
@@ -525,37 +525,31 @@
         renderMenuButtons();
     }
 
- // --- ACCION NAVEGAR ATRÁS (MODIFICADA PARA SOPORTAR NAVEGADOR) ---
+// ACCIÓN "ATRÁS" UNIFICADA
 function goBack() {
-    // Si estamos en modo visualización (Iframe), forzamos la salida al menú, sin depender de window.history.back()
     if (isViewingContent) {
         showMenuArea();
         const currentMenuId = currentMenuPath.length > 0 ? currentMenuPath[currentMenuPath.length - 1] : '';
         history.replaceState(null, '', currentMenuId ? '#folder=' + currentMenuId : '#');
         return;
     }
-    
-    // Si estamos en un submenú, sí usamos history.back()
     if (currentMenuPath.length > 0) {
         window.history.back();
         return;
     }
 }
 
-// GESTIÓN DEL HISTORIAL (Mantenemos onpopstate para el botón ATRÁS del NAVEGADOR)
+// GESTIÓN DEL HISTORIAL
 window.onpopstate = function(event) {
     if (isViewingContent) {
-        // Si el NAVEGADOR pulsa ATRÁS, salimos del visor
         showMenuArea();
     } else if (currentMenuPath.length > 0) {
-        // Si estábamos en una subcarpeta, subimos nivel (la acción de popstate lo hace automáticamente)
         currentMenuPath.pop();
         renderMenuButtons();
     }
 };
 
 sidebarBackBtn.onclick = () => { goBack(); closeSidebar(); };
-// Botón "ATRÁS" de la barra principal (Top Bar)
 document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     if (e.target.classList.contains('top-back-btn')) {
         goBack();
@@ -586,22 +580,18 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     // --- MANEJO DE CLICS EN BOTONES ---
     function handleGenericButtonClick(key, data) {
         if (data.type === 'parent') { 
-            // CARPETA (Azul)
             currentMenuPath.push(key); 
             history.pushState({folder: key}, '', '#folder=' + key);
             renderMenuButtons();
         } else if (data.htmlCode || data.href) {
-            // CONTENIDO (Verde/Personalizado) -> VISOR CON BARRAS
             history.pushState({content: true}, '', '#view');
             showIframeArea(data);
         }
     }
 
-    // --- 1. RENDER TOP BAR (Marcadores) ---
+    // --- 1. RENDER TOP BAR ---
     function renderTopBar(visibleButtons) {
         topHorizontalMenu.innerHTML = '';
-        
-        // Botón ATRÁS siempre visible si hay historial o contenido
         if(currentMenuPath.length > 0 || isViewingContent) {
             const backBtn = document.createElement('button');
             backBtn.className = 'top-nav-link top-back-btn';
@@ -609,26 +599,16 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
             backBtn.onclick = goBack;
             topHorizontalMenu.appendChild(backBtn);
         }
-
-        // Mostrar botones (marcadores) SOLO si no estamos viendo contenido
         if (!isViewingContent && visibleButtons) {
             visibleButtons.forEach(([key, data]) => {
                 const topBtn = document.createElement('a');
                 topBtn.className = 'top-nav-link';
-                
-                // Determinar la clase de estilo y color
-                let color = data.color;
                 let typeClass = data.type === 'parent' ? 'type-parent' : 'type-main';
-                
                 topBtn.classList.add(typeClass);
-                
-                // Aplicar color personalizado si no es la carpeta por defecto o el enlace por defecto
                 if (data.color && (data.color !== '#1e40af' || data.type !== 'parent') && (data.color !== '#16a34a' || data.type !== 'main')) {
                     topBtn.style.backgroundColor = data.color;
                     topBtn.style.color = 'white'; 
                 }
-
-                // ELIMINACIÓN DE ICONOS - Solo se muestra el texto
                 topBtn.innerHTML = `${data.text}`; 
                 topBtn.onclick = () => handleGenericButtonClick(key, data);
                 topHorizontalMenu.appendChild(topBtn);
@@ -641,43 +621,33 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         const items = Object.entries(menuButtonsData)
             .filter(([k, v]) => parentId === null ? !v.parent : v.parent === parentId)
             .sort((a, b) => a[1].order - b[1].order);
-
         if (items.length === 0) return;
-
         items.forEach(([key, data]) => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'sidebar-item';
-
             const row = document.createElement('div');
             row.className = 'sidebar-row';
-            
             const contentDiv = document.createElement('div');
             contentDiv.className = 'sidebar-row-content';
             let iconClass = data.type === 'parent' ? 'fa-folder' : 'fa-link';
-            // Mantenemos los iconos en el menú lateral
             contentDiv.innerHTML = `<i class="fas ${iconClass}"></i> <span>${data.text}</span>`; 
             contentDiv.onclick = () => { 
                 handleGenericButtonClick(key, data); 
                 closeSidebar(); 
             };
             row.appendChild(contentDiv);
-
-            let childContainer = null;
             if (data.type === 'parent') {
                 const toggleIcon = document.createElement('div');
                 toggleIcon.className = 'toggle-icon';
                 toggleIcon.innerHTML = `<i class="fas fa-plus"></i>`; 
-                
-                childContainer = document.createElement('div');
+                const childContainer = document.createElement('div');
                 childContainer.className = 'sidebar-children';
-                
                 toggleIcon.onclick = (e) => {
                     e.stopPropagation(); 
                     const isExpanded = childContainer.classList.toggle('show');
                     toggleIcon.classList.toggle('expanded', isExpanded);
                     toggleIcon.innerHTML = isExpanded ? `<i class="fas fa-minus"></i>` : `<i class="fas fa-plus"></i>`;
                 };
-                
                 row.appendChild(toggleIcon);
                 itemDiv.appendChild(row);
                 itemDiv.appendChild(childContainer); 
@@ -692,30 +662,21 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     // --- RENDER MENÚ PRINCIPAL ---
     function renderMenuButtons() {
         mainMenuGrid.innerHTML = ''; secondaryMenuContainer.innerHTML = ''; navBtns.innerHTML = ''; navBtns.style.display = 'none';
-        
-        // Calcular botones para la barra superior incluso si no se muestra el grid
         const currentMenuId = currentMenuPath.length > 0 ? currentMenuPath[currentMenuPath.length - 1] : null;
         const currentButtons = Object.entries(menuButtonsData)
             .filter(([k, v]) => currentMenuId === null ? !v.parent : v.parent === currentMenuId)
             .sort((a, b) => a[1].order - b[1].order);
-
         renderTopBar(currentButtons);
-        
         sidebarTreeContainer.innerHTML = '';
         renderSidebarTree(null, sidebarTreeContainer);
         sidebarBackBtn.style.display = (currentMenuPath.length > 0 || isViewingContent) ? 'block' : 'none';
-
-        // Si estamos viendo contenido, paramos aquí (no renderizamos el grid)
         if (isViewingContent) return;
-
         renderTitle();
-        
         currentButtons.forEach(([k, v]) => {
             const el = createButton(k, v);
             if (v.type === 'secondary' && !currentMenuId) secondaryMenuContainer.appendChild(el);
             else mainMenuGrid.appendChild(el);
         });
-        
         if (currentMenuPath.length > 0) {
             navBtns.style.display = 'flex';
             const btnMain = document.createElement('button'); btnMain.innerText = 'MENÚ PRINCIPAL'; btnMain.className = 'py-3 px-6 bg-yellow-400 font-bold rounded-lg shadow uppercase text-sm w-40'; btnMain.onclick = () => { currentMenuPath = []; renderMenuButtons(); };
@@ -736,12 +697,10 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         a.innerHTML = `<span>${data.text}</span>`;
         if (data.logo) a.innerHTML += `<img src="${data.logo}" class="construccion-logo">`;
         a.href = 'javascript:void(0)';
-        
         a.onclick = () => {
             if (isEditMode) return;
             handleGenericButtonClick(key, data);
         };
-        
         div.appendChild(a);
         if (isEditMode) {
             div.draggable = true; addDragHandlers(div);
@@ -771,7 +730,6 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         renderMenuButtons();
     });
 
-    // --- ACCIONES ADMIN ---
     window.openEdit = (key) => {
         const d = menuButtonsData[key];
         document.getElementById('edit-button-id').value = key;
@@ -786,7 +744,6 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     window.delBtn = (k, t, p) => { if(confirm(`¿Borrar "${t}"?`)) { const u={}; u[`/${BUTTONS_NODE}/${k}`]=null; if(p && Object.values(menuButtonsData).filter(b=>b.parent===p).length===1) u[`/${BUTTONS_NODE}/${p}/children`]=null; db.ref().update(u); }};
     window.moveToRoot = async (k) => { const s = await db.ref(BUTTONS_NODE).once('value'); const order = Object.values(s.val()||{}).filter(b=>!b.parent).length + 1; db.ref(`${BUTTONS_NODE}/${k}`).update({parent:null, order}); };
 
-    // --- DRAG & DROP ---
     function addDragHandlers(el) {
         el.ondragstart = e => { draggedItem = el; setTimeout(() => el.classList.add('dragging'),0); };
         el.ondragend = () => { draggedItem.classList.remove('dragging'); draggedItem=null; document.querySelectorAll('.drag-over-container').forEach(c=>c.classList.remove('drag-over-container')); };
@@ -805,7 +762,6 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     dragZone.ondrop = e => { e.preventDefault(); dragZone.classList.remove('drag-over-container'); if(draggedItem) { mainMenuGrid.appendChild(draggedItem); updateOrder(); } };
     function updateOrder() { const u={}; document.querySelectorAll('#main-menu-grid .menu-button-container').forEach((b,i) => u[`/${BUTTONS_NODE}/${b.dataset.id}/order`]=i+1); db.ref().update(u); }
 
-    // --- LOGIN (FINAL) ---
     function initAppLogic() {
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -826,10 +782,8 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         const emailKey = sanitizeEmail(user.email);
         const now = Date.now();
         const ip = await getClientIP();
-        
         db.ref(USERS_NODE + '/' + emailKey).transaction(d => d ? {...d, email: user.email, accesos: (d.accesos||0)+1, ultimoAcceso: now} : (isAdmin ? {email:user.email, accesos:1, ultimoAcceso:now, nombre:'Admin'} : d));
         db.ref('visitLog').push().set({ userId: emailKey, userName: user.displayName||user.email, email: user.email, timestamp: now, ip: ip });
-
         document.getElementById('user-info-display').innerHTML = `<i class="fas fa-user-circle"></i> ${user.email}`;
         if (isAdmin) { adminPanel.style.display = 'flex'; document.getElementById('edit-title-icon').style.display = isEditMode ? 'inline-block' : 'none'; } 
         else userControls.style.display = 'block';
@@ -840,29 +794,17 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         p.setCustomParameters({ prompt: 'select_account' }); 
         auth.signInWithPopup(p).catch(e => alert("Error: " + e.message)); 
     };
-    
     const logout = () => { 
         if(isEditMode) toggleEditModeUI(); 
-        
         auth.signOut().then(() => {
-            // Limpiar la interfaz
-            adminPanel.style.display = 'none';
-            userControls.style.display = 'none';
-            showMenuArea(); // Asegura volver a la vista del menú (no al iframe)
-            
-            // Mostrar el modal de login.
-            modalLogin.style.display = 'flex';
-        }).catch((error) => {
-            console.error("Error al cerrar sesión:", error);
-            // En caso de error, igualmente forzamos la vista de login
+            adminPanel.style.display = 'none'; userControls.style.display = 'none';
+            showMenuArea();
             modalLogin.style.display = 'flex';
         });
     };
-    
     document.getElementById('btn-logout').onclick = logout;
     document.getElementById('btn-logout-user').onclick = logout;
 
-    // --- ADMIN PANEL & MODALES ---
     function renderAdminCounters(users) {
         if(!users) return;
         let sorted = Object.entries(users).map(([k, v]) => ({ key: k, ...v })).sort((a, b) => (a.nombre || a.email).localeCompare(b.nombre || b.email));
@@ -887,16 +829,12 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
     document.getElementById('show-edit-menu-modal').onclick = toggleEditModeUI;
     
     window.addEventListener('DOMContentLoaded', () => {
-        modalLogin.innerHTML = `<div class="modal"><div class="modal-header-logo"><img src="logogad.png"></div><h2>Acceso GAD</h2><button id="google-login-btn" class="google-btn"><i class="fab fa-google" style="color:#DB4437;"></i> Google Login</button></div>`;
+        modalLogin.innerHTML = `<div class="modal"><div class="modal-header-logo"><img src="logogad.png"></div><h2>Acceso GAD V1</h2><button id="google-login-btn" class="google-btn"><i class="fab fa-google" style="color:#DB4437;"></i> Google Login</button></div>`;
         document.getElementById('google-login-btn').onclick = loginWithGoogle;
-        
-        document.getElementById('manage-users-modal').innerHTML = `<div class="modal"><span class="modal-close" onclick="this.closest('.modal-overlay').style.display='none'">&times;</span><h2>Gestionar Acceso</h2><div class="modal-body"><input type="email" id="new-user-email" placeholder="Email"/><input type="text" id="new-user-alias" placeholder="Nombre"/><button id="add-user-button" class="standard-btn">Autorizar</button><p id="add-user-message" style="color:#4ade80;display:none;">OK</p><hr><ul id="user-list-to-delete"></ul></div></div>`;
-        
+        document.getElementById('manage-users-modal').innerHTML = `<div class="modal"><span class="modal-close" onclick="this.closest('.modal-overlay').style.display='none'">&times;</span><h2>Gestionar Acceso</h2><div class="modal-body"><input type="email" id="new-user-email" placeholder="Email"/><input type="text" id="new-user-alias" placeholder="Nombre"/><button id="add-user-button" class="standard-btn">Autorizar</button><hr><ul id="user-list-to-delete"></ul></div></div>`;
         document.getElementById('full-log-modal').innerHTML = `<div class="modal" style="max-width:800px;height:90vh;"><span class="modal-close" onclick="this.closest('.modal-overlay').style.display='none'">&times;</span><h2>Registro Global</h2><button id="clear-global-log" class="btn-admin-modal">Borrar Log</button><div id="full-log-container" style="overflow-y:auto;height:80%;"></div></div>`;
-
         document.getElementById('show-manage-users-modal').onclick = () => modalManageUsers.style.display = 'flex';
         document.getElementById('show-full-log-modal').onclick = () => { renderFullGlobalLog(); modalFullLog.style.display = 'flex'; };
-
         db.ref(USERS_NODE).on('value', s => {
             if(s.val()) {
                 const ul = document.getElementById('user-list-to-delete'); if(ul) ul.innerHTML = '';
@@ -906,16 +844,12 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
                 if (auth.currentUser?.email === ADMIN_EMAIL) renderAdminCounters(s.val());
             }
         });
-
         document.getElementById('add-user-button').onclick = () => {
             const e = document.getElementById('new-user-email').value.trim().toLowerCase();
             if(e) db.ref(USERS_NODE + '/' + sanitizeEmail(e)).update({ email: e, nombre: document.getElementById('new-user-alias').value, accesos: 0 }).then(()=>alert('Añadido'));
         };
-
         document.getElementById('clear-global-log').onclick = () => { if(confirm("¿Borrar?")) db.ref('visitLog').remove(); };
-
         initAppLogic();
-
         document.getElementById('add-new-button').onclick = () => { document.getElementById('new-button-text').value=''; modalAddBtn.style.display='flex'; };
         document.getElementById('save-new-button').onclick = async () => {
             const t = document.getElementById('new-button-text').value; if(!t) return;
@@ -940,7 +874,6 @@ document.querySelector('.top-bar-strip').addEventListener('click', (e) => {
         document.querySelectorAll('.color-circle').forEach(c => c.onclick = e => { document.querySelectorAll('.color-circle').forEach(x=>x.classList.remove('active')); e.target.classList.add('active'); });
         document.querySelectorAll('.modal-close').forEach(c => c.onclick = () => c.closest('.modal-overlay').style.display = 'none');
     });
-
     window.delUser = (k) => db.ref(USERS_NODE+'/'+k).remove();
     window.openUserVisitHistory = async (key, email) => {
         const s = await db.ref('visitLog').orderByChild('userId').equalTo(key).once('value');
