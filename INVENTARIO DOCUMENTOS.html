@@ -197,7 +197,7 @@
             transition: background 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* Centrado */
             gap: 8px;
             white-space: nowrap;
         }
@@ -308,7 +308,7 @@
             text-overflow: ellipsis;
         }
 
-        /* BOTÓN VIEW (OJO VERDE) MODIFICADO PARA USAR CURSOR POINTER */
+        /* BOTÓN VIEW (OJO VERDE) - MODIFICADO A BUTTON PARA CONTROL JS */
         .btn-view {
             color: var(--eye-color);
             font-size: 22px;
@@ -409,7 +409,7 @@
         .warning-box strong { display: block; margin-bottom: 8px; }
 
         /* ==========================================================================
-           DISEÑO RESPONSIVE (MÓVIL) - CORRECCIÓN DE AMONTONAMIENTO
+           DISEÑO RESPONSIVE (MÓVIL) - OPTIMIZADO PARA NO AMONTONARSE
            ========================================================================== */
         @media (max-width: 768px) {
             header {
@@ -451,6 +451,7 @@
             .btn-clear {
                 margin-top: 5px;
                 padding: 12px;
+                justify-content: center;
             }
 
             /* Filtros mejor distribuidos */
@@ -595,7 +596,7 @@
         }
 
         // ===============================================
-        // 🛠️ GESTIÓN DE CUENTA GOOGLE (SOLUCIÓN SELECTOR)
+        // 🛠️ GESTIÓN DE CUENTA GOOGLE (SOLUCIÓN DEFINITIVA ACCOUNTCHOOSER)
         // ===============================================
         function obtenerCuentaGuardada() {
             return localStorage.getItem('gad_google_account');
@@ -611,7 +612,7 @@
         function resetearCuenta() {
             localStorage.removeItem('gad_google_account');
             actualizarTextoCuentaAyuda();
-            alert("Cuenta eliminada. La próxima vez que abras un documento se te pedirá de nuevo.");
+            alert("Cuenta eliminada. La próxima vez se te pedirá de nuevo.");
         }
 
         function actualizarTextoCuentaAyuda() {
@@ -624,35 +625,38 @@
             }
         }
 
-        // Esta es la función clave que abre el documento
+        // FUNCIÓN PRINCIPAL DE APERTURA MODIFICADA
         function abrirDocumento(urlOriginal) {
             let email = obtenerCuentaGuardada();
 
-            // Si no tiene cuenta guardada, PREGUNTAR UNA VEZ Y MEMORIZAR
+            // Si no tiene cuenta, preguntar una vez y guardar
             if (!email) {
-                const input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nPara evitar que Google Drive te pregunte cada vez qué cuenta usar, por favor introduce tu correo de Gmail (Ej: policia@gmail.com).\n\nSe guardará en este dispositivo y no volverá a preguntar.");
+                const input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nIntroduce tu correo Gmail (Ej: policia@gmail.com) para que Google no te pregunte cada vez qué cuenta usar.");
                 
                 if (input) {
                     email = input.trim();
                     guardarCuenta(email);
-                } else {
-                    // Si cancela, abrimos sin forzar cuenta (comportamiento antiguo)
                 }
             }
 
-            let urlFinal = urlOriginal;
-            
-            if (email) {
-                // Añadimos el parámetro authuser=EMAIL para forzar la cuenta
-                const separador = urlFinal.includes('?') ? '&' : '?';
-                urlFinal += `${separador}authuser=${encodeURIComponent(email)}`;
+            // Preparar destino forzando vista web
+            let destino = urlOriginal;
+            if (!destino.includes('usp=')) {
+                const sep = destino.includes('?') ? '&' : '?';
+                destino += sep + "usp=drive_web";
             }
 
-            // Abrir en nueva pestaña
-            window.open(urlFinal, '_blank');
+            if (email) {
+                // TRUCO SUPREMO: Usar AccountChooser para forzar la cuenta antes de llegar a Drive
+                // Esto suele evitar que la App nativa intercepte y pregunte de nuevo
+                const urlMagica = `https://accounts.google.com/AccountChooser?Email=${encodeURIComponent(email)}&continue=${encodeURIComponent(destino)}`;
+                window.open(urlMagica, '_blank');
+            } else {
+                // Si el usuario canceló, abrir normal
+                window.open(destino, '_blank');
+            }
         }
 
-        // Inicializar texto en modal ayuda
         document.addEventListener('DOMContentLoaded', actualizarTextoCuentaAyuda);
 
         // ===============================================
@@ -742,7 +746,7 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
-                // CAMBIO: En lugar de href directo, usamos onclick para gestionar la cuenta
+                // USAMOS ONCLICK PARA LA NUEVA FUNCIÓN
                 const html = `
                     <div class="card">
                         <div class="card-content">
