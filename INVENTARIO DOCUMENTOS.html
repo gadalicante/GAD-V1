@@ -2,10 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventario Documentos GAD</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -18,6 +20,8 @@
             --eye-color: #28a745; /* Verde Ojo */
             --danger-color: #dc3545; /* Rojo Limpiar */
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
@@ -41,6 +45,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: height 0.3s ease;
         }
 
         /* TÍTULO */
@@ -163,6 +168,7 @@
             outline: none;
             transition: border-color 0.3s;
             box-sizing: border-box;
+            -webkit-appearance: none; /* Fix iOS */
         }
 
         .search-input:focus {
@@ -191,6 +197,7 @@
             transition: background 0.2s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             white-space: nowrap;
         }
@@ -242,7 +249,6 @@
             margin: 0 auto;
             width: 100%;
             padding: 0 20px 40px 20px;
-            box-sizing: border-box;
         }
 
         .grid {
@@ -302,6 +308,7 @@
             text-overflow: ellipsis;
         }
 
+        /* BOTÓN VIEW (OJO VERDE) MODIFICADO PARA USAR CURSOR POINTER */
         .btn-view {
             color: var(--eye-color);
             font-size: 22px;
@@ -312,6 +319,9 @@
             align-items: center;
             justify-content: center;
             text-decoration: none;
+            cursor: pointer;
+            border: none;
+            background: none;
         }
 
         .btn-view:hover {
@@ -349,6 +359,7 @@
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(3px);
+            padding: 20px;
         }
 
         .modal-content {
@@ -356,9 +367,11 @@
             padding: 30px;
             border-radius: 10px;
             max-width: 550px;
-            width: 90%;
+            width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-close {
@@ -395,53 +408,66 @@
         }
         .warning-box strong { display: block; margin-bottom: 8px; }
 
-        /* ==========================================================
-           MEJORA RESPONSIVE (MÓVIL) - AÑADIDO AL FINAL
-           ========================================================== */
+        /* ==========================================================================
+           DISEÑO RESPONSIVE (MÓVIL) - CORRECCIÓN DE AMONTONAMIENTO
+           ========================================================================== */
         @media (max-width: 768px) {
             header {
                 height: auto;
                 flex-direction: column;
-                padding: 15px;
+                padding: 15px 20px;
                 gap: 15px;
             }
+
             .header-left, .header-center, .header-right {
                 width: 100%;
                 text-align: center;
                 justify-content: center;
+                flex: none; /* Reset flex grow */
             }
+
+            /* Orden: 1. Logo, 2. Título, 3. Botones */
+            .header-center { order: 1; margin-bottom: 5px; }
+            .header-left { order: 2; margin-bottom: 5px; }
+            .header-right { order: 3; justify-content: space-around; }
+
+            .logo { height: 80px; } /* Un poco más pequeño en móvil */
+
             .header-title {
-                white-space: normal; /* Permite saltos de línea en título largo */
+                white-space: normal;
                 font-size: 20px;
-                text-align: center;
+                line-height: 1.2;
             }
-            .header-center { order: -1; } /* Logo arriba del todo si se desea, o dejar normal */
             
-            /* Ajuste buscador */
+            /* Buscador y botones apilados */
             .search-wrapper {
                 flex-direction: column;
             }
-            .search-input-container {
+            
+            .search-input-container, .btn-clear {
                 width: 100%;
-            }
-            .btn-clear {
-                width: 100%;
-                justify-content: center;
             }
             
-            /* Ajuste chips */
-            .filters-chips {
-                gap: 5px;
+            .btn-clear {
+                margin-top: 5px;
+                padding: 12px;
             }
+
+            /* Filtros mejor distribuidos */
+            .filters-chips {
+                gap: 8px;
+            }
+            
             .chip {
+                flex: 1 1 auto; /* Crecer para llenar huecos */
+                text-align: center;
                 padding: 10px;
-                flex-grow: 1;
                 justify-content: center;
                 display: flex;
             }
-            .divider { display: none; }
+            
+            .divider { display: none; } /* Ocultar barra vertical en móvil */
         }
-
     </style>
 </head>
 <body>
@@ -451,7 +477,7 @@
             <h1 class="header-title">INVENTARIO DE DOCUMENTOS GAD</h1>
         </div>
         <div class="header-center">
-            <img src="logogad.png" alt="GAD Logo" class="logo">
+            <img src="logogad.png" alt="GAD Logo" class="logo" onerror="this.style.display='none'">
         </div>
         <div class="header-right">
             <button class="btn-help-premium" onclick="toggleModal(true)">
@@ -469,7 +495,7 @@
             <div class="search-input-container">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" id="buscador" class="search-input" 
-                       placeholder="Ej: España DNI 2025 (Busca sin acentos: Rumania = Rumanía)"
+                       placeholder="Ej: España DNI... (Ignora tildes)"
                        onkeyup="aplicarFiltrosInteligentes()">
             </div>
             <button class="btn-clear" onclick="limpiarBusqueda()">
@@ -509,6 +535,12 @@
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Ver Documento:</strong><br>
                 Una vez localizado, pulsa el <b>Ojo Verde</b> para abrir el documento original.
+            </div>
+
+            <div class="help-item" style="background:#e8f5e9; padding:10px; border-radius:5px; border:1px solid #c8e6c9;">
+                 <strong><i class="fa-solid fa-user-gear help-icon"></i> Cuenta de Google Configurada:</strong><br>
+                 <span id="cuenta-configurada-texto" style="font-size:13px; color:#2e7d32;">-- No configurada --</span><br>
+                 <button onclick="resetearCuenta()" style="margin-top:5px; background:white; border:1px solid #ccc; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Cambiar Cuenta</button>
             </div>
 
             <div class="warning-box">
@@ -552,15 +584,76 @@
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
         // ===============================================
-        // 🛠️ FUNCIÓN NORMALIZAR TEXTO (ELIMINA ACENTOS)
+        // 🛠️ FUNCIÓN NORMALIZAR TEXTO
         // ===============================================
         function normalizarTexto(texto) {
             if (!texto) return "";
             return texto.toString()
-                .toLowerCase() // Minusculas
-                .normalize("NFD") // Descompone tildes (á -> a + ´)
-                .replace(/[\u0300-\u036f]/g, ""); // Elimina los simbolos de tilde
+                .toLowerCase() 
+                .normalize("NFD") 
+                .replace(/[\u0300-\u036f]/g, ""); 
         }
+
+        // ===============================================
+        // 🛠️ GESTIÓN DE CUENTA GOOGLE (SOLUCIÓN SELECTOR)
+        // ===============================================
+        function obtenerCuentaGuardada() {
+            return localStorage.getItem('gad_google_account');
+        }
+
+        function guardarCuenta(email) {
+            if(email && email.includes('@')) {
+                localStorage.setItem('gad_google_account', email.trim());
+                actualizarTextoCuentaAyuda();
+            }
+        }
+
+        function resetearCuenta() {
+            localStorage.removeItem('gad_google_account');
+            actualizarTextoCuentaAyuda();
+            alert("Cuenta eliminada. La próxima vez que abras un documento se te pedirá de nuevo.");
+        }
+
+        function actualizarTextoCuentaAyuda() {
+            const el = document.getElementById('cuenta-configurada-texto');
+            const mail = obtenerCuentaGuardada();
+            if(mail) {
+                el.innerText = "Abriendo siempre con: " + mail;
+            } else {
+                el.innerText = "No configurada. Se te pedirá al abrir un documento.";
+            }
+        }
+
+        // Esta es la función clave que abre el documento
+        function abrirDocumento(urlOriginal) {
+            let email = obtenerCuentaGuardada();
+
+            // Si no tiene cuenta guardada, PREGUNTAR UNA VEZ Y MEMORIZAR
+            if (!email) {
+                const input = prompt("⚠️ CONFIGURACIÓN INICIAL GAD:\n\nPara evitar que Google Drive te pregunte cada vez qué cuenta usar, por favor introduce tu correo de Gmail (Ej: policia@gmail.com).\n\nSe guardará en este dispositivo y no volverá a preguntar.");
+                
+                if (input) {
+                    email = input.trim();
+                    guardarCuenta(email);
+                } else {
+                    // Si cancela, abrimos sin forzar cuenta (comportamiento antiguo)
+                }
+            }
+
+            let urlFinal = urlOriginal;
+            
+            if (email) {
+                // Añadimos el parámetro authuser=EMAIL para forzar la cuenta
+                const separador = urlFinal.includes('?') ? '&' : '?';
+                urlFinal += `${separador}authuser=${encodeURIComponent(email)}`;
+            }
+
+            // Abrir en nueva pestaña
+            window.open(urlFinal, '_blank');
+        }
+
+        // Inicializar texto en modal ayuda
+        document.addEventListener('DOMContentLoaded', actualizarTextoCuentaAyuda);
 
         // ===============================================
         // CARGA DE DATOS
@@ -581,9 +674,7 @@
 
                     Object.values(data).forEach(grupo => {
                         Object.values(grupo).forEach(doc => {
-                            // Concatenamos todo
                             const rawText = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
-                            // Limpiamos caracteres raros y normalizamos
                             const textoNormalizado = normalizarTexto(rawText)
                                                     .replace(/_/g, ' ')
                                                     .replace(/-/g, ' ')
@@ -595,7 +686,7 @@
                                 ...doc,
                                 _cat: nodo.cat,
                                 _cal: nodo.cal,
-                                _palabras: palabrasClave // Ahora guardamos palabras "limpias"
+                                _palabras: palabrasClave
                             });
                         });
                     });
@@ -613,10 +704,8 @@
         // BÚSQUEDA
         // ===============================================
         function aplicarFiltrosInteligentes() {
-            // Obtenemos lo que escribe el usuario Y LO NORMALIZAMOS
             const inputRaw = document.getElementById('buscador').value;
             const input = normalizarTexto(inputRaw).trim();
-            
             const terminosBusqueda = input.split(/\s+/).filter(t => t.length > 0);
             const grid = document.getElementById('grid-resultados');
             const statsNum = document.getElementById('stats-number');
@@ -628,7 +717,6 @@
                 if (filtros.cal !== 'TODOS' && doc._cal !== filtros.cal) return false;
 
                 if (terminosBusqueda.length > 0) {
-                    // Comparamos termino normalizado con palabras normalizadas del doc
                     const cumpleTodosLosTerminos = terminosBusqueda.every(termino => {
                         return doc._palabras.some(palabraDoc => palabraDoc.startsWith(termino));
                     });
@@ -654,13 +742,7 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
-                // MEJORA: Añadir authuser=0 al enlace para forzar la cuenta predeterminada
-                let enlaceConAuth = doc.Enlace;
-                if (enlaceConAuth && !enlaceConAuth.includes("authuser=")) {
-                    const separador = enlaceConAuth.includes("?") ? "&" : "?";
-                    enlaceConAuth += separador + "authuser=0";
-                }
-
+                // CAMBIO: En lugar de href directo, usamos onclick para gestionar la cuenta
                 const html = `
                     <div class="card">
                         <div class="card-content">
@@ -672,9 +754,9 @@
                                 ${doc.NombreDocumento}
                             </div>
                         </div>
-                        <a href="${enlaceConAuth}" target="_blank" class="btn-view" title="Ver Documento">
+                        <button class="btn-view" onclick="abrirDocumento('${doc.Enlace}')" title="Ver Documento">
                             <i class="fa-solid fa-eye"></i>
-                        </a>
+                        </button>
                     </div>
                 `;
                 grid.innerHTML += html;
