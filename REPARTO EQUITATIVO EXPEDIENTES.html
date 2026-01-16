@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel GAD Alicante - Gestión de Historial</title>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         :root { --blue-main: #1a73e8; --blue-dark: #0d47a1; --success: #28a745; --danger: #d93025; --bg: #f4f7f9; }
@@ -43,11 +44,20 @@
 
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
         .modal-content { background: white; margin: 10% auto; padding: 25px; border-radius: 12px; width: 80%; max-width: 500px; }
+
+        /* Pantalla de carga */
+        #loading-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9); z-index: 50;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--blue-main); border-radius: 15px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div id="loading-overlay">Verificando credenciales...</div>
     <button class="help-btn" onclick="document.getElementById('helpModal').style.display='block'">?</button>
     <h1>GAD Alicante - Reparto de Tareas Expedientes</h1>
 
@@ -94,48 +104,80 @@
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
-  authDomain: "gad-alicante-v1.firebaseapp.com",
-  databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "gad-alicante-v1",
-  storageBucket: "gad-alicante-v1.firebasestorage.app",
-  messagingSenderId: "545835357966",
-  appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
-  measurementId: "G-QG8KDLCWQS"
-};
+    // CONFIGURACIÓN V1 (CORRECTA)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
+      authDomain: "gad-alicante-v1.firebaseapp.com",
+      databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "gad-alicante-v1",
+      storageBucket: "gad-alicante-v1.firebasestorage.app",
+      messagingSenderId: "545835357966",
+      appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
+      measurementId: "G-QG8KDLCWQS"
+    };
 
-    firebase.initializeApp(firebaseConfig);
+    // INICIALIZACIÓN SEGURA
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
     const auth = firebase.auth();
     const db = firebase.database();
     let currentData = null;
-    let primeraCargaRealizada = false; // Control para el auto-load inicial
+    let primeraCargaRealizada = false; 
 
-    // Escuchar cambios en la base de datos
-    db.ref('repartos').on('value', (snapshot) => {
-        const select = document.getElementById('historyList');
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">Consultar anteriores...</option>';
+    // --- SISTEMA DE SEGURIDAD ---
+    function iniciarSistema() {
+        const loader = document.getElementById('loading-overlay');
         
-        let ultimaClave = null;
-
-        snapshot.forEach((child) => {
-            let option = document.createElement('option');
-            option.value = child.key; 
-            option.text = child.key;
-            select.appendChild(option);
-            ultimaClave = child.key; // Al final del bucle, será el más reciente
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                console.log("Acceso autorizado: " + user.email);
+                loader.style.display = 'none';
+                
+                // AHORA QUE SABEMOS QUIÉN ERES, ESCUCHAMOS LA BASE DE DATOS
+                activarEscuchaBaseDatos();
+            } else {
+                console.warn("No hay sesión. Bloqueando acceso.");
+                loader.innerHTML = "<span style='color:red'>ACCESO DENEGADO<br>Inicia sesión en el Dashboard</span>";
+            }
         });
+    }
 
-        // LÓGICA DE CARGA AUTOMÁTICA
-        if (!primeraCargaRealizada && ultimaClave) {
-            select.value = ultimaClave;
-            cargarReparto(); 
-            primeraCargaRealizada = true; // Solo lo hace al abrir el archivo
-        } else {
-            select.value = currentValue;
-        }
-    });
+    function activarEscuchaBaseDatos() {
+        // Escuchar cambios en la base de datos SOLO si hay usuario
+        db.ref('repartos').on('value', (snapshot) => {
+            const select = document.getElementById('historyList');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Consultar anteriores...</option>';
+            
+            let ultimaClave = null;
+
+            if(snapshot.exists()){
+                snapshot.forEach((child) => {
+                    let option = document.createElement('option');
+                    option.value = child.key; 
+                    option.text = child.key;
+                    select.appendChild(option);
+                    ultimaClave = child.key; 
+                });
+            } else {
+                select.innerHTML = '<option value="">Sin registros guardados</option>';
+            }
+
+            // LÓGICA DE CARGA AUTOMÁTICA
+            if (!primeraCargaRealizada && ultimaClave) {
+                select.value = ultimaClave;
+                cargarReparto(); 
+                primeraCargaRealizada = true; 
+            } else {
+                select.value = currentValue;
+            }
+        }, (error) => {
+            console.error("Error de permisos:", error);
+            alert("Error: No tienes permisos para leer la base de datos.");
+        });
+    }
 
     function corregir(t) {
         return t.replace(/ESPA\?A/gi, "ESPAÑA").replace(/cauci\?n/gi, "caución").replace(/gesti\?n/gi, "gestión").replace(/expedici\?n/gi, "expedición");
@@ -217,7 +259,9 @@ const firebaseConfig = {
     function guardarReparto() {
         const nombre = document.getElementById('saveName').value.trim();
         if(!nombre || !currentData) return alert("Escribe un nombre para el registro y procesa los datos.");
-        db.ref('repartos/' + nombre).set(currentData).then(() => alert("Guardado con éxito."));
+        db.ref('repartos/' + nombre).set(currentData)
+            .then(() => alert("Guardado con éxito."))
+            .catch(err => alert("Error al guardar: " + err.message));
     }
 
     function cargarReparto() {
@@ -239,7 +283,7 @@ const firebaseConfig = {
                 alert("Registro eliminado.");
                 document.getElementById('results').innerHTML = "";
                 document.getElementById('saveName').value = "";
-            });
+            }).catch(err => alert("Error al eliminar: " + err.message));
         }
     }
 
@@ -257,9 +301,12 @@ const firebaseConfig = {
                         document.getElementById('saveName').value = nuevoNombre.trim();
                     });
                 });
-            });
+            }).catch(err => alert("Error al renombrar: " + err.message));
         }
     }
+
+    // ARRANQUE
+    iniciarSistema();
 </script>
 </body>
 </html>
