@@ -31,6 +31,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            /* Evita scroll de fondo cuando hay modal abierto */
+            overflow-x: hidden;
         }
 
         /* === 1. CABECERA === */
@@ -178,22 +180,22 @@
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODAL AYUDA REPARADO (CORRECTO SCROLL Y CENTRADO) === */
+        /* === 5. MODALES (AYUDA Y VISOR) === */
         .modal-overlay {
             display: none; 
             position: fixed; 
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 2000; 
-            /* Flexbox para centrar perfectamente */
             justify-content: center; 
             align-items: center;
             backdrop-filter: blur(3px); 
-            padding: 15px; /* Margen de seguridad en bordes */
-            overflow-y: auto; /* Permite scroll si la pantalla es muy pequeña verticalmente */
+            padding: 15px; 
+            overflow-y: hidden; /* Evitar scroll doble en body */
         }
 
-        .modal-content {
+        /* Modal Ayuda */
+        .modal-content-help {
             background: white; 
             padding: 25px 25px 20px 25px; 
             border-radius: 10px;
@@ -201,35 +203,60 @@
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
-            margin: auto; /* Centrado extra en flex */
+            max-height: 85vh; 
+            overflow-y: auto; 
             display: flex;
             flex-direction: column;
         }
 
-        /* Botón Cerrar (Posición segura) */
-        .modal-close {
-            align-self: flex-end; /* Lo alineamos a la derecha dentro del flujo o absoluto */
+        /* Modal Visor (Nuevo) */
+        .modal-content-viewer {
+            background: white; 
+            width: 95%; 
+            height: 90vh; /* Ocupa casi toda la pantalla */
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Botón Cerrar (Estilo Común) */
+        .btn-close-modal {
             position: absolute; 
             top: 10px; 
             right: 10px;
-            font-size: 24px; 
+            font-size: 20px; 
             cursor: pointer; 
-            color: #888;
-            background: #f0f0f0; /* Fondo gris claro para resaltar */
+            color: #555;
+            background: #fff; 
             width: 36px; 
             height: 36px;
             display: flex; 
             align-items: center; 
             justify-content: center;
             border-radius: 50%; 
-            z-index: 10;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            font-weight: bold;
+            border: 1px solid #eee;
+        }
+        
+        /* Ajuste específico para el botón de cerrar del visor (fuera del iframe) */
+        .btn-close-viewer {
+            top: 10px;
+            right: 10px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
         }
 
         .modal-title {
             font-size: 20px; color: var(--primary-color);
             margin-bottom: 20px; border-bottom: 2px solid #eee;
-            padding-bottom: 10px; margin-top: 10px; /* Espacio extra arriba */
-            padding-right: 30px;
+            padding-bottom: 10px; margin-top: 10px;
+            padding-right: 40px;
         }
 
         .help-item { margin-bottom: 15px; line-height: 1.5; color: #444; }
@@ -248,6 +275,14 @@
             font-size: 16px; font-weight: 600; cursor: pointer;
             margin-top: 25px; width: 100%; max-width: 200px;
         }
+        
+        /* Iframe del Visor */
+        #frame-documento {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #eee;
+        }
 
         /* RESPONSIVE */
         @media screen and (max-width: 768px) {
@@ -263,6 +298,18 @@
             .filters-chips { gap: 8px; }
             .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
             .divider { display: none; }
+            
+            /* En móvil, el visor ocupa el 100% real */
+            .modal-content-viewer {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+            .modal-overlay {
+                padding: 0; /* Sin padding en móvil para el visor */
+            }
+            /* Si es ayuda, sí queremos margen */
+            #modalAyuda { padding: 15px; }
         }
     </style>
 </head>
@@ -276,7 +323,7 @@
             <img src="logogad.png" alt="GAD Logo" class="logo" onerror="this.style.display='none'">
         </div>
         <div class="header-right">
-            <button class="btn-help-premium" onclick="toggleModal(true)">
+            <button class="btn-help-premium" onclick="toggleModalAyuda(true)">
                 <i class="fa-regular fa-circle-question"></i> AYUDA
             </button>
             <div class="stats-group">
@@ -317,35 +364,38 @@
         <div id="grid-resultados" class="grid"></div>
     </div>
 
-    <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModal(false)">
-        <div class="modal-content">
-            <span class="modal-close" onclick="toggleModal(false)">&times;</span>
+    <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModalAyuda(false)">
+        <div class="modal-content-help">
+            <span class="btn-close-modal" onclick="toggleModalAyuda(false)">&times;</span>
             <h2 class="modal-title"><i class="fa-solid fa-circle-info"></i> Ayuda y Soporte</h2>
             
             <div class="help-item">
                 <strong><i class="fa-solid fa-magnifying-glass help-icon"></i> Búsqueda Inteligente:</strong><br>
-                Escribe palabras clave. El sistema ignora <b>tildes</b> y <b>mayúsculas</b>. Buscar "Rumanía" es igual a "rumania".<br>
-                <em style="color:#666; font-size: 13px;">Ej: "españa dni" encontrará "ESPAÑA D.N.I."</em>
+                Escribe palabras clave. El sistema ignora <b>tildes</b> y <b>mayúsculas</b>.<br>
             </div>
 
             <div class="help-item">
-                <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Ver Documento:</strong><br>
-                Pulsa el <b>Ojo Verde</b> para abrir la <b>previsualización</b> del documento.
+                <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Visor Directo:</strong><br>
+                Pulsa el <b>Ojo Verde</b> para abrir el documento <b>dentro de esta misma pantalla</b>, sin salir de la aplicación y usando tu cuenta actual.
             </div>
 
             <div class="warning-box">
-                <strong><i class="fa-solid fa-triangle-exclamation"></i> IMPORTANTE: CORRECCIÓN DE ERRORES</strong>
-                <p>Si detectas un error ortográfico o un archivo mal nombrado:</p>
-                <ol style="margin-left: 15px; margin-top: 5px;">
-                    <li>Accede a Google Drive y usa la opción <b>"Cambiar nombre"</b> para corregirlo.</li>
-                    <li>Esta modificación <b>NO</b> se verá en el programa inmediatamente.</li>
-                    <li>Será efectiva tras la próxima <b>actualización automática</b> (domingos 23:00) o si realizas una actualización manual.</li>
-                </ol>
+                <strong><i class="fa-solid fa-triangle-exclamation"></i> CORRECCIÓN DE ERRORES</strong>
+                <p>Cambia el nombre en Google Drive y espera a la actualización automática del domingo (23:00) o fuerza una manual.</p>
             </div>
             
             <div style="text-align:center;">
-                <button class="btn-modal-ok" onclick="toggleModal(false)">Entendido</button>
+                <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">Entendido</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modalVisor" class="modal-overlay" style="z-index: 3000;">
+        <div class="modal-content-viewer">
+            <button class="btn-close-modal btn-close-viewer" onclick="cerrarVisor()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <iframe id="frame-documento" src="" allow="autoplay"></iframe>
         </div>
     </div>
 
@@ -382,24 +432,28 @@
         }
 
         // ===============================================
-        // 🚀 APERTURA INTELIGENTE (MODO PREVIEW + NEW TAB)
+        // 🚀 GESTIÓN DEL VISOR INTEGRADO (SOLUCIÓN DEFINITIVA)
         // ===============================================
-        function abrirDocumentoInteligente(urlOriginal) {
-            let finalUrl = urlOriginal;
-
-            // TRUCO MAESTRO: Reemplazar '/view' por '/preview'
-            // Esto fuerza la interfaz web de Google, evita que la App móvil capture el enlace
-            // y usa tus cookies del navegador (donde ya estás logueado).
-            if (finalUrl.includes('/view')) {
-                finalUrl = finalUrl.replace(/\/view.*/, '/preview');
-            } else if (!finalUrl.includes('/preview')) {
-                // Si es un enlace corto o distinto, intentamos añadirle preview si es posible
-                // (Aunque generalmente los de Drive vienen con /view)
+        function abrirEnVisor(urlOriginal) {
+            // Convertimos la URL a modo "preview" para que se pueda incrustar y NO abra la App
+            let urlVisor = urlOriginal;
+            
+            if (urlVisor.includes('/view')) {
+                urlVisor = urlVisor.replace(/\/view.*/, '/preview');
             }
+            
+            // Asignamos la URL al iframe
+            const iframe = document.getElementById('frame-documento');
+            iframe.src = urlVisor;
 
-            // Abrimos en PESTAÑA NUEVA (_blank)
-            // Al ser un enlace /preview, no saltará la App, sino que abrirá una pestaña del navegador.
-            window.open(finalUrl, '_blank');
+            // Mostramos el modal
+            document.getElementById('modalVisor').style.display = 'flex';
+        }
+
+        function cerrarVisor() {
+            // Ocultamos modal y limpiamos iframe para detener carga/memoria
+            document.getElementById('modalVisor').style.display = 'none';
+            document.getElementById('frame-documento').src = "";
         }
 
         // ===============================================
@@ -489,6 +543,7 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
+                // CAMBIO CLAVE: Usamos abrirEnVisor() en lugar de window.open
                 const html = `
                     <div class="card">
                         <div class="card-content">
@@ -500,7 +555,7 @@
                                 ${doc.NombreDocumento}
                             </div>
                         </div>
-                        <button class="btn-view" onclick="abrirDocumentoInteligente('${doc.Enlace}')" title="Ver Documento">
+                        <button class="btn-view" onclick="abrirEnVisor('${doc.Enlace}')" title="Ver Documento">
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -523,10 +578,11 @@
             aplicarFiltrosInteligentes();
         }
 
-        function toggleModal(mostrar) {
+        function toggleModalAyuda(mostrar) {
             const modal = document.getElementById('modalAyuda');
             if (mostrar) {
-                modal.style.display = 'flex'; // Usamos Flex para centrar
+                modal.style.display = 'flex';
+                modal.querySelector('.modal-content-help').scrollTop = 0;
             } else {
                 modal.style.display = 'none';
             }
