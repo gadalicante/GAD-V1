@@ -31,8 +31,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            /* Evita scroll de fondo cuando hay modal abierto */
-            overflow-x: hidden;
+            overflow-x: hidden; /* Evita scroll horizontal */
         }
 
         /* === 1. CABECERA === */
@@ -180,24 +179,24 @@
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODALES (AYUDA Y VISOR) === */
+        /* === 5. MODALES (OVERLAY GENERAL) === */
         .modal-overlay {
             display: none; 
             position: fixed; 
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 2000; 
             justify-content: center; 
             align-items: center;
             backdrop-filter: blur(3px); 
             padding: 15px; 
-            overflow-y: hidden; /* Evitar scroll doble en body */
+            overflow: hidden; 
         }
 
-        /* Modal Ayuda */
+        /* --- MODAL AYUDA (Estilo Compacto) --- */
         .modal-content-help {
             background: white; 
-            padding: 25px 25px 20px 25px; 
+            padding: 25px;
             border-radius: 10px;
             max-width: 550px; 
             width: 100%;
@@ -209,53 +208,10 @@
             flex-direction: column;
         }
 
-        /* Modal Visor (Nuevo) */
-        .modal-content-viewer {
-            background: white; 
-            width: 95%; 
-            height: 90vh; /* Ocupa casi toda la pantalla */
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Botón Cerrar (Estilo Común) */
-        .btn-close-modal {
-            position: absolute; 
-            top: 10px; 
-            right: 10px;
-            font-size: 20px; 
-            cursor: pointer; 
-            color: #555;
-            background: #fff; 
-            width: 36px; 
-            height: 36px;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            border-radius: 50%; 
-            z-index: 20;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            font-weight: bold;
-            border: 1px solid #eee;
-        }
-        
-        /* Ajuste específico para el botón de cerrar del visor (fuera del iframe) */
-        .btn-close-viewer {
-            top: 10px;
-            right: 10px;
-            background: var(--danger-color);
-            color: white;
-            border: none;
-        }
-
         .modal-title {
             font-size: 20px; color: var(--primary-color);
             margin-bottom: 20px; border-bottom: 2px solid #eee;
-            padding-bottom: 10px; margin-top: 10px;
+            padding-bottom: 10px; margin-top: 0;
             padding-right: 40px;
         }
 
@@ -275,13 +231,51 @@
             font-size: 16px; font-weight: 600; cursor: pointer;
             margin-top: 25px; width: 100%; max-width: 200px;
         }
-        
-        /* Iframe del Visor */
+
+        /* Botón Cerrar Ayuda */
+        .btn-close-help {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 24px; cursor: pointer; color: #888;
+            background: #fff; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* --- MODAL VISOR DE DOCUMENTOS (NUEVO) --- */
+        #modalVisor {
+            padding: 0; /* Sin padding en visor para aprovechar pantalla */
+            z-index: 3000; /* Por encima de todo */
+        }
+
+        .modal-content-viewer {
+            background: #f0f0f0; 
+            width: 95%; height: 90vh; /* Casi pantalla completa */
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Botón Cerrar Visor (CAMBIADO A LA IZQUIERDA) */
+        .btn-close-viewer {
+            position: absolute; 
+            top: 10px; 
+            left: 10px; /* <--- AHORA A LA IZQUIERDA */
+            width: 40px; height: 40px;
+            background: var(--danger-color); color: white;
+            border-radius: 50%; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; z-index: 50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .btn-close-viewer:active { transform: scale(0.9); }
+
+        /* Iframe */
         #frame-documento {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background-color: #eee;
+            width: 100%; height: 100%; border: none; background: white;
         }
 
         /* RESPONSIVE */
@@ -299,17 +293,13 @@
             .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
             .divider { display: none; }
             
-            /* En móvil, el visor ocupa el 100% real */
+            /* Ajustes Visor en Móvil */
             .modal-content-viewer {
-                width: 100%;
-                height: 100%;
-                border-radius: 0;
+                width: 100%; height: 100%; border-radius: 0; /* Pantalla completa real */
             }
-            .modal-overlay {
-                padding: 0; /* Sin padding en móvil para el visor */
+            .btn-close-viewer {
+                top: 15px; left: 15px; /* Más margen para el dedo, también a la izquierda */
             }
-            /* Si es ayuda, sí queremos margen */
-            #modalAyuda { padding: 15px; }
         }
     </style>
 </head>
@@ -366,17 +356,18 @@
 
     <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModalAyuda(false)">
         <div class="modal-content-help">
-            <span class="btn-close-modal" onclick="toggleModalAyuda(false)">&times;</span>
+            <span class="btn-close-help" onclick="toggleModalAyuda(false)">&times;</span>
             <h2 class="modal-title"><i class="fa-solid fa-circle-info"></i> Ayuda y Soporte</h2>
             
             <div class="help-item">
                 <strong><i class="fa-solid fa-magnifying-glass help-icon"></i> Búsqueda Inteligente:</strong><br>
-                Escribe palabras clave. El sistema ignora <b>tildes</b> y <b>mayúsculas</b>.<br>
+                Escribe palabras clave. El sistema ignora <b>tildes</b> y <b>mayúsculas</b>. Buscar "Rumanía" es igual a "rumania".<br>
+                <em style="color:#666; font-size: 13px;">Ej: "españa dni" encontrará "ESPAÑA D.N.I."</em>
             </div>
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Visor Directo:</strong><br>
-                Pulsa el <b>Ojo Verde</b> para abrir el documento <b>dentro de esta misma pantalla</b>, sin salir de la aplicación y usando tu cuenta actual.
+                Pulsa el <b>Ojo Verde</b> para visualizar el documento aquí mismo, sin salir de la pantalla y usando tu cuenta actual.
             </div>
 
             <div class="warning-box">
@@ -390,9 +381,9 @@
         </div>
     </div>
 
-    <div id="modalVisor" class="modal-overlay" style="z-index: 3000;">
+    <div id="modalVisor" class="modal-overlay">
         <div class="modal-content-viewer">
-            <button class="btn-close-modal btn-close-viewer" onclick="cerrarVisor()">
+            <button class="btn-close-viewer" onclick="cerrarVisor()">
                 <i class="fa-solid fa-times"></i>
             </button>
             <iframe id="frame-documento" src="" allow="autoplay"></iframe>
@@ -432,17 +423,18 @@
         }
 
         // ===============================================
-        // 🚀 GESTIÓN DEL VISOR INTEGRADO (SOLUCIÓN DEFINITIVA)
+        // 🚀 GESTIÓN DEL VISOR (IFRAME)
         // ===============================================
         function abrirEnVisor(urlOriginal) {
-            // Convertimos la URL a modo "preview" para que se pueda incrustar y NO abra la App
+            // Transformamos la URL de /view a /preview
             let urlVisor = urlOriginal;
             
             if (urlVisor.includes('/view')) {
                 urlVisor = urlVisor.replace(/\/view.*/, '/preview');
+            } else if (!urlVisor.includes('/preview')) {
+                if (urlVisor.includes('?')) urlVisor += '&usp=embed_googleplus';
             }
             
-            // Asignamos la URL al iframe
             const iframe = document.getElementById('frame-documento');
             iframe.src = urlVisor;
 
@@ -451,8 +443,8 @@
         }
 
         function cerrarVisor() {
-            // Ocultamos modal y limpiamos iframe para detener carga/memoria
             document.getElementById('modalVisor').style.display = 'none';
+            // Limpiamos el iframe
             document.getElementById('frame-documento').src = "";
         }
 
@@ -543,7 +535,6 @@
                 const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                 const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
 
-                // CAMBIO CLAVE: Usamos abrirEnVisor() en lugar de window.open
                 const html = `
                     <div class="card">
                         <div class="card-content">
