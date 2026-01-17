@@ -178,57 +178,58 @@
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODAL AYUDA === */
+        /* === 5. MODAL AYUDA REPARADO (CORRECTO SCROLL Y CENTRADO) === */
         .modal-overlay {
             display: none; 
             position: fixed; 
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 2000; 
+            /* Flexbox para centrar perfectamente */
             justify-content: center; 
             align-items: center;
             backdrop-filter: blur(3px); 
-            padding: 15px;
+            padding: 15px; /* Margen de seguridad en bordes */
+            overflow-y: auto; /* Permite scroll si la pantalla es muy pequeña verticalmente */
         }
 
         .modal-content {
             background: white; 
-            padding: 25px; 
+            padding: 25px 25px 20px 25px; 
             border-radius: 10px;
             max-width: 550px; 
             width: 100%;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             position: relative;
-            max-height: 85vh; 
-            overflow-y: auto; 
+            margin: auto; /* Centrado extra en flex */
             display: flex;
             flex-direction: column;
         }
 
-        /* Botón Cerrar */
+        /* Botón Cerrar (Posición segura) */
         .modal-close {
+            align-self: flex-end; /* Lo alineamos a la derecha dentro del flujo o absoluto */
             position: absolute; 
             top: 10px; 
             right: 10px;
             font-size: 24px; 
             cursor: pointer; 
             color: #888;
-            background: white; 
-            width: 32px; 
-            height: 32px;
+            background: #f0f0f0; /* Fondo gris claro para resaltar */
+            width: 36px; 
+            height: 36px;
             display: flex; 
             align-items: center; 
             justify-content: center;
             border-radius: 50%; 
             z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .modal-title {
             font-size: 20px; color: var(--primary-color);
             margin-bottom: 20px; border-bottom: 2px solid #eee;
-            padding-bottom: 10px; margin-top: 0;
-            padding-right: 35px;
+            padding-bottom: 10px; margin-top: 10px; /* Espacio extra arriba */
+            padding-right: 30px;
         }
 
         .help-item { margin-bottom: 15px; line-height: 1.5; color: #444; }
@@ -245,8 +246,7 @@
             background-color: var(--primary-color); color: white;
             border: none; padding: 12px 30px; border-radius: 30px;
             font-size: 16px; font-weight: 600; cursor: pointer;
-            margin-top: 20px; width: 100%; max-width: 200px;
-            margin-bottom: 5px;
+            margin-top: 25px; width: 100%; max-width: 200px;
         }
 
         /* RESPONSIVE */
@@ -330,7 +330,7 @@
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Ver Documento:</strong><br>
-                Pulsa el <b>Ojo Verde</b> para abrir el documento original directamente con tu cuenta autorizada.
+                Pulsa el <b>Ojo Verde</b> para abrir la <b>previsualización</b> del documento.
             </div>
 
             <div class="warning-box">
@@ -382,21 +382,24 @@
         }
 
         // ===============================================
-        // 🚀 APERTURA SIMPLE (SIN FORZAR CUENTA)
+        // 🚀 APERTURA INTELIGENTE (MODO PREVIEW + NEW TAB)
         // ===============================================
         function abrirDocumentoInteligente(urlOriginal) {
-            // Limpiamos la URL y añadimos SOLO usp=drive_web
-            // Esto le dice al navegador que prefiera la versión web, pero respeta TU sesión actual.
             let finalUrl = urlOriginal;
-            
-            if (!finalUrl.includes('usp=')) {
-                finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'usp=drive_web';
+
+            // TRUCO MAESTRO: Reemplazar '/view' por '/preview'
+            // Esto fuerza la interfaz web de Google, evita que la App móvil capture el enlace
+            // y usa tus cookies del navegador (donde ya estás logueado).
+            if (finalUrl.includes('/view')) {
+                finalUrl = finalUrl.replace(/\/view.*/, '/preview');
+            } else if (!finalUrl.includes('/preview')) {
+                // Si es un enlace corto o distinto, intentamos añadirle preview si es posible
+                // (Aunque generalmente los de Drive vienen con /view)
             }
 
-            // NAVEGAR EN LA MISMA VENTANA (_self)
-            // Esto es lo que evita que salte el selector de cuentas del móvil
-            // y usa directamente la cuenta con la que estás viendo este inventario.
-            window.location.href = finalUrl;
+            // Abrimos en PESTAÑA NUEVA (_blank)
+            // Al ser un enlace /preview, no saltará la App, sino que abrirá una pestaña del navegador.
+            window.open(finalUrl, '_blank');
         }
 
         // ===============================================
@@ -523,8 +526,7 @@
         function toggleModal(mostrar) {
             const modal = document.getElementById('modalAyuda');
             if (mostrar) {
-                modal.style.display = 'flex';
-                modal.querySelector('.modal-content').scrollTop = 0;
+                modal.style.display = 'flex'; // Usamos Flex para centrar
             } else {
                 modal.style.display = 'none';
             }
