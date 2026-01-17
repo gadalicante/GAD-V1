@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Inventario Documentos GAD</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -31,7 +31,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            overflow-x: hidden; /* Evita scroll horizontal */
+            /* Permitimos scroll normal para que el zoom funcione bien */
         }
 
         /* === 1. CABECERA === */
@@ -190,7 +190,8 @@
             align-items: center;
             backdrop-filter: blur(3px); 
             padding: 15px; 
-            overflow: hidden; 
+            /* Permitimos eventos de puntero para que el zoom funcione */
+            touch-action: pan-x pan-y;
         }
 
         /* --- MODAL AYUDA (Estilo Compacto) --- */
@@ -242,15 +243,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* --- MODAL VISOR DE DOCUMENTOS (NUEVO) --- */
+        /* --- MODAL VISOR DE DOCUMENTOS --- */
         #modalVisor {
-            padding: 0; /* Sin padding en visor para aprovechar pantalla */
-            z-index: 3000; /* Por encima de todo */
+            padding: 0; /* Sin padding para aprovechar espacio */
+            z-index: 3000;
         }
 
         .modal-content-viewer {
             background: #f0f0f0; 
-            width: 95%; height: 90vh; /* Casi pantalla completa */
+            width: 95%; height: 90vh; 
             border-radius: 8px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             position: relative;
@@ -258,12 +259,12 @@
             overflow: hidden;
         }
 
-        /* Botón Cerrar Visor (CAMBIADO A LA IZQUIERDA) */
+        /* Botón Cerrar Visor (EN LA IZQUIERDA) */
         .btn-close-viewer {
             position: absolute; 
             top: 10px; 
-            left: 10px; /* <--- AHORA A LA IZQUIERDA */
-            width: 40px; height: 40px;
+            left: 10px; /* Posición izquierda */
+            width: 44px; height: 44px; /* Un poco más grande para el dedo */
             background: var(--danger-color); color: white;
             border-radius: 50%; border: 2px solid white;
             display: flex; align-items: center; justify-content: center;
@@ -295,10 +296,10 @@
             
             /* Ajustes Visor en Móvil */
             .modal-content-viewer {
-                width: 100%; height: 100%; border-radius: 0; /* Pantalla completa real */
+                width: 100%; height: 100%; border-radius: 0; 
             }
             .btn-close-viewer {
-                top: 15px; left: 15px; /* Más margen para el dedo, también a la izquierda */
+                top: 15px; left: 15px; 
             }
         }
     </style>
@@ -369,6 +370,11 @@
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Visor Directo:</strong><br>
                 Pulsa el <b>Ojo Verde</b> para visualizar el documento aquí mismo, sin salir de la pantalla y usando tu cuenta actual.
             </div>
+            
+             <div class="help-item">
+                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Zoom Activado:</strong><br>
+                Puedes usar el gesto de "pellizcar" en el móvil para hacer zoom en los documentos.
+            </div>
 
             <div class="warning-box">
                 <strong><i class="fa-solid fa-triangle-exclamation"></i> CORRECCIÓN DE ERRORES</strong>
@@ -426,9 +432,9 @@
         // 🚀 GESTIÓN DEL VISOR (IFRAME)
         // ===============================================
         function abrirEnVisor(urlOriginal) {
-            // Transformamos la URL de /view a /preview
             let urlVisor = urlOriginal;
             
+            // Forzamos modo preview para que funcione en iframe
             if (urlVisor.includes('/view')) {
                 urlVisor = urlVisor.replace(/\/view.*/, '/preview');
             } else if (!urlVisor.includes('/preview')) {
