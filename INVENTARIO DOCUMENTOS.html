@@ -185,7 +185,9 @@
         .viewer-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex; align-items: center; /* Centrado vertical */
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; /* ALINEACIÓN A LA IZQUIERDA */
             padding: 0 15px; z-index: 5002; pointer-events: none;
             gap: 15px;
         }
@@ -196,15 +198,16 @@
             width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            flex-shrink: 0; /* Evita que se aplaste */
+            flex-shrink: 0;
         }
 
         .viewer-title {
             color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            flex-grow: 1; /* Ocupa el resto del espacio hacia la derecha */
-            text-align: right; /* Alinear texto a la derecha para alejarlo del botón */
-            opacity: 0.8;
+            /* ALINEACIÓN IZQUIERDA Y LIMITE DE ANCHO PARA NO TAPAR BOTON DRIVE */
+            text-align: left; 
+            max-width: 65%; 
+            opacity: 0.9;
         }
 
         /* Iframe contenedor */
@@ -324,9 +327,9 @@
                     <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
                     <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
                     <div class="help-example">
-                        <strong>Ejemplo 1:</strong> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
-                        <strong>Ejemplo 2:</strong> Escribe "espana 2024" para ver los documentos más recientes.<br>
-                        <strong>Ejemplo 3:</strong> Escribe "PNC" para Permisos de Conducción o "PSP" para Seguridad Privada.
+                        <b>Ejemplo 1:</b> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
+                        <b>Ejemplo 2:</b> Escribe "Alemania PNC 2024" para ver el documento concreto.<br>
+                        <b>Ejemplo 3:</b> Escribe "PNC" para Permisos de Conducción o "PSP" para Pasaporte.
                     </div>
                 </div>
 
@@ -337,8 +340,8 @@
                         <li><strong>Zoom Táctil:</strong> En el móvil, usa dos dedos sobre la pantalla (gesto de pellizco) para ampliar y ver las microescrituras.</li>
                         <li><strong>Navegación:</strong> Usa las flechas laterales para ver otros documentos de la misma carpeta sin salir.</li>
                     </ul>
-                    <div class="help-example">
-                        💡 <strong>Nota:</strong> El botón ROJO de cerrar ahora está a la <strong>izquierda</strong>. Esto deja libre la esquina derecha para que puedas usar los botones de Google Drive (abrir en ventana nueva, editar, etc.).
+                    <div class="help-example" style="background:#fff3cd; border-color:#ffc107;">
+                        💡 <strong>Nota:</strong> Pulsa el botón <b>ROJO</b> para cerrar o pulsa el botón de la derecha para entrar en Google Drive en ventana nueva y así poder editar el documento.
                     </div>
                 </div>
 
