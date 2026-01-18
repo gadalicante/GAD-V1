@@ -131,7 +131,7 @@
         }
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === MODAL AYUDA CORREGIDO === */
+        /* === MODAL AYUDA === */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -141,7 +141,7 @@
         .modal-content-help {
             background: white; padding: 0; border-radius: 10px;
             max-width: 600px; width: 100%; position: relative;
-            /* CAMBIO: Max-height reducido y flexbox para que el cuerpo haga scroll, no todo el modal */
+            /* Flexbox para garantizar que el botón quede abajo visible */
             max-height: 85vh; 
             display: flex; flex-direction: column;
             overflow: hidden;
@@ -150,14 +150,14 @@
         .help-header {
             background: var(--primary-color); color: white; padding: 15px 20px;
             display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0; /* Cabecera fija */
+            flex-shrink: 0; /* No encoger */
         }
         .help-header h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
         
         .help-body { 
             padding: 20px; color: #444; 
-            overflow-y: auto; /* El scroll va AQUI */
-            flex: 1; /* Ocupa el espacio disponible */
+            overflow-y: auto; /* Scroll interno solo aquí */
+            flex: 1; /* Ocupar el resto del espacio */
         }
 
         .btn-close-help {
@@ -178,7 +178,7 @@
         .btn-modal-ok {
             background-color: var(--primary-color); color: white; border: none; padding: 15px 0;
             width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;
-            flex-shrink: 0; /* Botón fijo abajo */
+            flex-shrink: 0; /* No encoger */
         }
 
         /* === VISOR GAD === */
@@ -238,17 +238,21 @@
             header { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; }
             .header-center { order: 1; margin-bottom: 5px; }
-            .header-left { order: 2; margin-bottom: 10px; }
+            .header-left { order: 2; margin-bottom: 10px; white-space: normal; width: 100%; }
             .header-right { order: 3; justify-content: space-evenly; }
+            
+            /* REPARACIÓN DEL TITULO CORTADO */
+            .header-title { 
+                font-size: 18px; 
+                white-space: normal; /* Permite salto de línea */
+                line-height: 1.2;
+            }
             
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
 
-            /* AJUSTE PARA MÓVIL: Evitar que la barra del sistema tape el botón */
-            .modal-content-help { 
-                max-height: 80vh; /* Altura máxima reducida para móviles */
-            }
+            .modal-content-help { max-height: 80vh; }
         }
 
         :fullscreen header, :fullscreen .controls-container, :fullscreen .pie-pagina { display: none; }
