@@ -131,7 +131,7 @@
         }
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === MODAL AYUDA (MEJORADA) === */
+        /* === MODAL AYUDA CORREGIDO === */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -141,24 +141,31 @@
         .modal-content-help {
             background: white; padding: 0; border-radius: 10px;
             max-width: 600px; width: 100%; position: relative;
-            max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+            /* CAMBIO: Max-height reducido y flexbox para que el cuerpo haga scroll, no todo el modal */
+            max-height: 85vh; 
+            display: flex; flex-direction: column;
             overflow: hidden;
         }
         
         .help-header {
-            background: var(--primary-color); color: white; padding: 20px;
+            background: var(--primary-color); color: white; padding: 15px 20px;
             display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; /* Cabecera fija */
         }
-        .help-header h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .help-header h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
         
-        .help-body { padding: 25px; color: #444; overflow-y: auto; }
+        .help-body { 
+            padding: 20px; color: #444; 
+            overflow-y: auto; /* El scroll va AQUI */
+            flex: 1; /* Ocupa el espacio disponible */
+        }
 
         .btn-close-help {
             cursor: pointer; font-size: 24px; color: white; opacity: 0.8;
             background: none; border: none;
         }
 
-        .help-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .help-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .help-section:last-child { border: none; }
         
         .help-title { font-weight: 700; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
@@ -171,6 +178,7 @@
         .btn-modal-ok {
             background-color: var(--primary-color); color: white; border: none; padding: 15px 0;
             width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;
+            flex-shrink: 0; /* Botón fijo abajo */
         }
 
         /* === VISOR GAD === */
@@ -181,45 +189,29 @@
         
         #modalVisor.active { display: flex; }
 
-        /* Barra flotante superior */
         .viewer-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex; 
-            align-items: center; 
-            justify-content: flex-start; /* ALINEACIÓN A LA IZQUIERDA */
-            padding: 0 15px; z-index: 5002; pointer-events: none;
-            gap: 15px;
+            display: flex; align-items: center; justify-content: flex-start;
+            padding: 0 15px; z-index: 5002; pointer-events: none; gap: 15px;
         }
         
-        /* BOTÓN CERRAR A LA IZQUIERDA */
         .btn-close-viewer {
             pointer-events: auto; background: #dc3545; color: white; border: none;
             width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); flex-shrink: 0;
         }
 
         .viewer-title {
             color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            /* ALINEACIÓN IZQUIERDA Y LIMITE DE ANCHO PARA NO TAPAR BOTON DRIVE */
-            text-align: left; 
-            max-width: 65%; 
-            opacity: 0.9;
+            text-align: left; max-width: 65%; opacity: 0.9;
         }
 
-        /* Iframe contenedor */
-        .iframe-container {
-            flex: 1; width: 100%; height: 100%; position: relative; background: #000;
-        }
-        
-        #visor-iframe {
-            width: 100%; height: 100%; border: none; display: block;
-        }
+        .iframe-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
+        #visor-iframe { width: 100%; height: 100%; border: none; display: block; }
 
-        /* Controles de Navegación (Flechas) */
         .nav-overlay {
             position: absolute; top: 50%; width: 100%; transform: translateY(-50%);
             display: flex; justify-content: space-between; padding: 0 10px;
@@ -227,18 +219,13 @@
         }
 
         .nav-btn {
-            pointer-events: auto;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white; width: 50px; height: 50px; border-radius: 50%;
-            font-size: 24px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s;
+            pointer-events: auto; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3); color: white; width: 50px; height: 50px;
+            border-radius: 50%; font-size: 24px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
         }
         .nav-btn:hover { background: rgba(241, 196, 15, 0.8); color: black; }
 
-        /* Loader del Visor */
         #visor-loader {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-size: 16px; background: rgba(0,0,0,0.8);
@@ -257,9 +244,13 @@
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
+
+            /* AJUSTE PARA MÓVIL: Evitar que la barra del sistema tape el botón */
+            .modal-content-help { 
+                max-height: 80vh; /* Altura máxima reducida para móviles */
+            }
         }
 
-        /* MODO FULLSCREEN PURO */
         :fullscreen header, :fullscreen .controls-container, :fullscreen .pie-pagina { display: none; }
         :fullscreen #modalVisor { width: 100vw; height: 100vh; }
     </style>
@@ -326,6 +317,7 @@
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
                     <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
+                    
                     <div class="help-example">
                         <b>Ejemplo 1:</b> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
                         <b>Ejemplo 2:</b> Escribe "Alemania PNC 2024" para ver el documento concreto.<br>
@@ -340,6 +332,7 @@
                         <li><strong>Zoom Táctil:</strong> En el móvil, usa dos dedos sobre la pantalla (gesto de pellizco) para ampliar y ver las microescrituras.</li>
                         <li><strong>Navegación:</strong> Usa las flechas laterales para ver otros documentos de la misma carpeta sin salir.</li>
                     </ul>
+                    
                     <div class="help-example" style="background:#fff3cd; border-color:#ffc107;">
                         💡 <strong>Nota:</strong> Pulsa el botón <b>ROJO</b> para cerrar o pulsa el botón de la derecha para entrar en Google Drive en ventana nueva y así poder editar el documento.
                     </div>
@@ -411,7 +404,6 @@
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
-            // Agrupar por carpeta para navegación
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
 
@@ -427,7 +419,6 @@
             tituloEl.innerText = `${INDICE_ACTUAL + 1}/${LISTA_REPRODUCCION.length} - ${doc.NombreDocumento}`;
             loaderVisor.style.display = 'flex';
 
-            // Usar /preview para permitir gestos nativos del navegador
             let urlLimpia = doc.Enlace;
             if (urlLimpia.includes('/view')) {
                 urlLimpia = urlLimpia.replace(/\/view.*/, '/preview');
@@ -474,7 +465,6 @@
             }
         }
 
-        // Teclado
         document.addEventListener('keydown', (e) => {
             if (!modalVisor.classList.contains('active')) return;
             if (e.key === "ArrowLeft") cambiarDoc(-1);
