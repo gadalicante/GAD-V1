@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,6 +24,7 @@
             --card-bg: #fff;
             --eye-color: #28a745;
             --danger-color: #dc3545;
+            --zoom-color: #ff9800; /* Color naranja para modo zoom */
         }
 
         * { box-sizing: border-box; }
@@ -151,11 +152,11 @@
         }
         .modal-title { font-size: 20px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;}
         
-        .help-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
+        .help-section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
         .help-section:last-child { border-bottom: none; }
-        .help-header { font-weight: 700; color: #333; margin-bottom: 8px; display: block; font-size: 15px; }
+        .help-header { font-weight: 700; color: #333; margin-bottom: 5px; display: block; font-size: 15px; }
         .help-text { font-size: 14px; color: #555; line-height: 1.5; margin: 0; }
-        .help-example { background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 13px; color: #666; margin-top: 5px; font-style: italic; }
+        .help-example { background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 13px; color: #666; margin-top: 5px; border-left: 3px solid var(--primary-color); }
         .help-icon-inline { color: var(--primary-color); margin-right: 5px; }
 
         .warning-box {
@@ -184,7 +185,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
             display: flex; align-items: center; padding: 0 15px; z-index: 200;
-            pointer-events: none; 
+            pointer-events: none; /* Permite clicks a través, salvo en botones */
         }
 
         /* Botón Cerrar (IZQUIERDA) */
@@ -195,10 +196,25 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: auto; margin-right: 15px;
         }
 
+        /* Botón Toggle Zoom (DERECHA) */
+        .btn-toggle-mode {
+            width: 40px; height: 40px; background: white; color: #333;
+            border-radius: 50%; border: none; display: flex; align-items: center;
+            justify-content: center; font-size: 18px; cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: auto;
+            margin-left: auto; /* Empuja a la derecha */
+            transition: all 0.3s;
+        }
+        
+        .mode-zoom-active {
+            background: var(--zoom-color); color: white;
+            border: 2px solid white;
+        }
+
         .viewer-title {
-            color: white; font-size: 16px; font-weight: 500; white-space: nowrap;
+            color: white; font-size: 15px; font-weight: 500; white-space: nowrap;
             overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            pointer-events: auto; flex: 1;
+            pointer-events: auto; flex: 1; margin-right: 10px;
         }
 
         /* INDICADOR DE CARGA */
@@ -214,8 +230,7 @@
         #touch-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 100; background: transparent;
-            /* Permite pinch-zoom nativo */
-            touch-action: manipulation; 
+            touch-action: pan-y; /* Permite scroll vertical pero captura horizontal */
         }
 
         /* FLECHAS PC */
@@ -231,12 +246,13 @@
 
         #frame-documento { width: 100%; height: 100%; border: none; background: white; }
 
-        /* REGLA MAESTRA PARA PC: Si hay ratón, ocultamos la capa táctil para permitir scroll/zoom con ratón */
+        /* REGLA MAESTRA PARA PC */
         @media (hover: hover) {
-            #touch-layer { display: none; } 
+            #touch-layer { display: none !important; } 
+            .btn-toggle-mode { display: none !important; } /* En PC no hace falta botón de modo */
         }
 
-        /* REGLA MAESTRA PARA MÓVIL: Si es táctil, ocultamos las flechas */
+        /* REGLA MAESTRA PARA MÓVIL */
         @media (hover: none) {
             .nav-btn { display: none !important; }
         }
@@ -257,7 +273,7 @@
             .chip { flex-grow: 1; justify-content: center; }
             .divider { display: none; }
             
-            .viewer-title { font-size: 14px; }
+            .viewer-title { font-size: 13px; margin-right: 5px; }
         }
     </style>
 </head>
@@ -320,30 +336,33 @@
             <div class="help-section">
                 <span class="help-header"><i class="fa-solid fa-magnifying-glass help-icon-inline"></i> Cómo Buscar</span>
                 <p class="help-text">
-                    Escribe palabras clave del documento que necesitas. El sistema es inteligente y omite tildes.
+                    Escribe qué buscas. El sistema ignora tildes y mayúsculas.
                 </p>
-                <div class="help-example">Ejemplo: Escribe "rumania permiso" para encontrar "RUMANÍA PERMISO DE CONDUCIR".</div>
+                <div class="help-example">
+                    Ej 1: Escribe <b>"rumania carta"</b> para ver Carta de Identidad Rumana.<br>
+                    Ej 2: Escribe <b>"bulgaria permiso"</b> para ver Permisos de conducir.
+                </div>
             </div>
 
             <div class="help-section">
-                <span class="help-header"><i class="fa-solid fa-eye help-icon-inline"></i> Visualización y Zoom</span>
+                <span class="help-header"><i class="fa-solid fa-mobile-screen-button help-icon-inline"></i> Visor Móvil (Importante)</span>
                 <p class="help-text">
-                    Pulsa el <b>Ojo Verde</b> para abrir el documento a pantalla completa.
+                    En el móvil hay dos modos de uso que se alternan con el botón de la esquina superior derecha:
                 </p>
                 <ul class="help-text" style="padding-left: 20px; margin-top:5px;">
-                    <li><b>En Móvil:</b> Pellizca con dos dedos sobre la pantalla para hacer Zoom. Arrastra la imagen lateralmente para pasar al siguiente documento.</li>
-                    <li><b>En PC:</b> Usa la rueda del ratón o el botón lateral para cambiar de imagen.</li>
+                    <li><i class="fa-solid fa-hand-pointer help-icon-inline"></i> <b>Modo Navegar (Mano):</b> Desliza el dedo para pasar de foto. El zoom está bloqueado.</li>
+                    <li><i class="fa-solid fa-magnifying-glass-plus help-icon-inline"></i> <b>Modo Zoom (Lupa):</b> Puedes pellizcar para hacer zoom y moverte por el documento.</li>
                 </ul>
             </div>
 
             <div class="warning-box">
-                <strong><i class="fa-solid fa-triangle-exclamation"></i> ¿CÓMO CORREGIR UN ERROR?</strong>
-                <p>Si detectas un documento mal nombrado o con errores:</p>
+                <strong><i class="fa-solid fa-pen-to-square"></i> CÓMO CORREGIR ERRORES (EDITAR)</strong>
+                <p>Para cambiar el nombre o editar un archivo:</p>
                 <ol style="margin-left: 15px; margin-top: 5px; padding-left: 10px;">
-                    <li>Abre el documento pulsando el Ojo Verde.</li>
-                    <li>Dentro del visor, busca en la <b>esquina superior derecha</b> el icono de "Abrir en ventana nueva" (un cuadrado con una flecha).</li>
-                    <li>Esto te llevará a <b>Google Drive</b>, donde podrás usar la opción "Cambiar nombre".</li>
-                    <li>Los cambios se reflejarán tras la actualización automática del domingo.</li>
+                    <li>Abre el documento (Ojo Verde).</li>
+                    <li>Activa el <b>Modo Zoom</b> <i class="fa-solid fa-magnifying-glass-plus"></i>.</li>
+                    <li>Pulsa el icono de <b>"Abrir en ventana nueva"</b> (cuadrado con flecha) que verás en la barra negra superior del propio documento de Google.</li>
+                    <li>Eso abrirá la App de Google Drive para editar.</li>
                 </ol>
             </div>
             
@@ -360,7 +379,11 @@
                 <button class="btn-close-viewer" onclick="cerrarVisor()">
                     <i class="fa-solid fa-times"></i>
                 </button>
-                <span id="viewer-doc-title" class="viewer-title">Cargando documento...</span>
+                <span id="viewer-doc-title" class="viewer-title">Cargando...</span>
+                
+                <button id="btnToggleMode" class="btn-toggle-mode" onclick="toggleTouchMode()">
+                    <i class="fa-solid fa-hand-pointer"></i>
+                </button>
             </div>
             
             <div id="loading-indicator" class="loading-indicator">
@@ -406,7 +429,7 @@
         // Variables para Swipe
         let touchStartX = 0;
         let touchEndX = 0;
-        let isMultiTouch = false; // Para detectar zoom (dos dedos)
+        let isZoomMode = false; // Estado del modo visor en móvil
 
         // ===============================================
         // 🛠️ FUNCIÓN NORMALIZAR TEXTO
@@ -417,28 +440,45 @@
         }
 
         // ===============================================
-        // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE INTELIGENTE)
+        // 🚀 GESTIÓN DEL VISOR Y MODOS
         // ===============================================
         
         const loadingIndicator = document.getElementById('loading-indicator');
         const iframeDoc = document.getElementById('frame-documento');
+        const touchLayer = document.getElementById('touch-layer');
+        const btnToggle = document.getElementById('btnToggleMode');
 
         iframeDoc.onload = function() {
             loadingIndicator.style.display = 'none';
         };
 
-        function abrirEnVisor(idDocumentoUnico) {
-            const elem = document.documentElement;
-            // Solo activar fullscreen en pantallas pequeñas
-            if (window.innerWidth < 768) {
-                if (elem.requestFullscreen) { elem.requestFullscreen().catch(() => {}); }
-                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+        function toggleTouchMode() {
+            isZoomMode = !isZoomMode;
+            
+            if (isZoomMode) {
+                // MODO ZOOM ACTIVO
+                touchLayer.style.display = 'none'; // Quitamos la capa para permitir tocar el iframe
+                btnToggle.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i>';
+                btnToggle.classList.add('mode-zoom-active');
+            } else {
+                // MODO NAVEGACIÓN ACTIVO
+                touchLayer.style.display = 'block'; // Ponemos la capa para capturar swipe
+                btnToggle.innerHTML = '<i class="fa-solid fa-hand-pointer"></i>';
+                btnToggle.classList.remove('mode-zoom-active');
             }
+        }
 
+        function abrirEnVisor(idDocumentoUnico) {
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idDocumentoUnico);
             if (!docClicado) return;
 
-            // Modo Álbum: Cargar todos los de la misma carpeta
+            // Resetear modo a Navegación al abrir
+            isZoomMode = false;
+            touchLayer.style.display = 'block';
+            btnToggle.innerHTML = '<i class="fa-solid fa-hand-pointer"></i>';
+            btnToggle.classList.remove('mode-zoom-active');
+
+            // Filtro por Carpeta
             LISTA_VISOR = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_VISOR = LISTA_VISOR.findIndex(d => d._idUnico === idDocumentoUnico);
 
@@ -466,7 +506,6 @@
 
         function cambiarDocumento(direccion) {
             let nuevoIndice = INDICE_VISOR + direccion;
-            // Carrusel infinito
             if (nuevoIndice < 0) nuevoIndice = LISTA_VISOR.length - 1;
             else if (nuevoIndice >= LISTA_VISOR.length) nuevoIndice = 0;
             
@@ -478,39 +517,25 @@
             document.getElementById('modalVisor').style.display = 'none';
             iframeDoc.src = "";
             loadingIndicator.style.display = 'none';
-            
-            if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); }
-            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
         }
 
-        // --- GESTOS TÁCTILES (INTELIGENTES: IGNORAN ZOOM) ---
-        const touchLayer = document.getElementById('touch-layer');
-
+        // --- GESTOS TÁCTILES ---
         touchLayer.addEventListener('touchstart', e => {
-            // Si hay más de 1 dedo, es zoom -> Ignorar swipe
-            if (e.touches.length > 1) {
-                isMultiTouch = true;
-                return;
-            }
-            isMultiTouch = false;
             touchStartX = e.changedTouches[0].screenX;
         }, {passive: true});
 
         touchLayer.addEventListener('touchend', e => {
-            if (isMultiTouch) return; // Si estábamos haciendo zoom, no cambiar foto
-
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
         }, {passive: true});
 
         function handleSwipe() {
-            const threshold = 100; // Umbral aumentado para evitar falsos positivos
-            
+            const threshold = 100; // Sensibilidad ajustada
             if (touchEndX < touchStartX - threshold) {
-                cambiarDocumento(1); // Siguiente
+                cambiarDocumento(1); 
             }
             if (touchEndX > touchStartX + threshold) {
-                cambiarDocumento(-1); // Anterior
+                cambiarDocumento(-1); 
             }
         }
 
