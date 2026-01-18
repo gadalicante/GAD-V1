@@ -131,7 +131,7 @@
         }
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === MODAL AYUDA === */
+        /* === MODAL AYUDA (MEJORADA) === */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -139,23 +139,41 @@
         }
 
         .modal-content-help {
-            background: white; padding: 25px; border-radius: 10px;
-            max-width: 550px; width: 100%; position: relative;
-            max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;
+            background: white; padding: 0; border-radius: 10px;
+            max-width: 600px; width: 100%; position: relative;
+            max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+            overflow: hidden;
         }
+        
+        .help-header {
+            background: var(--primary-color); color: white; padding: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .help-header h2 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        
+        .help-body { padding: 25px; color: #444; overflow-y: auto; }
+
         .btn-close-help {
-            position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; color: #888;
-            background: #fff; width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .modal-title { font-size: 20px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .help-item { margin-bottom: 15px; color: #444; }
-        .btn-modal-ok {
-            background-color: var(--primary-color); color: white; border: none; padding: 12px 30px;
-            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px;
+            cursor: pointer; font-size: 24px; color: white; opacity: 0.8;
+            background: none; border: none;
         }
 
-        /* === VISOR GAD (PANTALLA COMPLETA) === */
+        .help-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .help-section:last-child { border: none; }
+        
+        .help-title { font-weight: 700; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
+        
+        .help-example { 
+            background: #f8f9fa; border-left: 4px solid var(--gad-gold); 
+            padding: 10px 15px; margin: 10px 0; font-size: 13px; color: #555; font-style: italic; 
+        }
+
+        .btn-modal-ok {
+            background-color: var(--primary-color); color: white; border: none; padding: 15px 0;
+            width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;
+        }
+
+        /* === VISOR GAD === */
         #modalVisor {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 5000; flex-direction: column;
@@ -165,20 +183,28 @@
 
         /* Barra flotante superior */
         .viewer-top {
-            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; z-index: 5002; pointer-events: none;
+            display: flex; align-items: center; /* Centrado vertical */
+            padding: 0 15px; z-index: 5002; pointer-events: none;
+            gap: 15px;
         }
-        .viewer-title {
-            color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;
-        }
+        
+        /* BOTÓN CERRAR A LA IZQUIERDA */
         .btn-close-viewer {
             pointer-events: auto; background: #dc3545; color: white; border: none;
-            width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer;
+            width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            flex-shrink: 0; /* Evita que se aplaste */
+        }
+
+        .viewer-title {
+            color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            flex-grow: 1; /* Ocupa el resto del espacio hacia la derecha */
+            text-align: right; /* Alinear texto a la derecha para alejarlo del botón */
+            opacity: 0.8;
         }
 
         /* Iframe contenedor */
@@ -208,7 +234,6 @@
             transition: background 0.2s;
         }
         .nav-btn:hover { background: rgba(241, 196, 15, 0.8); color: black; }
-        .nav-btn:active { transform: scale(0.9); }
 
         /* Loader del Visor */
         #visor-loader {
@@ -225,14 +250,9 @@
             .header-center { order: 1; margin-bottom: 5px; }
             .header-left { order: 2; margin-bottom: 10px; }
             .header-right { order: 3; justify-content: space-evenly; }
-            .header-title { font-size: 20px; white-space: normal; }
-            .logo { height: 80px; }
             
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
-            .filters-chips { gap: 8px; }
-            
-            /* Ajuste botones móvil para que no estorben */
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
         }
 
@@ -266,7 +286,7 @@
             <div class="search-input-container">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" id="buscador" class="search-input" 
-                       placeholder="Ej: España DNI 2025 (Busca sin acentos: Rumania = Rumanía)"
+                       placeholder="Ej: España DNI 2025"
                        onkeyup="aplicarFiltrosInteligentes()">
             </div>
             <button class="btn-clear" onclick="limpiarBusqueda()">
@@ -294,33 +314,52 @@
 
     <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModalAyuda(false)">
         <div class="modal-content-help">
-            <span class="btn-close-help" onclick="toggleModalAyuda(false)">&times;</span>
-            <h2 class="modal-title"><i class="fa-solid fa-circle-info"></i> Ayuda y Soporte</h2>
+            <div class="help-header">
+                <h2><i class="fa-solid fa-book-open"></i> Manual de Operador</h2>
+                <button class="btn-close-help" onclick="toggleModalAyuda(false)">✕</button>
+            </div>
             
-            <div class="help-item">
-                <strong><i class="fa-solid fa-magnifying-glass"></i> Búsqueda:</strong>
-                <p>Escriba PNC, CI o PSP. El sistema agrupa automáticamente los documentos.</p>
+            <div class="help-body">
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
+                    <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
+                    <div class="help-example">
+                        <strong>Ejemplo 1:</strong> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
+                        <strong>Ejemplo 2:</strong> Escribe "espana 2024" para ver los documentos más recientes.<br>
+                        <strong>Ejemplo 3:</strong> Escribe "PNC" para Permisos de Conducción o "PSP" para Seguridad Privada.
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. El Visor de Imágenes</div>
+                    <p>Al pulsar el icono del ojo, se abre el documento en pantalla completa.</p>
+                    <ul>
+                        <li><strong>Zoom Táctil:</strong> En el móvil, usa dos dedos sobre la pantalla (gesto de pellizco) para ampliar y ver las microescrituras.</li>
+                        <li><strong>Navegación:</strong> Usa las flechas laterales para ver otros documentos de la misma carpeta sin salir.</li>
+                    </ul>
+                    <div class="help-example">
+                        💡 <strong>Nota:</strong> El botón ROJO de cerrar ahora está a la <strong>izquierda</strong>. Esto deja libre la esquina derecha para que puedas usar los botones de Google Drive (abrir en ventana nueva, editar, etc.).
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-layer-group"></i> 3. Filtros Rápidos</div>
+                    <p>Usa los botones grises (chips) debajo del buscador para filtrar rápidamente:</p>
+                    <ul>
+                        <li><strong>Personas vs Vehículos:</strong> Separa DNI/Pasaportes de Cartas de Coche.</li>
+                        <li><strong>600 vs 2400 DPI:</strong> Elige entre calidad estándar o ultra-alta definición.</li>
+                    </ul>
+                </div>
             </div>
 
-            <div class="help-item">
-                <strong><i class="fa-solid fa-mobile-screen-button" style="color:var(--primary-color)"></i> Uso en Móvil (Nuevo):</strong>
-                <ul>
-                    <li><b>Zoom:</b> Pellizque la pantalla con dos dedos sobre el documento para ampliar detalles.</li>
-                    <li><b>Navegación:</b> Use las flechas laterales ( &lt; &gt; ) para cambiar entre documentos de la misma carpeta (mismo país/tipo) sin salir del visor.</li>
-                    <li><b>Pantalla Completa:</b> Al abrir un documento, el sistema oculta automáticamente las barras del navegador.</li>
-                </ul>
-            </div>
-            
-            <div style="text-align:center;">
-                <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">Entendido</button>
-            </div>
+            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">ENTENDIDO, VOLVER AL INVENTARIO</button>
         </div>
     </div>
 
     <div id="modalVisor">
         <div class="viewer-top">
-            <div class="viewer-title" id="visor-titulo">Cargando...</div>
             <button class="btn-close-viewer" onclick="cerrarVisor()">✕</button>
+            <div class="viewer-title" id="visor-titulo">Cargando...</div>
         </div>
 
         <div id="visor-loader"><i class="fa-solid fa-spinner fa-spin"></i> Cargando Documento...</div>
@@ -353,12 +392,12 @@
         const db = firebase.database();
 
         let BD_GLOBAL = [];
-        let LISTA_REPRODUCCION = []; // Lista filtrada para las flechas
+        let LISTA_REPRODUCCION = []; 
         let INDICE_ACTUAL = 0;
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
         // ===============================================
-        // LÓGICA DEL VISOR (CORREGIDA)
+        // LÓGICA DEL VISOR
         // ===============================================
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
@@ -366,19 +405,14 @@
         const loaderVisor = document.getElementById('visor-loader');
 
         function abrirVisor(idUnico) {
-            // 1. Encontrar el documento clicado
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
-            // 2. Crear lista de reproducción (Documentos de la misma carpeta/país)
-            // Esto permite navegar con flechas solo entre documentos relevantes
+            // Agrupar por carpeta para navegación
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
 
-            // 3. Activar Pantalla Completa
             entrarFullscreen();
-
-            // 4. Mostrar Modal y Cargar
             modalVisor.classList.add('active');
             cargarDocumentoActual();
         }
@@ -390,18 +424,12 @@
             tituloEl.innerText = `${INDICE_ACTUAL + 1}/${LISTA_REPRODUCCION.length} - ${doc.NombreDocumento}`;
             loaderVisor.style.display = 'flex';
 
-            // TRUCO PARA QUE SIEMPRE ABRA LA IMAGEN:
-            // Convertimos /view a /preview. Preview es más limpio y permite zoom nativo.
+            // Usar /preview para permitir gestos nativos del navegador
             let urlLimpia = doc.Enlace;
             if (urlLimpia.includes('/view')) {
                 urlLimpia = urlLimpia.replace(/\/view.*/, '/preview');
-            } else if (!urlLimpia.includes('/preview')) {
-                // Si es un ID suelto
-                if (urlLimpia.includes('id=')) {
-                    // Mantener tal cual si no sabemos transformarlo, pero intentar preview
-                } else {
-                     urlLimpia += '/preview';
-                }
+            } else if (!urlLimpia.includes('/preview') && !urlLimpia.includes('id=')) {
+                 urlLimpia += '/preview';
             }
 
             iframeEl.src = urlLimpia;
@@ -413,8 +441,6 @@
 
         function cambiarDoc(direccion) {
             let nuevoIndice = INDICE_ACTUAL + direccion;
-            
-            // Loop infinito (carrusel)
             if (nuevoIndice < 0) nuevoIndice = LISTA_REPRODUCCION.length - 1;
             if (nuevoIndice >= LISTA_REPRODUCCION.length) nuevoIndice = 0;
 
@@ -428,12 +454,11 @@
             salirFullscreen();
         }
 
-        // Pantalla Completa API
         function entrarFullscreen() {
             const elem = document.documentElement;
             if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.log(err));
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) {
                 elem.webkitRequestFullscreen();
             }
         }
@@ -446,7 +471,7 @@
             }
         }
 
-        // Teclado PC
+        // Teclado
         document.addEventListener('keydown', (e) => {
             if (!modalVisor.classList.contains('active')) return;
             if (e.key === "ArrowLeft") cambiarDoc(-1);
@@ -455,7 +480,7 @@
         });
 
         // ===============================================
-        // CARGA DE DATOS (MANTENIDA)
+        // DATA & SEARCH
         // ===============================================
         function normalizarTexto(texto) {
             if (!texto) return "";
@@ -488,7 +513,7 @@
                                 _cat: nodo.cat,
                                 _cal: nodo.cal,
                                 _palabras: palabrasClave,
-                                _carpeta: nombreCarpeta, // Clave para agrupar en el visor
+                                _carpeta: nombreCarpeta,
                                 _idUnico: contadorId++
                             });
                         });
