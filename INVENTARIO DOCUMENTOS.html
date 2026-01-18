@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +23,6 @@
             --card-bg: #fff;
             --eye-color: #28a745;
             --danger-color: #dc3545;
-            --zoom-color: #ff9800; /* Color naranja para modo zoom */
         }
 
         * { box-sizing: border-box; }
@@ -139,36 +137,22 @@
             backdrop-filter: blur(3px); padding: 15px;
         }
 
-        /* --- MODAL AYUDA (MEJORADO) --- */
+        /* --- MODAL AYUDA --- */
         .modal-content-help {
             background: white; padding: 25px; border-radius: 10px;
             max-width: 550px; width: 100%; position: relative;
-            max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+            max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;
         }
         .btn-close-help {
             position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; color: #888;
             background: #fff; width: 36px; height: 36px; display: flex; align-items: center;
             justify-content: center; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .modal-title { font-size: 20px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 0;}
-        
-        .help-section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
-        .help-section:last-child { border-bottom: none; }
-        .help-header { font-weight: 700; color: #333; margin-bottom: 5px; display: block; font-size: 15px; }
-        .help-text { font-size: 14px; color: #555; line-height: 1.5; margin: 0; }
-        .help-example { background: #f8f9fa; padding: 8px; border-radius: 4px; font-size: 13px; color: #666; margin-top: 5px; border-left: 3px solid var(--primary-color); }
-        .help-icon-inline { color: var(--primary-color); margin-right: 5px; }
-
-        .warning-box {
-            background-color: #fff3cd; border: 1px solid #ffeeba;
-            color: #856404; padding: 15px; border-radius: 6px;
-            margin-top: 10px; font-size: 13px; line-height: 1.4;
-        }
-        .warning-box strong { display: block; margin-bottom: 5px; color: #856404; font-size: 14px;}
-
+        .modal-title { font-size: 20px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .help-item { margin-bottom: 15px; color: #444; }
         .btn-modal-ok {
             background-color: var(--primary-color); color: white; border: none; padding: 12px 30px;
-            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%;
+            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px;
         }
 
         /* --- MODAL VISOR DE DOCUMENTOS --- */
@@ -185,7 +169,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
             display: flex; align-items: center; padding: 0 15px; z-index: 200;
-            pointer-events: none; /* Permite clicks a través, salvo en botones */
+            pointer-events: none; 
         }
 
         /* Botón Cerrar (IZQUIERDA) */
@@ -196,41 +180,39 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: auto; margin-right: 15px;
         }
 
-        /* Botón Toggle Zoom (DERECHA) */
-        .btn-toggle-mode {
-            width: 40px; height: 40px; background: white; color: #333;
-            border-radius: 50%; border: none; display: flex; align-items: center;
-            justify-content: center; font-size: 18px; cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: auto;
-            margin-left: auto; /* Empuja a la derecha */
-            transition: all 0.3s;
-        }
-        
-        .mode-zoom-active {
-            background: var(--zoom-color); color: white;
-            border: 2px solid white;
-        }
-
         .viewer-title {
-            color: white; font-size: 15px; font-weight: 500; white-space: nowrap;
+            color: white; font-size: 16px; font-weight: 500; white-space: nowrap;
             overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            pointer-events: auto; flex: 1; margin-right: 10px;
+            pointer-events: auto; flex: 1;
         }
 
-        /* INDICADOR DE CARGA */
+        /* INDICADOR DE CARGA (NUEVO) */
         .loading-indicator {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 18px; font-weight: 500; background: rgba(0,0,0,0.7);
-            padding: 15px 25px; border-radius: 30px; z-index: 150; display: none;
-            animation: fadeInOut 1.5s infinite; pointer-events: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 25px;
+            border-radius: 30px;
+            z-index: 150; /* Debajo de la cabecera, encima del iframe */
+            display: none; /* Oculto por defecto */
+            animation: fadeInOut 1.5s infinite;
+            pointer-events: none;
         }
-        @keyframes fadeInOut { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 
-        /* CAPA INVISIBLE PARA GESTOS (MÓVIL) */
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* CAPA INVISIBLE PARA GESTOS (SOLO ACTIVA EN MÓVIL) */
         #touch-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100; background: transparent;
-            touch-action: pan-y; /* Permite scroll vertical pero captura horizontal */
+            z-index: 100; 
+            background: transparent;
         }
 
         /* FLECHAS PC */
@@ -246,13 +228,12 @@
 
         #frame-documento { width: 100%; height: 100%; border: none; background: white; }
 
-        /* REGLA MAESTRA PARA PC */
+        /* REGLA MAESTRA PARA PC: Si hay ratón, ocultamos la capa táctil */
         @media (hover: hover) {
-            #touch-layer { display: none !important; } 
-            .btn-toggle-mode { display: none !important; } /* En PC no hace falta botón de modo */
+            #touch-layer { display: none; } 
         }
 
-        /* REGLA MAESTRA PARA MÓVIL */
+        /* REGLA MAESTRA PARA MÓVIL: Si es táctil, ocultamos las flechas */
         @media (hover: none) {
             .nav-btn { display: none !important; }
         }
@@ -273,7 +254,7 @@
             .chip { flex-grow: 1; justify-content: center; }
             .divider { display: none; }
             
-            .viewer-title { font-size: 13px; margin-right: 5px; }
+            .viewer-title { font-size: 14px; }
         }
     </style>
 </head>
@@ -333,37 +314,27 @@
             <span class="btn-close-help" onclick="toggleModalAyuda(false)">&times;</span>
             <h2 class="modal-title"><i class="fa-solid fa-circle-info"></i> Ayuda y Soporte</h2>
             
-            <div class="help-section">
-                <span class="help-header"><i class="fa-solid fa-magnifying-glass help-icon-inline"></i> Cómo Buscar</span>
-                <p class="help-text">
-                    Escribe qué buscas. El sistema ignora tildes y mayúsculas.
-                </p>
-                <div class="help-example">
-                    Ej 1: Escribe <b>"rumania carta"</b> para ver Carta de Identidad Rumana.<br>
-                    Ej 2: Escribe <b>"bulgaria permiso"</b> para ver Permisos de conducir.
-                </div>
+            <div class="help-item">
+                <strong><i class="fa-solid fa-magnifying-glass help-icon"></i> Búsqueda Inteligente:</strong><br>
+                Escribe palabras clave. El sistema ignora <b>tildes</b> y <b>mayúsculas</b>.
             </div>
 
-            <div class="help-section">
-                <span class="help-header"><i class="fa-solid fa-mobile-screen-button help-icon-inline"></i> Visor Móvil (Importante)</span>
-                <p class="help-text">
-                    En el móvil hay dos modos de uso que se alternan con el botón de la esquina superior derecha:
-                </p>
-                <ul class="help-text" style="padding-left: 20px; margin-top:5px;">
-                    <li><i class="fa-solid fa-hand-pointer help-icon-inline"></i> <b>Modo Navegar (Mano):</b> Desliza el dedo para pasar de foto. El zoom está bloqueado.</li>
-                    <li><i class="fa-solid fa-magnifying-glass-plus help-icon-inline"></i> <b>Modo Zoom (Lupa):</b> Puedes pellizcar para hacer zoom y moverte por el documento.</li>
+            <div class="help-item">
+                <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Modo Álbum:</strong><br>
+                El visor muestra todos los documentos de la misma carpeta (país/tipo).
+            </div>
+            
+             <div class="help-item">
+                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Navegación:</strong><br>
+                <ul>
+                    <li><b>Móvil:</b> Desliza el dedo sobre el documento para cambiar. Pellizca para Zoom.</li>
+                    <li><b>PC:</b> Usa las flechas laterales, el teclado o la rueda del ratón para Zoom.</li>
                 </ul>
             </div>
 
             <div class="warning-box">
-                <strong><i class="fa-solid fa-pen-to-square"></i> CÓMO CORREGIR ERRORES (EDITAR)</strong>
-                <p>Para cambiar el nombre o editar un archivo:</p>
-                <ol style="margin-left: 15px; margin-top: 5px; padding-left: 10px;">
-                    <li>Abre el documento (Ojo Verde).</li>
-                    <li>Activa el <b>Modo Zoom</b> <i class="fa-solid fa-magnifying-glass-plus"></i>.</li>
-                    <li>Pulsa el icono de <b>"Abrir en ventana nueva"</b> (cuadrado con flecha) que verás en la barra negra superior del propio documento de Google.</li>
-                    <li>Eso abrirá la App de Google Drive para editar.</li>
-                </ol>
+                <strong><i class="fa-solid fa-triangle-exclamation"></i> CORRECCIÓN DE ERRORES</strong>
+                <p>Cambia el nombre en Google Drive y espera a la actualización automática del domingo (23:00).</p>
             </div>
             
             <div style="text-align:center;">
@@ -379,11 +350,7 @@
                 <button class="btn-close-viewer" onclick="cerrarVisor()">
                     <i class="fa-solid fa-times"></i>
                 </button>
-                <span id="viewer-doc-title" class="viewer-title">Cargando...</span>
-                
-                <button id="btnToggleMode" class="btn-toggle-mode" onclick="toggleTouchMode()">
-                    <i class="fa-solid fa-hand-pointer"></i>
-                </button>
+                <span id="viewer-doc-title" class="viewer-title">Cargando documento...</span>
             </div>
             
             <div id="loading-indicator" class="loading-indicator">
@@ -429,7 +396,6 @@
         // Variables para Swipe
         let touchStartX = 0;
         let touchEndX = 0;
-        let isZoomMode = false; // Estado del modo visor en móvil
 
         // ===============================================
         // 🛠️ FUNCIÓN NORMALIZAR TEXTO
@@ -440,45 +406,28 @@
         }
 
         // ===============================================
-        // 🚀 GESTIÓN DEL VISOR Y MODOS
+        // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE CAPA)
         // ===============================================
         
+        // Elemento de carga
         const loadingIndicator = document.getElementById('loading-indicator');
         const iframeDoc = document.getElementById('frame-documento');
-        const touchLayer = document.getElementById('touch-layer');
-        const btnToggle = document.getElementById('btnToggleMode');
 
+        // Cuando el iframe termina de cargar, ocultamos el cartel
         iframeDoc.onload = function() {
             loadingIndicator.style.display = 'none';
         };
 
-        function toggleTouchMode() {
-            isZoomMode = !isZoomMode;
-            
-            if (isZoomMode) {
-                // MODO ZOOM ACTIVO
-                touchLayer.style.display = 'none'; // Quitamos la capa para permitir tocar el iframe
-                btnToggle.innerHTML = '<i class="fa-solid fa-magnifying-glass-plus"></i>';
-                btnToggle.classList.add('mode-zoom-active');
-            } else {
-                // MODO NAVEGACIÓN ACTIVO
-                touchLayer.style.display = 'block'; // Ponemos la capa para capturar swipe
-                btnToggle.innerHTML = '<i class="fa-solid fa-hand-pointer"></i>';
-                btnToggle.classList.remove('mode-zoom-active');
-            }
-        }
-
         function abrirEnVisor(idDocumentoUnico) {
+            const elem = document.documentElement;
+            if (window.innerWidth < 768) {
+                if (elem.requestFullscreen) { elem.requestFullscreen().catch(() => {}); }
+                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+            }
+
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idDocumentoUnico);
             if (!docClicado) return;
 
-            // Resetear modo a Navegación al abrir
-            isZoomMode = false;
-            touchLayer.style.display = 'block';
-            btnToggle.innerHTML = '<i class="fa-solid fa-hand-pointer"></i>';
-            btnToggle.classList.remove('mode-zoom-active');
-
-            // Filtro por Carpeta
             LISTA_VISOR = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_VISOR = LISTA_VISOR.findIndex(d => d._idUnico === idDocumentoUnico);
 
@@ -489,6 +438,7 @@
         function cargarDocumentoEnIframe() {
             if (INDICE_VISOR < 0 || INDICE_VISOR >= LISTA_VISOR.length) return;
 
+            // MOSTRAR CARGA
             loadingIndicator.style.display = 'block';
 
             const doc = LISTA_VISOR[INDICE_VISOR];
@@ -517,9 +467,14 @@
             document.getElementById('modalVisor').style.display = 'none';
             iframeDoc.src = "";
             loadingIndicator.style.display = 'none';
+            
+            if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); }
+            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
         }
 
         // --- GESTOS TÁCTILES ---
+        const touchLayer = document.getElementById('touch-layer');
+
         touchLayer.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
         }, {passive: true});
@@ -530,11 +485,10 @@
         }, {passive: true});
 
         function handleSwipe() {
-            const threshold = 100; // Sensibilidad ajustada
-            if (touchEndX < touchStartX - threshold) {
+            if (touchEndX < touchStartX - 50) {
                 cambiarDocumento(1); 
             }
-            if (touchEndX > touchStartX + threshold) {
+            if (touchEndX > touchStartX + 50) {
                 cambiarDocumento(-1); 
             }
         }
