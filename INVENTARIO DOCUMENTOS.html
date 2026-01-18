@@ -186,10 +186,32 @@
             pointer-events: auto; flex: 1;
         }
 
+        /* INDICADOR DE CARGA (NUEVO) */
+        .loading-indicator {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 25px;
+            border-radius: 30px;
+            z-index: 150; /* Debajo de la cabecera, encima del iframe */
+            display: none; /* Oculto por defecto */
+            animation: fadeInOut 1.5s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
         /* CAPA INVISIBLE PARA GESTOS (SOLO ACTIVA EN MÓVIL) */
         #touch-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100; /* Encima del iframe por defecto */
+            z-index: 100; 
             background: transparent;
         }
 
@@ -206,12 +228,12 @@
 
         #frame-documento { width: 100%; height: 100%; border: none; background: white; }
 
-        /* REGLA MAESTRA PARA PC: Si hay ratón (hover), ocultamos la capa táctil y las flechas táctiles */
+        /* REGLA MAESTRA PARA PC: Si hay ratón, ocultamos la capa táctil */
         @media (hover: hover) {
-            #touch-layer { display: none; } /* Permite clic/scroll directo en iframe en PC */
+            #touch-layer { display: none; } 
         }
 
-        /* REGLA MAESTRA PARA MÓVIL: Si no hay hover (touch), ocultamos las flechas */
+        /* REGLA MAESTRA PARA MÓVIL: Si es táctil, ocultamos las flechas */
         @media (hover: none) {
             .nav-btn { display: none !important; }
         }
@@ -331,6 +353,10 @@
                 <span id="viewer-doc-title" class="viewer-title">Cargando documento...</span>
             </div>
             
+            <div id="loading-indicator" class="loading-indicator">
+                <i class="fa-solid fa-spinner fa-spin"></i> Esperando imagen...
+            </div>
+
             <button class="nav-btn nav-prev" onclick="cambiarDocumento(-1)">&#10094;</button>
             <button class="nav-btn nav-next" onclick="cambiarDocumento(1)">&#10095;</button>
 
@@ -382,8 +408,17 @@
         // ===============================================
         // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE CAPA)
         // ===============================================
+        
+        // Elemento de carga
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const iframeDoc = document.getElementById('frame-documento');
+
+        // Cuando el iframe termina de cargar, ocultamos el cartel
+        iframeDoc.onload = function() {
+            loadingIndicator.style.display = 'none';
+        };
+
         function abrirEnVisor(idDocumentoUnico) {
-            // Intentar Fullscreen en móvil
             const elem = document.documentElement;
             if (window.innerWidth < 768) {
                 if (elem.requestFullscreen) { elem.requestFullscreen().catch(() => {}); }
@@ -393,7 +428,6 @@
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idDocumentoUnico);
             if (!docClicado) return;
 
-            // Filtro por Carpeta
             LISTA_VISOR = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_VISOR = LISTA_VISOR.findIndex(d => d._idUnico === idDocumentoUnico);
 
@@ -403,6 +437,9 @@
 
         function cargarDocumentoEnIframe() {
             if (INDICE_VISOR < 0 || INDICE_VISOR >= LISTA_VISOR.length) return;
+
+            // MOSTRAR CARGA
+            loadingIndicator.style.display = 'block';
 
             const doc = LISTA_VISOR[INDICE_VISOR];
             document.getElementById('viewer-doc-title').innerText = doc.NombreDocumento;
@@ -414,7 +451,7 @@
                 if (urlVisor.includes('?')) urlVisor += '&usp=embed_googleplus';
             }
             
-            document.getElementById('frame-documento').src = urlVisor;
+            iframeDoc.src = urlVisor;
         }
 
         function cambiarDocumento(direccion) {
@@ -428,14 +465,14 @@
 
         function cerrarVisor() {
             document.getElementById('modalVisor').style.display = 'none';
-            document.getElementById('frame-documento').src = "";
+            iframeDoc.src = "";
+            loadingIndicator.style.display = 'none';
             
-            // Salir Fullscreen
             if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); }
             else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
         }
 
-        // --- GESTOS TÁCTILES SOBRE LA CAPA INVISIBLE ---
+        // --- GESTOS TÁCTILES ---
         const touchLayer = document.getElementById('touch-layer');
 
         touchLayer.addEventListener('touchstart', e => {
@@ -448,11 +485,9 @@
         }, {passive: true});
 
         function handleSwipe() {
-            // Deslizar IZQUIERDA <- (Siguiente)
             if (touchEndX < touchStartX - 50) {
                 cambiarDocumento(1); 
             }
-            // Deslizar DERECHA -> (Anterior)
             if (touchEndX > touchStartX + 50) {
                 cambiarDocumento(-1); 
             }
