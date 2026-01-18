@@ -134,7 +134,7 @@
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); padding: 15px; touch-action: pan-x pan-y;
+            backdrop-filter: blur(3px); padding: 15px;
         }
 
         /* --- MODAL AYUDA --- */
@@ -169,7 +169,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
             display: flex; align-items: center; padding: 0 15px; z-index: 200;
-            pointer-events: none; /* Permite tocar a través de la barra (importante para swipes arriba) */
+            pointer-events: none; 
         }
 
         /* Botón Cerrar (IZQUIERDA) */
@@ -186,11 +186,18 @@
             pointer-events: auto; flex: 1;
         }
 
+        /* CAPA INVISIBLE PARA GESTOS (SOLO ACTIVA EN MÓVIL) */
+        #touch-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100; /* Encima del iframe por defecto */
+            background: transparent;
+        }
+
         /* FLECHAS PC */
         .nav-btn {
             position: absolute; top: 50%; transform: translateY(-50%);
             background-color: rgba(0, 0, 0, 0.3); color: white; border: none;
-            font-size: 40px; padding: 20px 15px; cursor: pointer; z-index: 100;
+            font-size: 40px; padding: 20px 15px; cursor: pointer; z-index: 250;
             transition: background 0.3s; user-select: none;
         }
         .nav-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
@@ -198,6 +205,16 @@
         .nav-next { right: 0; }
 
         #frame-documento { width: 100%; height: 100%; border: none; background: white; }
+
+        /* REGLA MAESTRA PARA PC: Si hay ratón (hover), ocultamos la capa táctil y las flechas táctiles */
+        @media (hover: hover) {
+            #touch-layer { display: none; } /* Permite clic/scroll directo en iframe en PC */
+        }
+
+        /* REGLA MAESTRA PARA MÓVIL: Si no hay hover (touch), ocultamos las flechas */
+        @media (hover: none) {
+            .nav-btn { display: none !important; }
+        }
 
         /* RESPONSIVE */
         @media screen and (max-width: 768px) {
@@ -215,10 +232,6 @@
             .chip { flex-grow: 1; justify-content: center; }
             .divider { display: none; }
             
-            /* OCULTAR FLECHAS EN MÓVIL */
-            .nav-btn { display: none !important; }
-            
-            /* Título más pequeño */
             .viewer-title { font-size: 14px; }
         }
     </style>
@@ -286,14 +299,14 @@
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Modo Álbum:</strong><br>
-                Al abrir un documento, podrás ver <b>todos los documentos de esa carpeta</b> deslizando el dedo.
+                El visor muestra todos los documentos de la misma carpeta (país/tipo).
             </div>
             
              <div class="help-item">
-                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Gestos Móvil:</strong><br>
+                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Navegación:</strong><br>
                 <ul>
-                    <li><b>Deslizar (Swipe):</b> Arrastra de un lado a otro para pasar foto.</li>
-                    <li><b>Zoom:</b> Pellizca para acercar los documentos.</li>
+                    <li><b>Móvil:</b> Desliza el dedo sobre el documento para cambiar. Pellizca para Zoom.</li>
+                    <li><b>PC:</b> Usa las flechas laterales, el teclado o la rueda del ratón para Zoom.</li>
                 </ul>
             </div>
 
@@ -320,6 +333,8 @@
             
             <button class="nav-btn nav-prev" onclick="cambiarDocumento(-1)">&#10094;</button>
             <button class="nav-btn nav-next" onclick="cambiarDocumento(1)">&#10095;</button>
+
+            <div id="touch-layer"></div>
 
             <iframe id="frame-documento" src="" allow="autoplay"></iframe>
         </div>
@@ -365,23 +380,20 @@
         }
 
         // ===============================================
-        // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE)
+        // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE CAPA)
         // ===============================================
         function abrirEnVisor(idDocumentoUnico) {
-            // 1. SOLICITAR PANTALLA COMPLETA (INMERSIVA)
+            // Intentar Fullscreen en móvil
             const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => console.log("Fullscreen negado"));
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
+            if (window.innerWidth < 768) {
+                if (elem.requestFullscreen) { elem.requestFullscreen().catch(() => {}); }
+                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
             }
 
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idDocumentoUnico);
             if (!docClicado) return;
 
-            // Filtro por Carpeta (Modo Álbum)
+            // Filtro por Carpeta
             LISTA_VISOR = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             INDICE_VISOR = LISTA_VISOR.findIndex(d => d._idUnico === idDocumentoUnico);
 
@@ -418,33 +430,31 @@
             document.getElementById('modalVisor').style.display = 'none';
             document.getElementById('frame-documento').src = "";
             
-            // SALIR DE PANTALLA COMPLETA
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(err => {});
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
+            // Salir Fullscreen
+            if (document.exitFullscreen) { document.exitFullscreen().catch(() => {}); }
+            else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
         }
 
-        // DETECCIÓN DE SWIPE (DESLIZAMIENTO)
-        const viewerContainer = document.getElementById('viewer-container');
+        // --- GESTOS TÁCTILES SOBRE LA CAPA INVISIBLE ---
+        const touchLayer = document.getElementById('touch-layer');
 
-        viewerContainer.addEventListener('touchstart', e => {
+        touchLayer.addEventListener('touchstart', e => {
             touchStartX = e.changedTouches[0].screenX;
         }, {passive: true});
 
-        viewerContainer.addEventListener('touchend', e => {
+        touchLayer.addEventListener('touchend', e => {
             touchEndX = e.changedTouches[0].screenX;
             handleSwipe();
         }, {passive: true});
 
         function handleSwipe() {
-            // Umbral de sensibilidad para el swipe (50px)
+            // Deslizar IZQUIERDA <- (Siguiente)
             if (touchEndX < touchStartX - 50) {
-                cambiarDocumento(1); // Deslizar Izquierda -> Siguiente
+                cambiarDocumento(1); 
             }
+            // Deslizar DERECHA -> (Anterior)
             if (touchEndX > touchStartX + 50) {
-                cambiarDocumento(-1); // Deslizar Derecha -> Anterior
+                cambiarDocumento(-1); 
             }
         }
 
