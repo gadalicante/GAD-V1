@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Inventario Documentos GAD</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -34,7 +38,7 @@
             overflow-x: hidden;
         }
 
-        /* === 1. CABECERA === */
+        /* === CABECERA === */
         header {
             background-color: var(--primary-color);
             height: 120px;
@@ -49,14 +53,9 @@
         }
 
         .header-left { flex: 1; text-align: left; white-space: nowrap; }
-        .header-title {
-            color: white; font-size: 24px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.5px; margin: 0;
-        }
-
+        .header-title { color: white; font-size: 24px; font-weight: 700; margin: 0; }
         .header-center { flex: 0 0 auto; display: flex; justify-content: center; align-items: center; height: 100%; }
-        .logo { height: 100px; width: auto; object-fit: contain; background: transparent; }
-
+        .logo { height: 100px; width: auto; object-fit: contain; }
         .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 25px; }
 
         .btn-help-premium {
@@ -65,255 +64,140 @@
             color: white; padding: 8px 18px; border-radius: 30px;
             cursor: pointer; font-size: 14px; font-weight: 600;
             display: flex; align-items: center; gap: 10px;
-            transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-transform: uppercase; text-decoration: none;
+            transition: all 0.3s ease; text-transform: uppercase;
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); }
 
-        .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; }
         .stats-counter { color: white; font-size: 32px; font-weight: 900; line-height: 1; display: block; }
         .stats-label { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8); display: block; }
+        .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; }
 
-        /* === 2. CONTROLES === */
-        .controls-container {
-            background: white; padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px;
-        }
-
-        .search-wrapper {
-            max-width: 1200px; margin: 0 auto; position: relative;
-            display: flex; gap: 10px; align-items: center;
-        }
-
+        /* === CONTROLES === */
+        .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .search-wrapper { max-width: 1200px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
         .search-input-container { position: relative; flex: 1; }
-
+        
         .search-input {
             width: 100%; padding: 15px 20px 15px 50px; font-size: 16px;
-            border: 2px solid #ddd; border-radius: 50px; outline: none;
-            transition: border-color 0.3s; box-sizing: border-box; height: 54px;
+            border: 2px solid #ddd; border-radius: 50px; outline: none; height: 54px;
         }
         .search-input:focus { border-color: var(--primary-color); }
-        
-        .search-icon {
-            position: absolute; left: 20px; top: 50%;
-            transform: translateY(-50%); color: #888; font-size: 18px;
-        }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #888; font-size: 18px; }
 
         .btn-clear {
-            background-color: var(--danger-color); color: white;
-            border: none; border-radius: 50px; padding: 0 30px;
-            height: 54px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: background 0.2s;
-            display: flex; align-items: center; justify-content: center;
-            gap: 8px; white-space: nowrap;
-        }
-        .btn-clear:hover { background-color: #c82333; }
-
-        .filters-chips {
-            display: flex; justify-content: center; gap: 10px;
-            margin-top: 15px; flex-wrap: wrap;
+            background-color: var(--danger-color); color: white; border: none;
+            border-radius: 50px; padding: 0 30px; height: 54px; font-size: 16px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
+        .filters-chips { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
         .chip {
-            padding: 8px 16px; background: #e9ecef; border: none;
-            border-radius: 20px; cursor: pointer; font-size: 14px;
-            font-weight: 500; color: #555; transition: all 0.2s;
+            padding: 8px 16px; background: #e9ecef; border: none; border-radius: 20px;
+            cursor: pointer; font-size: 14px; font-weight: 500; color: #555;
         }
-        .chip:hover { background: #dee2e6; }
         .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
         .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        /* === 3. RESULTADOS === */
-        .results-container {
-            flex: 1; max-width: 1400px; margin: 0 auto;
-            width: 100%; padding: 0 20px 40px 20px;
-        }
-
-        .grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;
-        }
+        /* === RESULTADOS === */
+        .results-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 
         .card {
             background: white; border-radius: 8px; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
             border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
         }
-        .card:hover {
-            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border-color: var(--primary-color);
-        }
-
+        .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
         .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
-        .card-badges { display: flex; gap: 6px; margin-bottom: 6px; }
         
-        .badge {
-            font-size: 11px; font-weight: 700; padding: 3px 8px;
-            border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
-        }
+        .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
         .badge-loc { background: #e3f2fd; color: #1565c0; }
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
-
-        .card-title {
-            font-size: 14px; font-weight: 500; color: #333;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
+        .card-title { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .btn-view {
-            color: var(--eye-color); font-size: 24px; padding: 8px;
-            border-radius: 50%; transition: background 0.2s, transform 0.2s;
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; border: none; background: transparent; cursor: pointer;
+            color: var(--eye-color); font-size: 24px; padding: 8px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            background: transparent; border: none;
         }
         .btn-view:hover { background-color: rgba(40, 167, 69, 0.1); transform: scale(1.1); }
 
-        /* === 4. PIE DE PÁGINA === */
+        /* === PIE DE PÁGINA === */
         .pie-pagina {
             background-color: var(--primary-color); color: white;
-            text-align: center; padding: 15px 0; margin-top: auto;
-            font-size: 14px; width: 100%; line-height: 1.6;
+            text-align: center; padding: 15px 0; margin-top: auto; font-size: 14px;
         }
-
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === 5. MODALES (GENERAL) === */
+        /* === MODALES (OVERLAY GENERAL) === */
         .modal-overlay {
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 2000; 
-            justify-content: center; 
-            align-items: center;
-            backdrop-filter: blur(3px); 
-            padding: 15px; 
-            touch-action: pan-x pan-y;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(3px); padding: 15px; touch-action: pan-x pan-y;
         }
 
         /* --- MODAL AYUDA --- */
         .modal-content-help {
-            background: white; 
-            padding: 25px;
-            border-radius: 10px;
-            max-width: 550px; 
-            width: 100%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative;
-            max-height: 85vh; 
-            overflow-y: auto; 
-            display: flex; flex-direction: column;
+            background: white; padding: 25px; border-radius: 10px;
+            max-width: 550px; width: 100%; position: relative;
+            max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;
         }
-
         .btn-close-help {
-            position: absolute; top: 10px; right: 10px;
-            font-size: 24px; cursor: pointer; color: #888;
-            background: #fff; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; z-index: 10;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; color: #888;
+            background: #fff; width: 36px; height: 36px; display: flex; align-items: center;
+            justify-content: center; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
-        .modal-title {
-            font-size: 20px; color: var(--primary-color);
-            margin-bottom: 20px; border-bottom: 2px solid #eee;
-            padding-bottom: 10px; margin-top: 0; padding-right: 40px;
-        }
-
-        .help-item { margin-bottom: 15px; line-height: 1.5; color: #444; }
-        .help-icon { color: var(--primary-color); margin-right: 8px; width: 20px; text-align: center; }
-        
-        .warning-box {
-            background-color: #fff3cd; border: 1px solid #ffeeba;
-            color: #856404; padding: 15px; border-radius: 6px;
-            margin-top: 20px; font-size: 14px;
-        }
-        .warning-box strong { display: block; margin-bottom: 8px; }
-
+        .modal-title { font-size: 20px; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .help-item { margin-bottom: 15px; color: #444; }
         .btn-modal-ok {
-            background-color: var(--primary-color); color: white;
-            border: none; padding: 12px 30px; border-radius: 30px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-            margin-top: 25px; width: 100%; max-width: 200px;
+            background-color: var(--primary-color); color: white; border: none; padding: 12px 30px;
+            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px;
         }
 
         /* --- MODAL VISOR DE DOCUMENTOS --- */
-        #modalVisor {
-            padding: 0 !important;
-            z-index: 3000;
-        }
+        #modalVisor { padding: 0 !important; z-index: 3000; background: #000; }
 
         .modal-content-viewer {
-            background: #000; 
-            width: 100vw; height: 100vh;
-            border-radius: 0; box-shadow: none;
-            position: relative;
-            display: flex; flex-direction: column;
+            background: #000; width: 100vw; height: 100vh;
+            border-radius: 0; position: relative; display: flex; flex-direction: column;
             overflow: hidden;
         }
 
-        /* CABECERA FLOTANTE DEL VISOR */
+        /* CABECERA VISOR */
         .viewer-header {
-            position: absolute;
-            top: 0; left: 0; width: 100%;
-            height: 60px;
-            background: rgba(0,0,0,0.6); /* Fondo semi-transparente */
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            z-index: 200; /* Por encima del iframe */
-            pointer-events: none; /* Dejar pasar clics excepto en botones */
+            position: absolute; top: 0; left: 0; width: 100%; height: 60px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            display: flex; align-items: center; padding: 0 15px; z-index: 200;
+            pointer-events: none; /* Permite tocar a través de la barra (importante para swipes arriba) */
         }
 
-        /* Botón Cerrar Visor */
+        /* Botón Cerrar (IZQUIERDA) */
         .btn-close-viewer {
-            width: 40px; height: 40px; 
-            background: var(--danger-color); color: white;
-            border-radius: 50%; border: 2px solid white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; cursor: pointer; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-            pointer-events: auto; /* Reactivar clics */
-            margin-right: 15px;
+            width: 40px; height: 40px; background: var(--danger-color); color: white;
+            border-radius: 50%; border: 2px solid white; display: flex; align-items: center;
+            justify-content: center; font-size: 22px; cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5); pointer-events: auto; margin-right: 15px;
         }
-        .btn-close-viewer:active { transform: scale(0.9); }
 
-        /* Título del documento en el visor */
         .viewer-title {
-            color: white;
-            font-size: 16px;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            pointer-events: auto;
-            flex: 1; /* Ocupa el resto del espacio */
+            color: white; font-size: 16px; font-weight: 500; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: auto; flex: 1;
         }
 
-        /* Botones de Navegación */
+        /* FLECHAS PC */
         .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.3);
-            color: white;
-            border: none;
-            font-size: 30px;
-            padding: 20px 15px;
-            cursor: pointer;
-            z-index: 100;
-            transition: background 0.3s;
-            user-select: none;
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.3); color: white; border: none;
+            font-size: 40px; padding: 20px 15px; cursor: pointer; z-index: 100;
+            transition: background 0.3s; user-select: none;
         }
         .nav-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
-        .nav-prev { left: 0; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
-        .nav-next { right: 0; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        .nav-prev { left: 0; }
+        .nav-next { right: 0; }
 
-        /* Iframe */
-        #frame-documento {
-            width: 100%; height: 100%; border: none; background: white;
-        }
+        #frame-documento { width: 100%; height: 100%; border: none; background: white; }
 
         /* RESPONSIVE */
         @media screen and (max-width: 768px) {
@@ -324,14 +208,17 @@
             .header-right { order: 3; justify-content: space-evenly; }
             .header-title { font-size: 20px; white-space: normal; }
             .logo { height: 80px; }
+            
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
             .filters-chips { gap: 8px; }
-            .chip { flex-grow: 1; text-align: center; justify-content: center; display: flex; }
+            .chip { flex-grow: 1; justify-content: center; }
             .divider { display: none; }
             
-            /* Ajustes Visor en Móvil */
-            .nav-btn { padding: 30px 20px; font-size: 40px; background-color: rgba(0,0,0,0.1); }
+            /* OCULTAR FLECHAS EN MÓVIL */
+            .nav-btn { display: none !important; }
+            
+            /* Título más pequeño */
             .viewer-title { font-size: 14px; }
         }
     </style>
@@ -399,14 +286,14 @@
 
             <div class="help-item">
                 <strong><i class="fa-solid fa-eye help-icon" style="color:var(--eye-color)"></i> Modo Álbum:</strong><br>
-                Al abrir un documento, verás automáticamente <b>todos los documentos de esa carpeta</b>. Usa las flechas para navegar sin salir del visor.
+                Al abrir un documento, podrás ver <b>todos los documentos de esa carpeta</b> deslizando el dedo.
             </div>
             
              <div class="help-item">
-                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Navegación y Zoom:</strong><br>
+                <strong><i class="fa-solid fa-hand-pointer help-icon"></i> Gestos Móvil:</strong><br>
                 <ul>
-                    <li><b>Móvil:</b> Pellizca para Zoom. Toca las flechas para pasar.</li>
-                    <li><b>PC:</b> Usa las teclas <i class="fa-solid fa-arrow-left"></i> y <i class="fa-solid fa-arrow-right"></i>.</li>
+                    <li><b>Deslizar (Swipe):</b> Arrastra de un lado a otro para pasar foto.</li>
+                    <li><b>Zoom:</b> Pellizca para acercar los documentos.</li>
                 </ul>
             </div>
 
@@ -422,7 +309,7 @@
     </div>
 
     <div id="modalVisor" class="modal-overlay">
-        <div class="modal-content-viewer">
+        <div class="modal-content-viewer" id="viewer-container">
             
             <div class="viewer-header">
                 <button class="btn-close-viewer" onclick="cerrarVisor()">
@@ -462,9 +349,12 @@
         let BD_GLOBAL = [];
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
         
-        // Variables para el Visor (CARRUSEL POR CARPETA)
         let LISTA_VISOR = []; 
         let INDICE_VISOR = -1;
+
+        // Variables para Swipe
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         // ===============================================
         // 🛠️ FUNCIÓN NORMALIZAR TEXTO
@@ -475,19 +365,24 @@
         }
 
         // ===============================================
-        // 🚀 GESTIÓN DEL VISOR (CARRUSEL CARPETA INFINITO)
+        // 🚀 GESTIÓN DEL VISOR (FULLSCREEN + SWIPE)
         // ===============================================
         function abrirEnVisor(idDocumentoUnico) {
-            // Buscamos el documento clicado en la BD Global
+            // 1. SOLICITAR PANTALLA COMPLETA (INMERSIVA)
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => console.log("Fullscreen negado"));
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idDocumentoUnico);
-            
             if (!docClicado) return;
 
-            // FILTRO MAGICO: Seleccionamos SOLO los documentos de la MISMA CARPETA
-            // Esto crea el "Álbum" del país o categoría automáticamente
+            // Filtro por Carpeta (Modo Álbum)
             LISTA_VISOR = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
-            
-            // Encontramos el índice relativo a esta nueva sub-lista
             INDICE_VISOR = LISTA_VISOR.findIndex(d => d._idUnico === idDocumentoUnico);
 
             cargarDocumentoEnIframe();
@@ -498,12 +393,9 @@
             if (INDICE_VISOR < 0 || INDICE_VISOR >= LISTA_VISOR.length) return;
 
             const doc = LISTA_VISOR[INDICE_VISOR];
-            
-            // Actualizar Título
             document.getElementById('viewer-doc-title').innerText = doc.NombreDocumento;
 
             let urlVisor = doc.Enlace;
-            // Forzar modo preview
             if (urlVisor.includes('/view')) {
                 urlVisor = urlVisor.replace(/\/view.*/, '/preview');
             } else if (!urlVisor.includes('/preview')) {
@@ -514,14 +406,9 @@
         }
 
         function cambiarDocumento(direccion) {
-            // Bucle Infinito
             let nuevoIndice = INDICE_VISOR + direccion;
-            
-            if (nuevoIndice < 0) {
-                nuevoIndice = LISTA_VISOR.length - 1; // Ir al final
-            } else if (nuevoIndice >= LISTA_VISOR.length) {
-                nuevoIndice = 0; // Ir al principio
-            }
+            if (nuevoIndice < 0) nuevoIndice = LISTA_VISOR.length - 1;
+            else if (nuevoIndice >= LISTA_VISOR.length) nuevoIndice = 0;
             
             INDICE_VISOR = nuevoIndice;
             cargarDocumentoEnIframe();
@@ -530,9 +417,38 @@
         function cerrarVisor() {
             document.getElementById('modalVisor').style.display = 'none';
             document.getElementById('frame-documento').src = "";
+            
+            // SALIR DE PANTALLA COMPLETA
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
 
-        // Teclado
+        // DETECCIÓN DE SWIPE (DESLIZAMIENTO)
+        const viewerContainer = document.getElementById('viewer-container');
+
+        viewerContainer.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        viewerContainer.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            // Umbral de sensibilidad para el swipe (50px)
+            if (touchEndX < touchStartX - 50) {
+                cambiarDocumento(1); // Deslizar Izquierda -> Siguiente
+            }
+            if (touchEndX > touchStartX + 50) {
+                cambiarDocumento(-1); // Deslizar Derecha -> Anterior
+            }
+        }
+
+        // Teclado PC
         document.addEventListener('keydown', function(event) {
             if (document.getElementById('modalVisor').style.display === 'flex') {
                 if (event.key === "ArrowLeft") cambiarDocumento(-1);
@@ -559,7 +475,6 @@
                     const data = snap.val();
                     if (!data) continue;
 
-                    // Iteramos CARPETAS (Grupos)
                     Object.entries(data).forEach(([nombreCarpeta, grupo]) => {
                         Object.values(grupo).forEach(doc => {
                             const rawText = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
@@ -575,8 +490,8 @@
                                 _cat: nodo.cat,
                                 _cal: nodo.cal,
                                 _palabras: palabrasClave,
-                                _carpeta: nombreCarpeta, // Guardamos la carpeta para el carrusel
-                                _idUnico: contadorId++ // ID interno para buscar rápido
+                                _carpeta: nombreCarpeta,
+                                _idUnico: contadorId++
                             });
                         });
                     });
@@ -626,7 +541,6 @@
                 return;
             }
 
-            // Renderizamos pasando el ID ÚNICO
             resultados.slice(0, 100).forEach(doc => {
                 const esVehiculo = doc._cat === 'VEHICULOS';
                 let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
