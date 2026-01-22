@@ -378,15 +378,16 @@
         // ===============================================
         // FIREBASE CONFIG
         // ===============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCY8V_P7m8lZUvGbMVlGaa-GVhbmyikmag", 
-            authDomain: "gad-alicante-v3.firebaseapp.com",
-            databaseURL: "https://gad-alicante-v3-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "gad-alicante-v3",
-            storageBucket: "gad-alicante-v3.appspot.com",
-            messagingSenderId: "TU_ID",
-            appId: "TU_APP"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
+  authDomain: "gad-alicante-v1.firebaseapp.com",
+  databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "gad-alicante-v1",
+  storageBucket: "gad-alicante-v1.firebasestorage.app",
+  messagingSenderId: "545835357966",
+  appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
+  measurementId: "G-QG8KDLCWQS"
+};
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -484,10 +485,13 @@
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
+        // =========================================================
+        // FUNCIÓN CORREGIDA - ESTA ES LA ÚNICA PARTE CAMBIADA
+        // =========================================================
         async function cargarInventario() {
             const nodos = [
-                { id: 'documentos 600 dpi', cat: 'PERSONAS', cal: '600' },
-                { id: 'vehiculos 600 dpi', cat: 'VEHICULOS', cal: '600' }
+                { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
+                { id: 'BD_VEHICULOS 600 DPI', cat: 'VEHICULOS', cal: '600' }
             ];
 
             let lista = [];
@@ -499,29 +503,32 @@
                     const data = snap.val();
                     if (!data) continue;
 
-                    Object.entries(data).forEach(([nombreCarpeta, grupo]) => {
-                        Object.values(grupo).forEach(doc => {
-                            const rawText = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
-                            const textoNormalizado = normalizarTexto(rawText).replace(/_/g, ' ').replace(/-/g, ' ');
-                            const palabrasClave = textoNormalizado.split(/\s+/).filter(w => w.length > 0);
+                    // CORRECCIÓN: Iteramos directamente sobre los documentos (Key, Documento)
+                    // Eliminamos el bucle interno que causaba la duplicación x8
+                    Object.entries(data).forEach(([key, doc]) => {
+                         if (!doc || typeof doc !== 'object') return;
 
-                            lista.push({
-                                ...doc,
-                                _cat: nodo.cat,
-                                _cal: nodo.cal,
-                                _palabras: palabrasClave,
-                                _carpeta: nombreCarpeta,
-                                _idUnico: contadorId++
-                            });
-                        });
+                         const rawText = `${doc.NombreDocumento || ''} ${doc.Pais || ''} ${doc.TipoDocumento || ''} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
+                         const textoNormalizado = normalizarTexto(rawText).replace(/_/g, ' ').replace(/-/g, ' ');
+                         const palabrasClave = textoNormalizado.split(/\s+/).filter(w => w.length > 0);
+
+                         lista.push({
+                             ...doc,
+                             _cat: nodo.cat,
+                             _cal: nodo.cal,
+                             _palabras: palabrasClave,
+                             _carpeta: key,
+                             _idUnico: contadorId++
+                         });
                     });
                 } catch (e) { console.error("Error nodo " + nodo.id, e); }
             }
 
-            BD_GLOBAL = lista.sort((a, b) => b.Timestamp - a.Timestamp);
+            BD_GLOBAL = lista.sort((a, b) => (b.Timestamp || 0) - (a.Timestamp || 0));
             document.getElementById('loader').style.display = 'none';
             aplicarFiltrosInteligentes();
         }
+        // =========================================================
 
         function aplicarFiltrosInteligentes() {
             const inputRaw = document.getElementById('buscador').value;
@@ -541,6 +548,7 @@
 
             if (resultados.length > 0) {
                 statsNum.innerText = resultados.length.toLocaleString();
+                // Renderizamos solo los primeros 100 para no colgar la página
                 resultados.slice(0, 100).forEach(doc => {
                     const esVehiculo = doc._cat === 'VEHICULOS';
                     let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
