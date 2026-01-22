@@ -16,6 +16,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        /* TUS ESTILOS ORIGINALES INTACTOS */
         :root {
             --primary-color: #0457C9;
             --bg-color: #f4f6f9;
@@ -31,26 +32,18 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* === CABECERA === */
         header {
             background-color: var(--primary-color);
-            height: 120px;
-            padding: 0 30px;
+            height: 120px; padding: 0 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
         }
 
         .header-left { flex: 1; text-align: left; white-space: nowrap; }
@@ -73,7 +66,6 @@
         .stats-label { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8); display: block; }
         .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; }
 
-        /* === CONTROLES === */
         .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .search-wrapper { max-width: 1200px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
         .search-input-container { position: relative; flex: 1; }
@@ -99,7 +91,6 @@
         .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
         .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        /* === RESULTADOS === */
         .results-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 
@@ -124,14 +115,9 @@
         }
         .btn-view:hover { background-color: rgba(40, 167, 69, 0.1); transform: scale(1.1); }
 
-        /* === PIE DE PÁGINA === */
-        .pie-pagina {
-            background-color: var(--primary-color); color: white;
-            text-align: center; padding: 15px 0; margin-top: auto; font-size: 14px;
-        }
+        .pie-pagina { background-color: var(--primary-color); color: white; text-align: center; padding: 15px 0; margin-top: auto; font-size: 14px; }
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === MODAL AYUDA === */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -141,83 +127,51 @@
         .modal-content-help {
             background: white; padding: 0; border-radius: 10px;
             max-width: 600px; width: 100%; position: relative;
-            /* Flexbox para garantizar que el botón quede abajo visible */
-            max-height: 85vh; 
-            display: flex; flex-direction: column;
-            overflow: hidden;
+            max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
         }
         
         .help-header {
             background: var(--primary-color); color: white; padding: 15px 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-shrink: 0; /* No encoger */
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .help-header h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-        
-        .help-body { 
-            padding: 20px; color: #444; 
-            overflow-y: auto; /* Scroll interno solo aquí */
-            flex: 1; /* Ocupar el resto del espacio */
-        }
-
-        .btn-close-help {
-            cursor: pointer; font-size: 24px; color: white; opacity: 0.8;
-            background: none; border: none;
-        }
-
+        .help-body { padding: 20px; color: #444; overflow-y: auto; flex: 1; }
+        .btn-close-help { cursor: pointer; font-size: 24px; color: white; opacity: 0.8; background: none; border: none; }
         .help-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .help-section:last-child { border: none; }
-        
         .help-title { font-weight: 700; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
-        
-        .help-example { 
-            background: #f8f9fa; border-left: 4px solid var(--gad-gold); 
-            padding: 10px 15px; margin: 10px 0; font-size: 13px; color: #555; font-style: italic; 
-        }
+        .help-example { background: #f8f9fa; border-left: 4px solid var(--gad-gold); padding: 10px 15px; margin: 10px 0; font-size: 13px; color: #555; font-style: italic; }
+        .btn-modal-ok { background-color: var(--primary-color); color: white; border: none; padding: 15px 0; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 
-        .btn-modal-ok {
-            background-color: var(--primary-color); color: white; border: none; padding: 15px 0;
-            width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;
-            flex-shrink: 0; /* No encoger */
-        }
-
-        /* === VISOR GAD === */
         #modalVisor {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 5000; flex-direction: column;
         }
-        
         #modalVisor.active { display: flex; }
-
         .viewer-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
             display: flex; align-items: center; justify-content: flex-start;
             padding: 0 15px; z-index: 5002; pointer-events: none; gap: 15px;
         }
-        
         .btn-close-viewer {
             pointer-events: auto; background: #dc3545; color: white; border: none;
             width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); flex-shrink: 0;
         }
-
         .viewer-title {
             color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
             text-align: left; max-width: 65%; opacity: 0.9;
         }
-
         .iframe-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
         #visor-iframe { width: 100%; height: 100%; border: none; display: block; }
-
         .nav-overlay {
             position: absolute; top: 50%; width: 100%; transform: translateY(-50%);
             display: flex; justify-content: space-between; padding: 0 10px;
             pointer-events: none; z-index: 5001;
         }
-
         .nav-btn {
             pointer-events: auto; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.3); color: white; width: 50px; height: 50px;
@@ -225,7 +179,6 @@
             display: flex; align-items: center; justify-content: center; transition: background 0.2s;
         }
         .nav-btn:hover { background: rgba(241, 196, 15, 0.8); color: black; }
-
         #visor-loader {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-size: 16px; background: rgba(0,0,0,0.8);
@@ -233,25 +186,16 @@
             display: flex; gap: 10px; align-items: center;
         }
 
-        /* RESPONSIVE */
         @media screen and (max-width: 768px) {
             header { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; }
             .header-center { order: 1; margin-bottom: 5px; }
             .header-left { order: 2; margin-bottom: 10px; white-space: normal; width: 100%; }
             .header-right { order: 3; justify-content: space-evenly; }
-            
-            /* REPARACIÓN DEL TITULO CORTADO */
-            .header-title { 
-                font-size: 18px; 
-                white-space: normal; /* Permite salto de línea */
-                line-height: 1.2;
-            }
-            
+            .header-title { font-size: 18px; white-space: normal; line-height: 1.2; }
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
-
             .modal-content-help { max-height: 80vh; }
         }
 
@@ -375,19 +319,17 @@
     </div>
 
     <script>
-        // ===============================================
-        // FIREBASE CONFIG
-        // ===============================================
-const firebaseConfig = {
-  apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
-  authDomain: "gad-alicante-v1.firebaseapp.com",
-  databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "gad-alicante-v1",
-  storageBucket: "gad-alicante-v1.firebasestorage.app",
-  messagingSenderId: "545835357966",
-  appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
-  measurementId: "G-QG8KDLCWQS"
-};
+        // CONFIGURACIÓN FIREBASE V3 (NUEVA)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6EDUJ2dG50DphB-dF6GLi3P2IlW8lDz4",
+            authDomain: "gad-alicante-v3.firebaseapp.com",
+            databaseURL: "https://gad-alicante-v3-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gad-alicante-v3",
+            storageBucket: "gad-alicante-v3.firebasestorage.app",
+            messagingSenderId: "906986258369",
+            appId: "1:906986258369:web:21a7ea29a33b5f395e3940",
+            measurementId: "G-Q0E3H1996K"
+        };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -397,9 +339,7 @@ const firebaseConfig = {
         let INDICE_ACTUAL = 0;
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
-        // ===============================================
-        // LÓGICA DEL VISOR
-        // ===============================================
+        // LOGICA DEL VISOR (¡¡ARREGLADA PARA V3!!)
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -409,7 +349,16 @@ const firebaseConfig = {
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
+            // TRUCO MAESTRO: Como la nueva base de datos no tiene carpetas reales, 
+            // usamos la propiedad '_carpeta' (que hemos llenado con el PAIS) 
+            // para agrupar las imágenes.
+            // Así, al darle a la flecha, solo pasas al siguiente documento DE ESE PAÍS.
+            
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
+            
+            // Si por alguna razón la lista sale vacía (error de datos), usamos la global
+            if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
+
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
 
             entrarFullscreen();
@@ -432,7 +381,6 @@ const firebaseConfig = {
             }
 
             iframeEl.src = urlLimpia;
-
             iframeEl.onload = function() {
                 loaderVisor.style.display = 'none';
             };
@@ -455,21 +403,11 @@ const firebaseConfig = {
 
         function entrarFullscreen() {
             const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(() => {});
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            }
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
         }
-
         function salirFullscreen() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         }
-
         document.addEventListener('keydown', (e) => {
             if (!modalVisor.classList.contains('active')) return;
             if (e.key === "ArrowLeft") cambiarDoc(-1);
@@ -477,17 +415,13 @@ const firebaseConfig = {
             if (e.key === "Escape") cerrarVisor();
         });
 
-        // ===============================================
-        // DATA & SEARCH
-        // ===============================================
+        // UTILIDADES
         function normalizarTexto(texto) {
             if (!texto) return "";
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
-        // =========================================================
-        // FUNCIÓN CORREGIDA - ESTA ES LA ÚNICA PARTE CAMBIADA
-        // =========================================================
+        // CARGA DE DATOS (VERSIÓN V3 SIN BUCLE x8)
         async function cargarInventario() {
             const nodos = [
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
@@ -503,32 +437,45 @@ const firebaseConfig = {
                     const data = snap.val();
                     if (!data) continue;
 
-                    // CORRECCIÓN: Iteramos directamente sobre los documentos (Key, Documento)
-                    // Eliminamos el bucle interno que causaba la duplicación x8
+                    // AQUI ESTA LA MAGIA: 
+                    // 1. Usamos Object.entries para leer la lista plana (sin subcarpetas).
+                    // 2. Asignamos 'doc.Pais' a '_carpeta'. Esto permite que el VISOR
+                    //    sepa que todos los docs de "ESPAÑA" pertenecen al mismo grupo.
+                    
                     Object.entries(data).forEach(([key, doc]) => {
-                         if (!doc || typeof doc !== 'object') return;
+                        if (!doc || !doc.NombreDocumento) return;
 
-                         const rawText = `${doc.NombreDocumento || ''} ${doc.Pais || ''} ${doc.TipoDocumento || ''} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
-                         const textoNormalizado = normalizarTexto(rawText).replace(/_/g, ' ').replace(/-/g, ' ');
-                         const palabrasClave = textoNormalizado.split(/\s+/).filter(w => w.length > 0);
+                        const rawText = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
+                        const textoNormalizado = normalizarTexto(rawText).replace(/_/g, ' ').replace(/-/g, ' ');
+                        const palabrasClave = textoNormalizado.split(/\s+/).filter(w => w.length > 0);
 
-                         lista.push({
-                             ...doc,
-                             _cat: nodo.cat,
-                             _cal: nodo.cal,
-                             _palabras: palabrasClave,
-                             _carpeta: key,
-                             _idUnico: contadorId++
-                         });
+                        // TRUCO: Si no hay país, usamos "General" para que no rompa el visor
+                        let carpetaVirtual = doc.Pais || "General"; 
+
+                        lista.push({
+                            ...doc,
+                            _cat: nodo.cat,
+                            _cal: nodo.cal,
+                            _palabras: palabrasClave,
+                            _carpeta: carpetaVirtual, // <--- ESTO ARREGLA EL CARRUSEL
+                            _idUnico: contadorId++
+                        });
                     });
                 } catch (e) { console.error("Error nodo " + nodo.id, e); }
             }
 
-            BD_GLOBAL = lista.sort((a, b) => (b.Timestamp || 0) - (a.Timestamp || 0));
+            // Ordenamos alfabéticamente por PAÍS (A-Z) para que quede bonito
+            BD_GLOBAL = lista.sort((a, b) => {
+                const paisA = (a.Pais || 'ZZZ').toUpperCase();
+                const paisB = (b.Pais || 'ZZZ').toUpperCase();
+                if (paisA < paisB) return -1;
+                if (paisA > paisB) return 1;
+                return (a.NombreDocumento || '').localeCompare(b.NombreDocumento || '');
+            });
+
             document.getElementById('loader').style.display = 'none';
             aplicarFiltrosInteligentes();
         }
-        // =========================================================
 
         function aplicarFiltrosInteligentes() {
             const inputRaw = document.getElementById('buscador').value;
@@ -548,7 +495,7 @@ const firebaseConfig = {
 
             if (resultados.length > 0) {
                 statsNum.innerText = resultados.length.toLocaleString();
-                // Renderizamos solo los primeros 100 para no colgar la página
+                // Mostramos 100 para no bloquear el navegador
                 resultados.slice(0, 100).forEach(doc => {
                     const esVehiculo = doc._cat === 'VEHICULOS';
                     let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
