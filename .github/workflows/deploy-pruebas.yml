@@ -12,11 +12,9 @@ jobs:
       - name: Bajar el código
         uses: actions/checkout@v4
 
-      - name: Desplegar a Firebase Hosting (Sitio de Pruebas)
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Instalar y Desplegar
+        uses: w9jds/firebase-action@master
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_TOKEN }}'
-          channelId: live 
-          projectId: gad-alicante-v1
-          target: gad-alicante-pruebas
+          args: deploy --only hosting:gad-alicante-pruebas --project gad-alicante-v1
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
