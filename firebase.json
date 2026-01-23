@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "gad-alicante-pruebas",
     "public": ".",
     "ignore": [
       "firebase.json",
