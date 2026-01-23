@@ -25,6 +25,7 @@
             --eye-color: #28a745;
             --danger-color: #dc3545;
             --gad-gold: #f1c40f;
+            --new-badge: #00c853; /* Color para nuevos */
         }
 
         * { box-sizing: border-box; }
@@ -62,9 +63,27 @@
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); }
 
-        .stats-counter { color: white; font-size: 32px; font-weight: 900; line-height: 1; display: block; }
-        .stats-label { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.8); display: block; }
-        .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; }
+        /* NUEVOS ESTILOS PARA LA ESTADÍSTICA DETALLADA */
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            text-align: right;
+            align-items: center;
+        }
+        
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            padding-right: 15px;
+        }
+        .stat-box:last-child { border-right: none; padding-right: 0; }
+
+        .stat-number { color: white; font-size: 20px; font-weight: 900; line-height: 1; }
+        .stat-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px; }
+        
+        .stat-new { color: var(--gad-gold); text-shadow: 0 0 5px rgba(241, 196, 15, 0.3); }
 
         .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .search-wrapper { max-width: 1200px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
@@ -97,7 +116,7 @@
         .card {
             background: white; border-radius: 8px; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s; position: relative;
         }
         .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
         .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
@@ -106,6 +125,14 @@
         .badge-loc { background: #e3f2fd; color: #1565c0; }
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
+        .badge-new { 
+            position: absolute; top: -5px; right: -5px; 
+            background: var(--danger-color); color: white; 
+            font-size: 9px; padding: 2px 6px; border-radius: 10px; 
+            animation: pulse 2s infinite; z-index: 10;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
         .card-title { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .btn-view {
@@ -197,6 +224,10 @@
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
             .modal-content-help { max-height: 80vh; }
+            /* Ajuste para las estadísticas en móvil */
+            .stats-container { gap: 10px; }
+            .stat-number { font-size: 16px; }
+            .stat-label { font-size: 9px; }
         }
 
         :fullscreen header, :fullscreen .controls-container, :fullscreen .pie-pagina { display: none; }
@@ -216,9 +247,20 @@
             <button class="btn-help-premium" onclick="toggleModalAyuda(true)">
                 <i class="fa-regular fa-circle-question"></i> AYUDA
             </button>
-            <div class="stats-group">
-                <span id="stats-number" class="stats-counter">--</span>
-                <span class="stats-label">Documentos</span>
+            
+            <div class="stats-container" id="stats-display">
+                <div class="stat-box">
+                    <span id="stat-prev" class="stat-number">--</span>
+                    <span class="stat-label">Anteriores</span>
+                </div>
+                <div class="stat-box">
+                    <span id="stat-new" class="stat-number stat-new">--</span>
+                    <span class="stat-label">Nuevos/Modif.</span>
+                </div>
+                <div class="stat-box">
+                    <span id="stat-total" class="stat-number">--</span>
+                    <span class="stat-label">Total Actual</span>
+                </div>
             </div>
         </div>
     </header>
@@ -265,11 +307,9 @@
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
                     <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
-                    
                     <div class="help-example">
-                        <b>Ejemplo 1:</b> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
-                        <b>Ejemplo 2:</b> Escribe "Alemania PNC 2024" para ver el documento concreto.<br>
-                        <b>Ejemplo 3:</b> Escribe "PNC" para Permisos de Conducción o "PSP" para Pasaporte.
+                        <b>Ejemplo:</b> "Alemania PNC 2024" mostrará el documento concreto.<br>
+                        <b>Ejemplo 2:</b> "Nuevos" te mostrará solo los documentos de la última subida.
                     </div>
                 </div>
 
@@ -277,22 +317,13 @@
                     <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. El Visor de Imágenes</div>
                     <p>Al pulsar el icono del ojo, se abre el documento en pantalla completa.</p>
                     <ul>
-                        <li><strong>Zoom Táctil:</strong> En el móvil, usa dos dedos sobre la pantalla (gesto de pellizco) para ampliar y ver las microescrituras.</li>
-                        <li><strong>Navegación:</strong> Usa las flechas laterales para ver otros documentos de la misma carpeta sin salir.</li>
+                        <li><strong>Navegación:</strong> Usa las flechas para ver el siguiente documento del mismo PAÍS.</li>
                     </ul>
-                    
-                    <div class="help-example" style="background:#fff3cd; border-color:#ffc107;">
-                        💡 <strong>Nota:</strong> Pulsa el botón <b>ROJO</b> para cerrar o pulsa el botón de la derecha para entrar en Google Drive en ventana nueva y así poder editar el documento.
-                    </div>
                 </div>
 
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-layer-group"></i> 3. Filtros Rápidos</div>
-                    <p>Usa los botones grises (chips) debajo del buscador para filtrar rápidamente:</p>
-                    <ul>
-                        <li><strong>Personas vs Vehículos:</strong> Separa DNI/Pasaportes de Cartas de Coche.</li>
-                        <li><strong>600 vs 2400 DPI:</strong> Elige entre calidad estándar o ultra-alta definición.</li>
-                    </ul>
+                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 3. Estadísticas de Subida</div>
+                    <p>En la cabecera (arriba a la derecha) verás la diferencia entre la carga anterior y la actual.</p>
                 </div>
             </div>
 
@@ -319,7 +350,7 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE V3 (NUEVA)
+        // CONFIGURACIÓN FIREBASE V3
         const firebaseConfig = {
             apiKey: "AIzaSyA6EDUJ2dG50DphB-dF6GLi3P2IlW8lDz4",
             authDomain: "gad-alicante-v3.firebaseapp.com",
@@ -337,9 +368,10 @@
         let BD_GLOBAL = [];
         let LISTA_REPRODUCCION = []; 
         let INDICE_ACTUAL = 0;
+        let ULTIMA_FECHA_CARGA = 0; // Para detectar nuevos
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
-        // LOGICA DEL VISOR (¡¡ARREGLADA PARA V3!!)
+        // --- LÓGICA DEL VISOR ---
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -349,14 +381,10 @@
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
-            // TRUCO MAESTRO: Como la nueva base de datos no tiene carpetas reales, 
-            // usamos la propiedad '_carpeta' (que hemos llenado con el PAIS) 
-            // para agrupar las imágenes.
-            // Así, al darle a la flecha, solo pasas al siguiente documento DE ESE PAÍS.
-            
+            // Lógica de CARPETA VIRTUAL (País)
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             
-            // Si por alguna razón la lista sale vacía (error de datos), usamos la global
+            // Si algo falla, fallback a global
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
 
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
@@ -390,7 +418,6 @@
             let nuevoIndice = INDICE_ACTUAL + direccion;
             if (nuevoIndice < 0) nuevoIndice = LISTA_REPRODUCCION.length - 1;
             if (nuevoIndice >= LISTA_REPRODUCCION.length) nuevoIndice = 0;
-
             INDICE_ACTUAL = nuevoIndice;
             cargarDocumentoActual();
         }
@@ -408,6 +435,7 @@
         function salirFullscreen() {
             if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         }
+
         document.addEventListener('keydown', (e) => {
             if (!modalVisor.classList.contains('active')) return;
             if (e.key === "ArrowLeft") cambiarDoc(-1);
@@ -421,7 +449,7 @@
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
-        // CARGA DE DATOS (VERSIÓN V3 SIN BUCLE x8)
+        // --- CARGA DE DATOS ---
         async function cargarInventario() {
             const nodos = [
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
@@ -437,34 +465,30 @@
                     const data = snap.val();
                     if (!data) continue;
 
-                    // AQUI ESTA LA MAGIA: 
-                    // 1. Usamos Object.entries para leer la lista plana (sin subcarpetas).
-                    // 2. Asignamos 'doc.Pais' a '_carpeta'. Esto permite que el VISOR
-                    //    sepa que todos los docs de "ESPAÑA" pertenecen al mismo grupo.
-                    
                     Object.entries(data).forEach(([key, doc]) => {
                         if (!doc || !doc.NombreDocumento) return;
 
                         const rawText = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento || ''} ${doc.EstadoProvincia || ''}`;
                         const textoNormalizado = normalizarTexto(rawText).replace(/_/g, ' ').replace(/-/g, ' ');
                         const palabrasClave = textoNormalizado.split(/\s+/).filter(w => w.length > 0);
-
-                        // TRUCO: Si no hay país, usamos "General" para que no rompa el visor
-                        let carpetaVirtual = doc.Pais || "General"; 
+                        
+                        // Carpeta virtual = País (para el carrusel)
+                        let carpetaVirtual = doc.Pais || "General";
 
                         lista.push({
                             ...doc,
                             _cat: nodo.cat,
                             _cal: nodo.cal,
                             _palabras: palabrasClave,
-                            _carpeta: carpetaVirtual, // <--- ESTO ARREGLA EL CARRUSEL
-                            _idUnico: contadorId++
+                            _carpeta: carpetaVirtual,
+                            _idUnico: contadorId++,
+                            Timestamp: doc.Timestamp || 0
                         });
                     });
                 } catch (e) { console.error("Error nodo " + nodo.id, e); }
             }
 
-            // Ordenamos alfabéticamente por PAÍS (A-Z) para que quede bonito
+            // Orden A-Z
             BD_GLOBAL = lista.sort((a, b) => {
                 const paisA = (a.Pais || 'ZZZ').toUpperCase();
                 const paisB = (b.Pais || 'ZZZ').toUpperCase();
@@ -472,9 +496,56 @@
                 if (paisA > paisB) return 1;
                 return (a.NombreDocumento || '').localeCompare(b.NombreDocumento || '');
             });
+            
+            // --- NUEVA LÓGICA DE ESTADÍSTICAS ---
+            calcularEstadisticas();
 
             document.getElementById('loader').style.display = 'none';
             aplicarFiltrosInteligentes();
+        }
+
+        function calcularEstadisticas() {
+            if (BD_GLOBAL.length === 0) return;
+
+            // 1. Buscamos la fecha más reciente (el último lote subido)
+            // Asumimos un margen de 1 hora para considerar archivos del mismo lote
+            const timestamps = BD_GLOBAL.map(d => d.Timestamp).sort((a,b) => b-a);
+            const ultimaCarga = timestamps[0];
+            
+            // Filtramos cuántos son de ese último lote (NUEVOS)
+            // Margen de 10 minutos (600000ms) por si la subida tardó un poco
+            const nuevos = BD_GLOBAL.filter(d => (ultimaCarga - d.Timestamp) < 600000);
+            const cantidadNuevos = nuevos.length;
+            const cantidadTotal = BD_GLOBAL.length;
+            const cantidadAnteriores = cantidadTotal - cantidadNuevos;
+
+            // Actualizamos la cabecera
+            animateValue("stat-prev", 0, cantidadAnteriores, 1000);
+            animateValue("stat-new", 0, cantidadNuevos, 1000);
+            animateValue("stat-total", 0, cantidadTotal, 1000);
+            
+            // Marcamos los nuevos en la base de datos visual
+            nuevos.forEach(d => d._esNuevo = true);
+        }
+
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            const obj = document.getElementById(id);
+            let range = end - start;
+            let current = start;
+            let increment = end > start ? 1 : -1;
+            let stepTime = Math.abs(Math.floor(duration / range));
+            if (stepTime < 1) stepTime = 1;
+            
+            let timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current.toLocaleString();
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+            // Fallback rápido si es muy grande
+            setTimeout(() => { obj.innerHTML = end.toLocaleString(); }, duration);
         }
 
         function aplicarFiltrosInteligentes() {
@@ -482,7 +553,6 @@
             const input = normalizarTexto(inputRaw).trim();
             const terminos = input.split(/\s+/).filter(t => t.length > 0);
             const grid = document.getElementById('grid-resultados');
-            const statsNum = document.getElementById('stats-number');
             
             grid.innerHTML = '';
 
@@ -494,16 +564,19 @@
             });
 
             if (resultados.length > 0) {
-                statsNum.innerText = resultados.length.toLocaleString();
-                // Mostramos 100 para no bloquear el navegador
+                // Renderizado limitado
                 resultados.slice(0, 100).forEach(doc => {
                     const esVehiculo = doc._cat === 'VEHICULOS';
                     let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
                     const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                     const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
+                    
+                    // Etiqueta "NUEVO" si corresponde
+                    const badgeNew = doc._esNuevo ? `<span class="badge-new">NUEVO</span>` : '';
 
                     const html = `
                         <div class="card">
+                            ${badgeNew}
                             <div class="card-content">
                                 <div class="card-badges">
                                     <span class="badge ${badgeClass}">${iconCat} ${ubicacion}</span>
@@ -520,7 +593,6 @@
                     grid.innerHTML += html;
                 });
             } else {
-                statsNum.innerText = "0";
                 grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:#999;">Sin resultados</div>`;
             }
         }
