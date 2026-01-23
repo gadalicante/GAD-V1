@@ -493,16 +493,23 @@
         // Usamos .on() en lugar de .once() para mantener la conexión persistente.
         // Y envolvemos todo en onAuthStateChanged para esperar a la sesión del Index.
         
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Usuario detectado (vienes del index): iniciamos carga segura
-                iniciarEscuchaDatos();
-            } else {
-                // No hay usuario. Intentamos cargar igual por si las reglas no son tan estrictas,
-                // o si estás en local y quieres probar. Si falla, saldrá error en consola.
-                iniciarEscuchaDatos();
-            }
-        });
+auth.onAuthStateChanged(user => {
+    const loader = document.getElementById('loader');
+    if (user) {
+        console.log("Usuario detectado:", user.email);
+        iniciarEscuchaDatos();
+    } else {
+        console.warn("No se detecta sesión activa.");
+        loader.innerHTML = `
+            <div class="error-msg" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">
+                ⚠️ <strong>SESIÓN NO DETECTADA</strong><br>
+                El sistema no te reconoce en esta web de pruebas.<br>
+                <button onclick="window.location.href='index.html'" style="margin-top:10px; padding:5px 10px; cursor:pointer;">
+                    Ir a Iniciar Sesión
+                </button>
+            </div>`;
+    }
+});
 
         function iniciarEscuchaDatos() {
             const nodos = [
