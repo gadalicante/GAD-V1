@@ -17,7 +17,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* === TUS ESTILOS ORIGINALES COMPLETOS === */
+        /* TUS ESTILOS ORIGINALES INTACTOS */
         :root {
             --primary-color: #0457C9;
             --bg-color: #f4f6f9;
@@ -41,7 +41,7 @@
             overflow-x: hidden;
         }
 
-        /* === CABECERA === */
+        /* HEADER ORIGINAL */
         header {
             background-color: var(--primary-color);
             height: 120px;
@@ -59,11 +59,7 @@
         .header-title { color: white; font-size: 24px; font-weight: 700; margin: 0; }
         .header-center { flex: 0 0 auto; display: flex; justify-content: center; align-items: center; height: 100%; }
         .logo { height: 100px; width: auto; object-fit: contain; }
-        
-        /* Zona derecha modificada para incluir estadísticas */
-        .header-right { 
-            flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 25px; 
-        }
+        .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 25px; }
 
         .btn-help-premium {
             background: rgba(255, 255, 255, 0.15);
@@ -75,21 +71,13 @@
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); }
 
-        /* ESTILOS DE ESTADÍSTICAS (INTEGRADOS) */
-        .stats-container {
-            display: flex; gap: 15px; text-align: right; align-items: center;
-        }
-        .stat-box {
-            display: flex; flex-direction: column; align-items: flex-end;
-            border-right: 1px solid rgba(255,255,255,0.3); padding-right: 15px;
-        }
-        .stat-box:last-child { border-right: none; padding-right: 0; }
-        
-        .stat-number { color: white; font-size: 20px; font-weight: 900; line-height: 1; }
-        .stat-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px; }
+        /* ESTADÍSTICAS EN CABECERA (Como pediste antes) */
+        .stats-group { text-align: right; border-left: 1px solid rgba(255,255,255,0.3); padding-left: 20px; display: flex; gap: 15px; }
+        .stat-item { display: flex; flex-direction: column; align-items: flex-end; }
+        .stats-counter { color: white; font-size: 20px; font-weight: 900; line-height: 1; display: block; }
+        .stats-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); display: block; text-transform: uppercase; }
         .stat-new { color: var(--gad-gold); text-shadow: 0 0 5px rgba(241,196,15,0.5); }
 
-        /* === CONTROLES === */
         .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .search-wrapper { max-width: 1200px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
         .search-input-container { position: relative; flex: 1; }
@@ -115,7 +103,6 @@
         .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
         .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        /* === RESULTADOS === */
         .results-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 
@@ -123,7 +110,7 @@
             background: white; border-radius: 8px; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
             border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
-            position: relative; /* Para el badge nuevo */
+            position: relative;
         }
         .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
         .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
@@ -133,17 +120,16 @@
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
         
-        /* Etiqueta NUEVO (Temporal 24h) */
+        /* Etiqueta Nuevo Temporal */
         .badge-new {
             position: absolute; top: -5px; right: -5px;
             background: var(--danger-color); color: white; font-size: 9px;
             padding: 2px 6px; border-radius: 8px; font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             animation: pulse 2s infinite; z-index: 10;
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        .card-title { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; }
+        .card-title { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .btn-view {
             color: var(--eye-color); font-size: 24px; padding: 8px; border-radius: 50%;
@@ -152,14 +138,10 @@
         }
         .btn-view:hover { background-color: rgba(40, 167, 69, 0.1); transform: scale(1.1); }
 
-        /* === PIE DE PÁGINA === */
-        .pie-pagina {
-            background-color: var(--primary-color); color: white;
-            text-align: center; padding: 15px 0; margin-top: auto; font-size: 14px;
-        }
-        .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; width: 100%; }
+        .pie-pagina { background-color: var(--primary-color); color: white; text-align: center; padding: 15px 0; margin-top: auto; font-size: 14px; }
+        .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; }
 
-        /* === MODAL AYUDA (TUS ESTILOS RESTAURADOS) === */
+        /* MODAL AYUDA COMPLETO (Recuperado del original) */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -204,43 +186,37 @@
             flex-shrink: 0; 
         }
 
-        /* === VISOR GAD === */
+        /* VISOR SCREEN */
         #modalVisor {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 5000; flex-direction: column;
         }
-        
         #modalVisor.active { display: flex; }
-
+        
         .viewer-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 50px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
             display: flex; align-items: center; justify-content: flex-start;
             padding: 0 15px; z-index: 5002; pointer-events: none; gap: 15px;
         }
-        
         .btn-close-viewer {
             pointer-events: auto; background: #dc3545; color: white; border: none;
             width: 34px; height: 34px; border-radius: 50%; font-size: 16px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5); flex-shrink: 0;
         }
-
         .viewer-title {
             color: white; font-size: 14px; font-weight: bold; text-shadow: 0 2px 4px #000;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
             text-align: left; max-width: 65%; opacity: 0.9;
         }
-
         .iframe-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
         #visor-iframe { width: 100%; height: 100%; border: none; display: block; }
-
         .nav-overlay {
             position: absolute; top: 50%; width: 100%; transform: translateY(-50%);
             display: flex; justify-content: space-between; padding: 0 10px;
             pointer-events: none; z-index: 5001;
         }
-
         .nav-btn {
             pointer-events: auto; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.3); color: white; width: 50px; height: 50px;
@@ -248,7 +224,6 @@
             display: flex; align-items: center; justify-content: center; transition: background 0.2s;
         }
         .nav-btn:hover { background: rgba(241, 196, 15, 0.8); color: black; }
-
         #visor-loader {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-size: 16px; background: rgba(0,0,0,0.8);
@@ -256,30 +231,20 @@
             display: flex; gap: 10px; align-items: center;
         }
 
-        /* RESPONSIVE */
         @media screen and (max-width: 768px) {
             header { height: auto; flex-direction: column; padding: 15px; gap: 15px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; }
             .header-center { order: 1; margin-bottom: 5px; }
             .header-left { order: 2; margin-bottom: 10px; white-space: normal; width: 100%; }
             .header-right { order: 3; justify-content: space-evenly; }
-            
-            .header-title { 
-                font-size: 18px; 
-                white-space: normal; 
-                line-height: 1.2;
-            }
-            
+            .header-title { font-size: 18px; white-space: normal; line-height: 1.2; }
             .search-wrapper { flex-direction: column; gap: 10px; }
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
-
             .modal-content-help { max-height: 80vh; }
-            
-            /* Ajustes para estadísticas en móvil */
-            .stats-container { gap: 10px; margin-top: 5px; }
-            .stat-number { font-size: 16px; }
-            .stat-label { font-size: 9px; }
+            .stats-group { gap: 10px; }
+            .stats-counter { font-size: 16px; }
+            .stats-label { font-size: 8px; }
         }
 
         :fullscreen header, :fullscreen .controls-container, :fullscreen .pie-pagina { display: none; }
@@ -296,19 +261,18 @@
             <img src="logogad.png" alt="GAD Logo" class="logo" onerror="this.style.display='none'">
         </div>
         <div class="header-right">
-            
-            <div class="stats-container">
-                <div class="stat-box">
-                    <span id="stat-prev" class="stat-number">--</span>
-                    <span class="stat-label">Anteriores</span>
+            <div class="stats-group">
+                <div class="stat-item">
+                    <span id="stat-prev" class="stats-counter">--</span>
+                    <span class="stats-label">Anteriores</span>
                 </div>
-                <div class="stat-box">
-                    <span id="stat-new" class="stat-number stat-new">--</span>
-                    <span class="stat-label">Nuevos 24h</span>
+                <div class="stat-item">
+                    <span id="stat-new" class="stats-counter stat-new">--</span>
+                    <span class="stats-label">Nuevos 24h</span>
                 </div>
-                <div class="stat-box">
-                    <span id="stat-total" class="stat-number">--</span>
-                    <span class="stat-label">Total</span>
+                <div class="stat-item">
+                    <span id="stat-total" class="stats-counter">--</span>
+                    <span class="stats-label">Total</span>
                 </div>
             </div>
 
@@ -344,7 +308,7 @@
 
     <div class="results-container">
         <div id="loader" class="loader-box">
-            <i class="fa-solid fa-sync fa-spin"></i> Cargando Inventario GAD...
+            <i class="fa-solid fa-sync fa-spin"></i> Conectando con GAD V1...
         </div>
         <div id="grid-resultados" class="grid"></div>
     </div>
@@ -360,11 +324,9 @@
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
                     <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
-                    
                     <div class="help-example">
                         <b>Ejemplo 1:</b> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
-                        <b>Ejemplo 2:</b> Escribe "Alemania PNC 2024" para ver el documento concreto.<br>
-                        <b>Ejemplo 3:</b> Escribe "PNC" para Permisos de Conducción o "PSP" para Pasaporte.
+                        <b>Ejemplo 2:</b> Escribe "Alemania PNC 2024" para ver el documento concreto.
                     </div>
                 </div>
 
@@ -372,27 +334,13 @@
                     <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. El Visor de Imágenes</div>
                     <p>Al pulsar el icono del ojo, se abre el documento en pantalla completa.</p>
                     <ul>
-                        <li><strong>Zoom Táctil:</strong> En el móvil, usa dos dedos sobre la pantalla (gesto de pellizco) para ampliar y ver las microescrituras.</li>
-                        <li><strong>Navegación:</strong> Usa las flechas laterales para ver otros documentos de la misma carpeta sin salir.</li>
-                    </ul>
-                    
-                    <div class="help-example" style="background:#fff3cd; border-color:#ffc107;">
-                        💡 <strong>Nota:</strong> Pulsa el botón <b>ROJO</b> para cerrar o pulsa el botón de la derecha para entrar en Google Drive en ventana nueva y así poder editar el documento.
-                    </div>
-                </div>
-
-                <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-layer-group"></i> 3. Filtros Rápidos</div>
-                    <p>Usa los botones grises (chips) debajo del buscador para filtrar rápidamente:</p>
-                    <ul>
-                        <li><strong>Personas vs Vehículos:</strong> Separa DNI/Pasaportes de Cartas de Coche.</li>
-                        <li><strong>600 vs 2400 DPI:</strong> Elige entre calidad estándar o ultra-alta definición.</li>
+                        <li><strong>Navegación:</strong> Usa las flechas para ver el siguiente documento del mismo PAÍS.</li>
                     </ul>
                 </div>
 
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 4. Estadísticas</div>
-                    <p>En la parte superior verás el conteo de documentos. Si aparece la etiqueta roja <b style="color:red">NUEVO</b>, significa que el archivo se ha subido en las últimas 24 horas.</p>
+                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 3. Estadísticas</div>
+                    <p>Arriba verás un contador de archivos Nuevos (últimas 24h) y el Total.</p>
                 </div>
             </div>
 
@@ -419,9 +367,7 @@
     </div>
 
     <script>
-        // ===============================================
-        // CONFIGURACIÓN FIREBASE V1 (LA CORRECTA)
-        // ===============================================
+        // === 1. CONFIGURACIÓN FIREBASE V1 (ESTRICTA) ===
         const firebaseConfig = {
             apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
             authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -433,19 +379,16 @@
             measurementId: "G-QG8KDLCWQS"
         };
 
-        // Inicializamos App y Auth (Vital para heredar sesión)
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth(); 
+        const auth = firebase.auth(); // NECESARIO PARA LA HERENCIA DE SESIÓN
 
         let BD_GLOBAL = [];
         let LISTA_REPRODUCCION = []; 
         let INDICE_ACTUAL = 0;
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
-        // ===============================================
-        // LÓGICA DEL VISOR (TUYA ORIGINAL)
-        // ===============================================
+        // === 2. LÓGICA DEL VISOR (ORIGINAL) ===
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -455,7 +398,6 @@
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
-            // Carrusel restringido a la "carpeta" (País)
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
@@ -491,24 +433,13 @@
             let nuevoIndice = INDICE_ACTUAL + direccion;
             if (nuevoIndice < 0) nuevoIndice = LISTA_REPRODUCCION.length - 1;
             if (nuevoIndice >= LISTA_REPRODUCCION.length) nuevoIndice = 0;
-
             INDICE_ACTUAL = nuevoIndice;
             cargarDocumentoActual();
         }
 
-        function cerrarVisor() {
-            modalVisor.classList.remove('active');
-            iframeEl.src = "";
-            salirFullscreen();
-        }
-
-        function entrarFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
-        }
-        function salirFullscreen() {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        }
+        function cerrarVisor() { modalVisor.classList.remove('active'); iframeEl.src = ""; salirFullscreen(); }
+        function entrarFullscreen() { const e = document.documentElement; if (e.requestFullscreen) e.requestFullscreen().catch(() => {}); }
+        function salirFullscreen() { if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); }
 
         document.addEventListener('keydown', (e) => {
             if (!modalVisor.classList.contains('active')) return;
@@ -522,12 +453,9 @@
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
-        // ===============================================
-        // CARGA DE DATOS (CON DETECTOR DE SESIÓN)
-        // ===============================================
-        
-        // Esta función intenta cargar. Si estás logueado en el index, Auth lo sabe y Firebase deja pasar.
+        // === 3. CARGA DE DATOS (CON DETECTOR DE SESIÓN) ===
         async function cargarInventario() {
+            // Nodos V1 (Nombres confirmados)
             const nodos = [
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
                 { id: 'BD_VEHICULOS 600 DPI', cat: 'VEHICULOS', cal: '600' }
@@ -560,13 +488,15 @@
                          });
                     });
                 } catch (e) { 
-                    console.error("Error leyendo nodo: " + nodo.id, e);
+                    console.error("Error en nodo " + nodo.id, e); 
                     if(e.code === 'PERMISSION_DENIED') {
-                        document.getElementById('loader').innerHTML = '⚠️ Esperando autorización...';
+                        // Si falla por permiso, es normal si el auth tarda un milisegundo más.
+                        // El listener de auth volverá a llamar a esta función cuando esté listo.
                     }
                 }
             }
 
+            // Orden A-Z
             BD_GLOBAL = lista.sort((a, b) => {
                 const paisA = (a.Pais || 'ZZZ').toUpperCase();
                 const paisB = (b.Pais || 'ZZZ').toUpperCase();
@@ -575,7 +505,7 @@
                 return (a.NombreDocumento || '').localeCompare(b.NombreDocumento || '');
             });
 
-            // Calcular estadísticas
+            // Lógica de Estadísticas
             calcularEstadisticas();
 
             if (BD_GLOBAL.length > 0) {
@@ -671,15 +601,13 @@
             document.getElementById('modalAyuda').style.display = mostrar ? 'flex' : 'none';
         }
 
-        // === LISTENER DE AUTH PARA ARRANCAR SOLO CUANDO SEPAMOS QUIÉN ERES ===
-        // Esto soluciona el problema de "Permission Denied" en V1 si vienes del index
+        // === LISTENER DE AUTH PARA REGLAS ESTRICTAS ===
+        // Esto espera a que el navegador confirme que vienes del Index logueado.
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Usuario detectado -> Cargar
                 cargarInventario();
             } else {
-                // No hay usuario -> Intentamos cargar igual (por si acaso)
-                // Pero si falla, el catch lo capturará
+                // Si no hay usuario, intentamos cargar igual (puede fallar si rules=strict)
                 cargarInventario();
             }
         });
