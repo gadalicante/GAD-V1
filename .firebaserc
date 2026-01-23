@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "gad-alicante-v1"
+  },
+  "targets": {
+    "gad-alicante-v1": {
+      "hosting": {
+        "gad-alicante-pruebas": [
+          "gad-alicante-pruebas"
+        ]
+      }
+    }
+  }
+}
