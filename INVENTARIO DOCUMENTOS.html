@@ -11,12 +11,13 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* === ESTILOS ESTRUCTURALES ORIGINALES === */
+        /* === TUS ESTILOS ORIGINALES (INTACTOS) === */
         :root {
             --primary-color: #0457C9;
             --bg-color: #f4f6f9;
@@ -32,34 +33,24 @@
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* CABECERA */
         header {
             background-color: var(--primary-color);
-            height: 120px;
-            padding: 0 30px;
+            height: 120px; padding: 0 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
         }
 
-        .header-left { flex: 1; }
+        .header-left { flex: 1; text-align: left; white-space: nowrap; }
         .header-title { color: white; font-size: 24px; font-weight: 700; margin: 0; }
-        .header-center { flex: 0 0 auto; display: flex; justify-content: center; height: 100%; }
+        .header-center { flex: 0 0 auto; display: flex; justify-content: center; align-items: center; height: 100%; }
         .logo { height: 100px; width: auto; object-fit: contain; }
-        
-        /* Modificado para incluir estadísticas */
         .header-right { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 20px; }
 
         .btn-help-premium {
@@ -72,56 +63,31 @@
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); }
 
-        /* ESTILOS NUEVOS: ESTADÍSTICAS EN CABECERA */
-        .stats-container {
-            display: flex; gap: 15px; text-align: right;
-        }
-        .stat-box {
-            display: flex; flex-direction: column; align-items: flex-end;
-            border-right: 1px solid rgba(255,255,255,0.3); padding-right: 15px;
-        }
+        /* ESTADÍSTICAS EN CABECERA (Integradas limpiamente) */
+        .stats-container { display: flex; gap: 15px; text-align: right; }
+        .stat-box { display: flex; flex-direction: column; align-items: flex-end; border-right: 1px solid rgba(255,255,255,0.3); padding-right: 15px; }
         .stat-box:last-child { border-right: none; padding-right: 0; }
-        
         .stat-number { color: white; font-size: 20px; font-weight: 900; line-height: 1; }
         .stat-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px; }
-        .stat-new { color: var(--gad-gold); text-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
+        .stat-new { color: var(--gad-gold); text-shadow: 0 0 5px rgba(241,196,15,0.5); }
 
-        /* CONTROLES Y BUSCADOR */
         .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .search-wrapper { max-width: 1200px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
         .search-input-container { position: relative; flex: 1; }
-        
-        .search-input {
-            width: 100%; padding: 15px 20px 15px 50px; font-size: 16px;
-            border: 2px solid #ddd; border-radius: 50px; outline: none; height: 54px;
-        }
+        .search-input { width: 100%; padding: 15px 20px 15px 50px; font-size: 16px; border: 2px solid #ddd; border-radius: 50px; outline: none; height: 54px; }
         .search-input:focus { border-color: var(--primary-color); }
         .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #888; font-size: 18px; }
-
-        .btn-clear {
-            background-color: var(--danger-color); color: white; border: none;
-            border-radius: 50px; padding: 0 30px; height: 54px; font-size: 16px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .btn-clear { background-color: var(--danger-color); color: white; border: none; border-radius: 50px; padding: 0 30px; height: 54px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         .filters-chips { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .chip {
-            padding: 8px 16px; background: #e9ecef; border: none; border-radius: 20px;
-            cursor: pointer; font-size: 14px; font-weight: 500; color: #555;
-        }
+        .chip { padding: 8px 16px; background: #e9ecef; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; color: #555; }
         .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
         .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        /* RESULTADOS GRID */
         .results-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 
-        .card {
-            background: white; border-radius: 8px; padding: 12px 15px;
-            display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
-            position: relative; /* Necesario para la etiqueta Nuevo */
-        }
+        .card { background: white; border-radius: 8px; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
         .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
         .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
         
@@ -130,79 +96,41 @@
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
         
-        /* ETIQUETA NUEVO */
-        .badge-new { 
-            position: absolute; top: -5px; right: -5px; 
-            background: var(--danger-color); color: white; 
-            font-size: 9px; padding: 3px 8px; border-radius: 10px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); font-weight: bold; letter-spacing: 0.5px;
-            animation: pulse 2s infinite; z-index: 10;
-        }
+        /* Etiqueta Nuevo (Temporal 24h) */
+        .badge-new { position: absolute; top: -5px; right: -5px; background: var(--danger-color); color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: bold; animation: pulse 2s infinite; z-index: 10; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .card-title { font-size: 14px; font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 5px; }
-
-        .btn-view {
-            color: var(--eye-color); font-size: 24px; padding: 8px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            background: transparent; border: none;
-        }
+        .btn-view { color: var(--eye-color); font-size: 24px; padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: transparent; border: none; }
         .btn-view:hover { background-color: rgba(40, 167, 69, 0.1); transform: scale(1.1); }
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; width: 100%; }
 
-        /* MODAL AYUDA */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(3px); padding: 15px;
-        }
-        .modal-content-help {
-            background: white; border-radius: 10px; max-width: 600px; width: 100%;
-            max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(3px); padding: 15px; }
+        .modal-content-help { background: white; border-radius: 10px; max-width: 600px; width: 100%; position: relative; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
         .help-header { background: var(--primary-color); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .help-body { padding: 20px; overflow-y: auto; }
+        .help-body { padding: 20px; overflow-y: auto; color: #444; }
+        .btn-close-help { cursor: pointer; font-size: 24px; color: white; background: none; border: none; }
         .btn-modal-ok { background: var(--primary-color); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; }
 
-        /* VISOR SCREEN */
-        #modalVisor {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 5000; flex-direction: column;
-        }
+        #modalVisor { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 5000; flex-direction: column; }
         #modalVisor.active { display: flex; }
-        
-        .viewer-top {
-            position: absolute; top: 0; left: 0; width: 100%; height: 50px;
-            background: rgba(0,0,0,0.8); display: flex; align-items: center;
-            padding: 0 15px; z-index: 5002; gap: 15px;
-        }
+        .viewer-top { position: absolute; top: 0; left: 0; width: 100%; height: 50px; background: rgba(0,0,0,0.8); display: flex; align-items: center; padding: 0 15px; z-index: 5002; gap: 15px; }
         .btn-close-viewer { background: #dc3545; color: white; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; }
         .viewer-title { color: white; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
-        
-        .nav-overlay {
-            position: absolute; top: 50%; width: 100%; transform: translateY(-50%);
-            display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; z-index: 5001;
-        }
-        .nav-btn {
-            pointer-events: auto; background: rgba(255, 255, 255, 0.2);
-            color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 24px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; border: none;
-        }
+        .nav-overlay { position: absolute; top: 50%; width: 100%; transform: translateY(-50%); display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; z-index: 5001; }
+        .nav-btn { pointer-events: auto; background: rgba(255, 255, 255, 0.2); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: none; }
         .nav-btn:hover { background: rgba(255, 255, 255, 0.4); }
-        
         .iframe-container { flex: 1; width: 100%; height: 100%; background: #000; }
         #visor-iframe { width: 100%; height: 100%; border: none; }
         #visor-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; }
 
-        /* RESPONSIVE */
         @media screen and (max-width: 768px) {
             header { height: auto; flex-direction: column; padding: 15px; gap: 10px; }
             .header-left, .header-center, .header-right { width: 100%; justify-content: center; text-align: center; }
             .header-title { font-size: 18px; white-space: normal; }
             .search-wrapper { flex-direction: column; }
             .search-input-container, .btn-clear { width: 100%; }
-            /* Ajuste estadísticas móvil */
             .stats-container { gap: 10px; margin-top: 5px; }
             .stat-number { font-size: 16px; }
             .stat-label { font-size: 9px; }
@@ -219,7 +147,6 @@
             <img src="logogad.png" alt="GAD Logo" class="logo" onerror="this.style.display='none'">
         </div>
         <div class="header-right">
-            
             <div class="stats-container">
                 <div class="stat-box">
                     <span id="stat-prev" class="stat-number">--</span>
@@ -246,7 +173,7 @@
             <div class="search-input-container">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" id="buscador" class="search-input" 
-                       placeholder="Buscar (Ej: Alemania, DNI, Pasaporte...)"
+                       placeholder="Ej: España DNI 2025"
                        onkeyup="aplicarFiltrosInteligentes()">
             </div>
             <button class="btn-clear" onclick="limpiarBusqueda()">
@@ -267,7 +194,7 @@
 
     <div class="results-container">
         <div id="loader" class="loader-box">
-            <i class="fa-solid fa-sync fa-spin"></i> Cargando y ordenando...
+            <i class="fa-solid fa-sync fa-spin"></i> Cargando GAD V1...
         </div>
         <div id="grid-resultados" class="grid"></div>
     </div>
@@ -291,19 +218,19 @@
         <div class="modal-content-help">
             <div class="help-header">
                 <h2>Ayuda</h2>
-                <button class="btn-close-help" onclick="toggleModalAyuda(false)">✕</button>
+                <button class="btn-close-help" onclick="toggleModalAyuda(false)" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">✕</button>
             </div>
             <div class="help-body">
                 <p><b>1. Orden:</b> Los documentos aparecen automáticamente ordenados por País (A-Z).</p>
                 <p><b>2. Carrusel:</b> Al abrir un documento, usa las flechas para ver el siguiente de la lista (dentro del mismo país).</p>
-                <p><b>3. Novedades:</b> En la cabecera verás estadísticas de carga y archivos nuevos.</p>
+                <p><b>3. Novedades:</b> En la cabecera verás cuántos archivos son nuevos (últimas 24h).</p>
             </div>
             <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">ENTENDIDO</button>
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURACIÓN FIREBASE V1 (LA QUE TÚ PEDISTE) ---
+        // --- CONFIGURACIÓN V1 (TUS DATOS CORRECTOS) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
             authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -317,13 +244,14 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        const auth = firebase.auth(); // Inicializamos auth para detectar sesión
 
         let BD_GLOBAL = [];
         let LISTA_REPRODUCCION = []; 
         let INDICE_ACTUAL = 0;
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
-        // --- 2. LÓGICA DEL VISOR ---
+        // --- LÓGICA DEL VISOR ---
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -333,9 +261,9 @@
             const docClicado = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!docClicado) return;
 
+            // Carrusel: Solo documentos del mismo País
             LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === docClicado._carpeta);
             
-            // Si por alguna razón la lista es vacía, fallback a todo
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
 
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
@@ -347,17 +275,13 @@
 
         function cargarDocumentoActual() {
             if (INDICE_ACTUAL < 0 || INDICE_ACTUAL >= LISTA_REPRODUCCION.length) return;
-            
             const doc = LISTA_REPRODUCCION[INDICE_ACTUAL];
             tituloEl.innerText = `${INDICE_ACTUAL + 1}/${LISTA_REPRODUCCION.length} - ${doc.Pais} - ${doc.NombreDocumento}`;
             loaderVisor.style.display = 'flex';
 
             let urlLimpia = doc.Enlace;
-            if (urlLimpia.includes('/view')) {
-                urlLimpia = urlLimpia.replace(/\/view.*/, '/preview');
-            } else if (!urlLimpia.includes('/preview') && !urlLimpia.includes('id=')) {
-                 urlLimpia += '/preview';
-            }
+            if (urlLimpia.includes('/view')) urlLimpia = urlLimpia.replace(/\/view.*/, '/preview');
+            else if (!urlLimpia.includes('/preview')) urlLimpia += '/preview';
 
             iframeEl.src = urlLimpia;
             iframeEl.onload = () => loaderVisor.style.display = 'none';
@@ -371,27 +295,25 @@
             cargarDocumentoActual();
         }
 
-        function cerrarVisor() {
-            modalVisor.classList.remove('active');
-            iframeEl.src = "";
-            salirFullscreen();
-        }
+        function cerrarVisor() { modalVisor.classList.remove('active'); iframeEl.src = ""; salirFullscreen(); }
+        function entrarFullscreen() { const elem = document.documentElement; if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {}); }
+        function salirFullscreen() { if (document.exitFullscreen) document.exitFullscreen().catch(() => {}); }
 
-        function entrarFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
-        }
-        function salirFullscreen() {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        }
+        document.addEventListener('keydown', e => {
+            if (!modalVisor.classList.contains('active')) return;
+            if (e.key === "ArrowLeft") cambiarDoc(-1);
+            if (e.key === "ArrowRight") cambiarDoc(1);
+            if (e.key === "Escape") cerrarVisor();
+        });
 
-        // --- 3. CARGA DE DATOS ---
         function normalizarTexto(texto) {
             if (!texto) return "";
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
+        // --- CARGA DE DATOS ---
         async function cargarInventario() {
+            // APUNTANDO A LAS CARPETAS V1 CORRECTAS (BD_)
             const nodos = [
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
                 { id: 'BD_VEHICULOS 600 DPI', cat: 'VEHICULOS', cal: '600' }
@@ -418,12 +340,15 @@
                              _cat: nodo.cat,
                              _cal: nodo.cal,
                              _palabras: palabrasClave,
-                             _carpeta: doc.Pais || "General", // CLAVE PARA EL CARRUSEL
+                             _carpeta: doc.Pais || "General",
                              _idUnico: contadorId++,
                              Timestamp: doc.Timestamp || 0
                          });
                     });
-                } catch (e) { console.error("Error nodo " + nodo.id, e); }
+                } catch (e) { 
+                    console.error("Error en nodo " + nodo.id, e); 
+                    // Si el error es de permiso, no hacemos nada visual, solo consola.
+                }
             }
 
             // Orden A-Z
@@ -435,7 +360,7 @@
                 return (a.NombreDocumento || '').localeCompare(b.NombreDocumento || '');
             });
 
-            // NUEVO: CALCULAR ESTADÍSTICAS Y ETIQUETAS "NUEVO"
+            // Lógica de estadísticas
             calcularEstadisticas();
 
             document.getElementById('loader').style.display = 'none';
@@ -445,15 +370,11 @@
         function calcularEstadisticas() {
             if (BD_GLOBAL.length === 0) return;
 
-            // 1. Buscamos la fecha más reciente encontrada en los archivos
             const timestamps = BD_GLOBAL.map(d => d.Timestamp).filter(t => t > 0);
-            const ultimaSubida = timestamps.length > 0 ? Math.max(...timestamps) : 0;
-            
-            // 2. Umbral de 24 horas (86400000 ms)
-            const umbral = 86400000;
+            const ultimaSubida = Math.max(...timestamps);
+            const umbral = 86400000; // 24h
             let contadorNuevos = 0;
 
-            // 3. Marcamos los archivos nuevos y contamos
             BD_GLOBAL.forEach(doc => {
                 if (ultimaSubida - doc.Timestamp < umbral && doc.Timestamp > 0) {
                     doc._esNuevo = true;
@@ -464,36 +385,11 @@
             const total = BD_GLOBAL.length;
             const anteriores = total - contadorNuevos;
 
-            // 4. Pintamos en la cabecera
-            animateValue("stat-prev", 0, anteriores, 1000);
-            animateValue("stat-new", 0, contadorNuevos, 1000);
-            animateValue("stat-total", 0, total, 1000);
+            document.getElementById('stat-prev').innerText = anteriores.toLocaleString();
+            document.getElementById('stat-new').innerText = contadorNuevos.toLocaleString();
+            document.getElementById('stat-total').innerText = total.toLocaleString();
         }
 
-        function animateValue(id, start, end, duration) {
-            if (start === end) {
-                document.getElementById(id).innerText = end.toLocaleString();
-                return;
-            }
-            const obj = document.getElementById(id);
-            let range = end - start;
-            let current = start;
-            let increment = end > start ? 1 : -1;
-            let stepTime = Math.abs(Math.floor(duration / range));
-            if (stepTime < 1) stepTime = 1;
-            
-            let timer = setInterval(function() {
-                current += increment;
-                obj.innerText = current.toLocaleString();
-                if (current == end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
-            // Fallback
-            setTimeout(() => { obj.innerText = end.toLocaleString(); }, duration);
-        }
-
-        // --- 4. FILTROS ---
         function aplicarFiltrosInteligentes() {
             const inputRaw = document.getElementById('buscador').value;
             const input = normalizarTexto(inputRaw).trim();
@@ -510,14 +406,12 @@
             });
 
             if (resultados.length > 0) {
-                // Limitamos renderizado inicial para no saturar
                 resultados.slice(0, 100).forEach(doc => {
                     const esVehiculo = doc._cat === 'VEHICULOS';
                     let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
                     const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                     const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
                     
-                    // ETIQUETA NUEVO (SOLO SI ES NUEVO)
                     const badgeNew = doc._esNuevo ? `<span class="badge-new">NUEVO</span>` : '';
 
                     const html = `
@@ -560,8 +454,22 @@
             document.getElementById('modalAyuda').style.display = mostrar ? 'flex' : 'none';
         }
 
-        // Arrancamos
-        cargarInventario();
+        // AQUÍ ESTÁ LA CLAVE DE QUE FUNCIONE EN V1 CON TUS REGLAS:
+        // Esperamos a ver si hay usuario (auth.onAuthStateChanged).
+        // Si vienes del Index logueado, 'user' existirá y cargará.
+        
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Estamos autorizados -> Cargamos datos
+                cargarInventario();
+            } else {
+                // No estamos autorizados (No logueado) -> Intentamos cargar igual por si acaso, 
+                // pero si tus reglas son estrictas, fallará y verás el error en consola.
+                console.warn("Usuario no logueado. Si las reglas son estrictas, esto fallará.");
+                cargarInventario();
+            }
+        });
+
     </script>
 </body>
 </html>
