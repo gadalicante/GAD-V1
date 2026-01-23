@@ -82,7 +82,6 @@
         .stat-number { color: white; font-size: 20px; font-weight: 900; line-height: 1; }
         .stat-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px; }
         
-        /* Color dorado y brillo para los nuevos */
         .stat-new { color: var(--gad-gold); text-shadow: 0 0 8px rgba(241, 196, 15, 0.5); }
 
         .controls-container { background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -126,7 +125,7 @@
         .badge-dpi { background: #f5f5f5; color: #616161; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
         
-        /* ETIQUETA ROJA "NUEVO" ANIMADA */
+        /* ETIQUETA NUEVO */
         .badge-new { 
             position: absolute; top: -5px; right: -5px; 
             background: var(--danger-color); color: white; 
@@ -227,7 +226,6 @@
             .search-input-container, .btn-clear { width: 100%; }
             .nav-btn { width: 45px; height: 45px; font-size: 20px; background: rgba(0,0,0,0.4); }
             .modal-content-help { max-height: 80vh; }
-            /* Ajuste para las estadísticas en móvil */
             .stats-container { gap: 10px; }
             .stat-number { font-size: 16px; }
             .stat-label { font-size: 9px; }
@@ -294,7 +292,7 @@
 
     <div class="results-container">
         <div id="loader" class="loader-box">
-            <i class="fa-solid fa-sync fa-spin"></i> Sincronizando con GAD V3...
+            <i class="fa-solid fa-sync fa-spin"></i> Conectando con GAD V1...
         </div>
         <div id="grid-resultados" class="grid"></div>
     </div>
@@ -326,7 +324,7 @@
 
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-chart-line"></i> 3. Archivos Nuevos</div>
-                    <p>La etiqueta roja <b>"NUEVO"</b> y el contador en la cabecera solo se muestran durante las 24 horas siguientes a una subida. Después, desaparecen automáticamente.</p>
+                    <p>La etiqueta roja <b>"NUEVO"</b> y el contador en la cabecera solo se muestran durante las 24 horas siguientes a una subida.</p>
                 </div>
             </div>
 
@@ -353,16 +351,16 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE V3
+        // CONFIGURACIÓN FIREBASE V1 (LA QUE HAS PEDIDO)
         const firebaseConfig = {
-            apiKey: "AIzaSyA6EDUJ2dG50DphB-dF6GLi3P2IlW8lDz4",
-            authDomain: "gad-alicante-v3.firebaseapp.com",
-            databaseURL: "https://gad-alicante-v3-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "gad-alicante-v3",
-            storageBucket: "gad-alicante-v3.firebasestorage.app",
-            messagingSenderId: "906986258369",
-            appId: "1:906986258369:web:21a7ea29a33b5f395e3940",
-            measurementId: "G-Q0E3H1996K"
+            apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
+            authDomain: "gad-alicante-v1.firebaseapp.com",
+            databaseURL: "https://gad-alicante-v1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gad-alicante-v1",
+            storageBucket: "gad-alicante-v1.firebasestorage.app",
+            messagingSenderId: "545835357966",
+            appId: "1:545835357966:web:6351ec6c0d3c8e69eb695f",
+            measurementId: "G-QG8KDLCWQS"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -449,8 +447,9 @@
             return texto.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); 
         }
 
-        // --- CARGA DE DATOS ---
+        // --- CARGA DE DATOS PARA V1 (CON LOS NODOS "BD_") ---
         async function cargarInventario() {
+            // Nodos cambiados a BD_ como pediste
             const nodos = [
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
                 { id: 'BD_VEHICULOS 600 DPI', cat: 'VEHICULOS', cal: '600' }
@@ -496,7 +495,7 @@
                 return (a.NombreDocumento || '').localeCompare(b.NombreDocumento || '');
             });
             
-            // LÓGICA DE ESTADÍSTICAS POR 24 HORAS
+            // Lógica 24h
             calcularEstadisticas();
 
             document.getElementById('loader').style.display = 'none';
@@ -507,21 +506,17 @@
             if (BD_GLOBAL.length === 0) return;
 
             const AHORA = Date.now();
-            const UN_DIA = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+            const UN_DIA = 24 * 60 * 60 * 1000; // 24 horas
 
-            // Un archivo es nuevo si su fecha es de hace menos de 24 horas
             const nuevos = BD_GLOBAL.filter(d => (AHORA - d.Timestamp) < UN_DIA);
-            
             const cantidadNuevos = nuevos.length;
             const cantidadTotal = BD_GLOBAL.length;
             const cantidadAnteriores = cantidadTotal - cantidadNuevos;
 
-            // Actualizamos la cabecera con animación
             animateValue("stat-prev", 0, cantidadAnteriores, 1000);
             animateValue("stat-new", 0, cantidadNuevos, 1000);
             animateValue("stat-total", 0, cantidadTotal, 1000);
             
-            // Marcamos los nuevos en la base de datos visual para ponerles la etiqueta roja
             nuevos.forEach(d => d._esNuevo = true);
         }
 
@@ -544,7 +539,6 @@
                     clearInterval(timer);
                 }
             }, stepTime);
-            // Fallback rápido
             setTimeout(() => { obj.innerHTML = end.toLocaleString(); }, duration);
         }
 
@@ -564,14 +558,12 @@
             });
 
             if (resultados.length > 0) {
-                // Renderizado limitado
                 resultados.slice(0, 100).forEach(doc => {
                     const esVehiculo = doc._cat === 'VEHICULOS';
                     let ubicacion = doc.EstadoProvincia && doc.EstadoProvincia !== 'N/A' ? doc.EstadoProvincia : doc.Pais;
                     const iconCat = esVehiculo ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                     const badgeClass = esVehiculo ? 'badge-veh' : 'badge-loc';
                     
-                    // Etiqueta "NUEVO" (Solo si tiene menos de 24h)
                     const badgeNew = doc._esNuevo ? `<span class="badge-new">NUEVO</span>` : '';
 
                     const html = `
