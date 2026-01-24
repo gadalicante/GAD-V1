@@ -41,7 +41,6 @@
         /* HEADER */
         header {
             background-color: var(--primary-color);
-            height: auto; min-height: 120px; /* Ajuste altura */
             padding: 15px 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             display: flex; justify-content: space-between; align-items: center;
@@ -54,25 +53,26 @@
         .header-center { flex: 0 0 auto; display: flex; justify-content: center; }
         .logo { height: 80px; width: auto; object-fit: contain; }
         
-        /* Zona derecha: Stats + Fecha + Ayuda */
         .header-right { 
             flex: 1; display: flex; flex-direction: column; 
-            align-items: flex-end; justify-content: center; gap: 10px; min-width: 250px;
+            align-items: flex-end; justify-content: center; gap: 5px; min-width: 250px;
         }
 
+        /* ESTADÍSTICAS EN CABECERA */
         .stats-wrapper { display: flex; align-items: center; gap: 20px; }
-
         .stats-container { display: flex; gap: 15px; text-align: right; }
+        
         .stat-box { display: flex; flex-direction: column; align-items: flex-end; border-right: 1px solid rgba(255,255,255,0.3); padding-right: 15px; }
         .stat-box:last-child { border-right: none; padding-right: 0; }
-        .stat-number { color: white; font-size: 20px; font-weight: 900; line-height: 1; }
+        
+        .stat-number { color: white; font-size: 22px; font-weight: 900; line-height: 1; }
+        .stat-number.new { color: var(--gad-gold); text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
         .stat-label { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px; }
 
-        /* NUEVO: Fecha de actualización */
         .last-update {
             color: rgba(255, 255, 255, 0.7);
             font-size: 11px; font-weight: 400;
-            text-align: right; margin-top: 2px;
+            text-align: right; margin-top: 5px;
             font-style: italic;
         }
 
@@ -81,7 +81,7 @@
             border: 1px solid rgba(255, 255, 255, 0.5);
             color: white; padding: 6px 15px; border-radius: 30px;
             cursor: pointer; font-size: 13px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 8px; margin-top: 5px;
             transition: all 0.3s ease; text-transform: uppercase;
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); }
@@ -112,17 +112,16 @@
         .chip.active { background: var(--primary-color); color: white; box-shadow: 0 2px 4px rgba(4, 87, 201, 0.3); }
         .divider { width: 1px; background: #ccc; margin: 0 10px; height: 30px; }
 
-        /* GRID RESULTADOS */
+        /* RESULTADOS */
         .results-container { flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
 
         .card {
             background: white; border-radius: 8px; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid #eee; transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
+            border: 1px solid #eee; transition: transform 0.2s; position: relative;
         }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+        .card:hover { transform: translateY(-2px); border-color: var(--primary-color); }
         .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
         
         .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
@@ -141,7 +140,7 @@
 
         .loader-box { text-align: center; padding: 50px; font-size: 18px; color: #666; width: 100%; }
 
-        /* MODAL AYUDA */
+        /* MODAL AYUDA EXTENSA */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;
@@ -157,12 +156,19 @@
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .help-header h2 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-        .help-body { padding: 20px; color: #444; overflow-y: auto; flex: 1; }
+        .help-body { padding: 25px; color: #444; overflow-y: auto; flex: 1; line-height: 1.6; }
         .btn-close-help { cursor: pointer; font-size: 24px; color: white; opacity: 0.8; background: none; border: none; }
-        .help-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .help-section:last-child { border: none; }
-        .help-title { font-weight: 700; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
-        .help-example { background: #f8f9fa; border-left: 4px solid var(--gad-gold); padding: 10px 15px; margin: 10px 0; font-size: 13px; color: #555; font-style: italic; }
+        
+        .help-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .help-section:last-child { border: none; margin-bottom: 0; }
+        .help-title { font-weight: 700; color: var(--primary-color); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 16px; text-transform: uppercase; }
+        .help-text { font-size: 14px; color: #555; margin-bottom: 10px; }
+        
+        .help-tip { 
+            background: #fff8e1; border-left: 4px solid var(--gad-gold); 
+            padding: 12px 15px; margin: 10px 0; font-size: 13px; color: #555; 
+        }
+        
         .btn-modal-ok { background-color: var(--primary-color); color: white; border: none; padding: 15px 0; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 
         /* VISOR */
@@ -193,10 +199,8 @@
             .logo { height: 60px; }
             .header-left { order: 2; }
             .header-right { order: 3; align-items: center; }
-            .stats-wrapper { flex-direction: column; gap: 5px; width: 100%; }
-            .stats-container { justify-content: center; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px; }
-            .btn-help-premium { width: 100%; justify-content: center; margin-top: 5px; }
-            
+            .stats-wrapper { flex-direction: row; justify-content: center; gap: 15px; width: 100%; }
+            .btn-help-premium { width: 100%; justify-content: center; margin-top: 10px; }
             .search-wrapper { flex-direction: column; }
             .search-input-container, .btn-clear { width: 100%; }
         }
@@ -206,24 +210,28 @@
 
     <header>
         <div class="header-left">
-            <h1 class="header-title">INVENTARIO DE DOCUMENTOS GAD</h1>
+            <h1 class="header-title">INVENTARIO GAD</h1>
         </div>
         <div class="header-center">
             <img src="logogad.png" alt="GAD Logo" class="logo" onerror="this.style.display='none'">
         </div>
         <div class="header-right">
             <div class="stats-wrapper">
-                <div class="stats-container">
-                    <div class="stat-box">
-                        <span id="stat-total" class="stat-number">--</span>
-                        <span class="stat-label">Total Documentos</span>
-                    </div>
+                <div class="stat-box">
+                    <span id="stat-total" class="stat-number">--</span>
+                    <span class="stat-label">Total</span>
                 </div>
-                <button class="btn-help-premium" onclick="toggleModalAyuda(true)">
-                    <i class="fa-regular fa-circle-question"></i> AYUDA
-                </button>
+                <div class="stat-box">
+                    <span id="stat-new" class="stat-number new">--</span>
+                    <span class="stat-label">Nuevos (24h)</span>
+                </div>
             </div>
-            <div id="fecha-actualizacion" class="last-update">Actualizado: --/--/----</div>
+            
+            <button class="btn-help-premium" onclick="toggleModalAyuda(true)">
+                <i class="fa-regular fa-circle-question"></i> AYUDA / MANUAL
+            </button>
+            
+            <div id="fecha-actualizacion" class="last-update">Actualizado: --/--/---- --:--</div>
         </div>
     </header>
 
@@ -261,31 +269,45 @@
     <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModalAyuda(false)">
         <div class="modal-content-help">
             <div class="help-header">
-                <h2><i class="fa-solid fa-book-open"></i> Manual de Operador</h2>
+                <h2><i class="fa-solid fa-book-open"></i> Manual de Operador GAD</h2>
                 <button class="btn-close-help" onclick="toggleModalAyuda(false)">✕</button>
             </div>
             
             <div class="help-body">
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Cómo buscar documentos</div>
-                    <p>El buscador es inteligente. No necesitas escribir acentos ni mayúsculas.</p>
-                    <div class="help-example">
-                        <b>Ejemplo 1:</b> Si escribes "rumania", el sistema encontrará "Rumanía".<br>
-                        <b>Ejemplo 2:</b> Escribe "PNC" para Permisos de Conducción o "PSP" para Pasaporte.
+                    <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. Motor de Búsqueda Inteligente</div>
+                    <p class="help-text">El sistema está diseñado para facilitar la búsqueda rápida. Puedes combinar términos.</p>
+                    <div class="help-tip">
+                        <b>Truco:</b> No necesitas poner acentos ni respetar mayúsculas. <br>
+                        Si buscas <i>"belgica pnc"</i> encontrarás "Bélgica - Permiso Nacional Conducción".
                     </div>
                 </div>
 
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. El Visor de Imágenes</div>
-                    <p>Al pulsar el icono del ojo, se abre el documento en pantalla completa.</p>
+                    <div class="help-title"><i class="fa-solid fa-filter"></i> 2. Uso de Filtros y Contadores</div>
+                    <p class="help-text">Los botones grises te permiten filtrar la base de datos.</p>
+                    <p class="help-text"><b>¡IMPORTANTE!</b> Los contadores de arriba ("Total" y "Nuevos") cambian según el filtro que tengas activo. Si filtras por "Vehículos", el total mostrará solo la cantidad de vehículos.</p>
+                    <div class="help-tip">
+                        Si seleccionas <b>"2400 DPI"</b> y el contador marca <b>0</b>, significa que aún no hay documentos de esa calidad en el sistema.
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 3. Visor de Documentos</div>
+                    <p class="help-text">Pulsa el icono del <b>ojo verde</b> para abrir el documento.</p>
                     <ul>
-                        <li><strong>Zoom:</strong> Usa dos dedos sobre la pantalla.</li>
-                        <li><strong>Navegación:</strong> Usa las flechas para ver otros documentos del mismo país.</li>
+                        <li><b>Zoom:</b> Pellizca la pantalla en móviles o usa el scroll en PC.</li>
+                        <li><b>Navegación:</b> Usa las flechas laterales para saltar al siguiente documento de la lista filtrada sin salir del visor.</li>
                     </ul>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-clock"></i> 4. Actualizaciones</div>
+                    <p class="help-text">El sistema se sincroniza automáticamente cada noche. El contador <b>"Nuevos (24h)"</b> te indica cuántos archivos se han añadido o modificado desde ayer.</p>
                 </div>
             </div>
 
-            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">ENTENDIDO</button>
+            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">ENTENDIDO, CERRAR MANUAL</button>
         </div>
     </div>
 
@@ -351,7 +373,7 @@
                     }
                 }, (error) => {
                     if (error.code === 'PERMISSION_DENIED') {
-                        document.getElementById('loader').innerText = "⛔ Sin permiso. Inicia sesión en Index.";
+                        document.getElementById('loader').innerText = "⛔ Sin permiso. Inicia sesión.";
                     }
                 });
             });
@@ -369,13 +391,12 @@
                 Object.entries(grupo.raw).forEach(([key, doc]) => {
                     if (!doc || !doc.NombreDocumento) return;
                     
-                    // IMPORTANTE: Creamos palabras clave para el buscador
                     const raw = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento||''} ${doc.EstadoProvincia||''}`;
                     const words = normalizarTexto(raw).replace(/_/g,' ').replace(/-/g,' ').split(/\s+/).filter(w=>w.length>0);
                     
                     lista.push({
                         ...doc,
-                        _cat: grupo.meta.cat, // 'PERSONAS' o 'VEHICULOS' (Clave para los filtros)
+                        _cat: grupo.meta.cat, 
                         _cal: grupo.meta.cal,
                         _palabras: words,
                         _carpeta: doc.Pais || "General",
@@ -394,52 +415,37 @@
 
             if (BD_GLOBAL.length > 0) {
                 document.getElementById('loader').style.display = 'none';
-                calcularEstadisticas();
+                calcularFechaGlobal(); // Solo la fecha, los contadores van con el filtro
                 aplicarFiltrosInteligentes();
             }
         }
 
-        // LÓGICA DE ESTADÍSTICAS Y FECHA (REPARADA)
-        function calcularEstadisticas() {
-            if (BD_GLOBAL.length === 0) return;
-            
-            // Total documentos
-            document.getElementById('stat-total').innerText = BD_GLOBAL.length.toLocaleString();
-
-            // Calcular Última Actualización
+        // LÓGICA DE FECHA (Global, basada en el archivo más reciente de TODO el sistema)
+        function calcularFechaGlobal() {
             const timestamps = BD_GLOBAL.map(d => d.Timestamp).filter(t => t > 0);
             if (timestamps.length > 0) {
                 const maxTs = Math.max(...timestamps);
                 const fecha = new Date(maxTs);
-                
-                // Formato DD/MM/YYYY HH:MM
-                const dia = fecha.getDate().toString().padStart(2, '0');
-                const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                const anyo = fecha.getFullYear();
-                const hora = fecha.getHours().toString().padStart(2, '0');
-                const min = fecha.getMinutes().toString().padStart(2, '0');
-                
-                document.getElementById('fecha-actualizacion').innerText = `Actualizado: ${dia}/${mes}/${anyo} ${hora}:${min}`;
+                // Usamos toLocaleString para respetar la hora del PC del usuario
+                document.getElementById('fecha-actualizacion').innerText = `Actualizado: ${fecha.toLocaleString('es-ES', { 
+                    day: '2-digit', month: '2-digit', year: 'numeric', 
+                    hour: '2-digit', minute: '2-digit' 
+                })}`;
             }
         }
 
-        // LÓGICA DE FILTROS Y BÚSQUEDA (REPARADA Y FLEXIBLE)
+        // LÓGICA CENTRAL DE FILTRADO Y ESTADÍSTICAS DINÁMICAS
         function aplicarFiltrosInteligentes() {
             const txt = normalizarTexto(document.getElementById('buscador').value).trim();
             const terms = txt.split(/\s+/).filter(t=>t.length>0);
             const grid = document.getElementById('grid-resultados');
             grid.innerHTML = '';
 
+            // 1. FILTRAR
             const res = BD_GLOBAL.filter(doc => {
-                // 1. Filtro Categoría (Personas/Vehículos)
                 if(filtros.cat !== 'TODOS' && doc._cat !== filtros.cat) return false;
-                
-                // 2. Filtro Calidad (DPI)
                 if(filtros.cal !== 'TODOS' && doc._cal !== filtros.cal) return false;
-                
-                // 3. Filtro Buscador (Flexible: 'includes' en lugar de 'startsWith')
                 if(terms.length > 0) {
-                    // Verificamos si TODAS las palabras escritas están contenidas en alguna palabra clave del documento
                     return terms.every(terminoBuscado => 
                         doc._palabras.some(palabraDoc => palabraDoc.includes(terminoBuscado))
                     );
@@ -447,14 +453,15 @@
                 return true;
             });
 
+            // 2. ACTUALIZAR ESTADÍSTICAS DINÁMICAS (Según lo que se ve en pantalla)
+            actualizarContadoresDinamicamente(res);
+
+            // 3. RENDERIZAR
             if (res.length > 0) {
-                // Renderizado (Limitado a 100 para no bloquear el navegador)
                 res.slice(0, 100).forEach(doc => {
                     const isVeh = doc._cat === 'VEHICULOS';
                     const icon = isVeh ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                     const badge = isVeh ? 'badge-veh' : 'badge-loc';
-                    
-                    // SIN ETIQUETA ROJA DE "NUEVO" (ELIMINADA)
 
                     const html = `
                         <div class="card">
@@ -472,16 +479,27 @@
                     grid.innerHTML += html;
                 });
             } else { 
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999">Sin resultados</div>`; 
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999">Sin resultados con estos filtros</div>`; 
             }
+        }
+
+        // FUNCIÓN NUEVA: Calcula Total y Nuevos basándose en los resultados FILTRADOS
+        function actualizarContadoresDinamicamente(datosFiltrados) {
+            // 1. Total (Filtrado)
+            document.getElementById('stat-total').innerText = datosFiltrados.length.toLocaleString();
+
+            // 2. Nuevos (Filtrado - Últimas 24h)
+            const ahora = new Date().getTime();
+            const unDia = 24 * 60 * 60 * 1000;
+            
+            const nuevosCount = datosFiltrados.filter(d => (ahora - d.Timestamp) < unDia).length;
+            document.getElementById('stat-new').innerText = nuevosCount.toLocaleString();
         }
 
         // CONTROL DE BOTONES DE FILTRO
         function setFiltro(type, val, btn) {
             filtros[type] = val;
-            // Quitamos la clase active de los hermanos
             btn.parentElement.querySelectorAll(`button[onclick*="'${type}'"]`).forEach(b => b.classList.remove('active'));
-            // Ponemos active al pulsado
             btn.classList.add('active');
             aplicarFiltrosInteligentes();
         }
@@ -495,7 +513,7 @@
             document.getElementById('modalAyuda').style.display = s ? 'flex' : 'none'; 
         }
 
-        // VISOR (Intacto)
+        // VISOR (Igual)
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -504,7 +522,7 @@
         function abrirVisor(idUnico) {
             const doc = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!doc) return;
-            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta);
+            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta); // Playlist de la misma carpeta
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
             entrarFullscreen();
