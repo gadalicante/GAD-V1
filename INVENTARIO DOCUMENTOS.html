@@ -24,12 +24,12 @@
             --text-color: #333;
             --card-bg: #fff;
             --eye-color: #28a745;
+            --folder-color: #f39c12;
             --danger-color: #dc3545;
             --gad-gold: #f1c40f;
             --text-muted: #6c757d;
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -44,15 +44,15 @@
             overflow-x: hidden;
         }
 
-        /* HEADER PREMIUM */
+        /* --- HEADER PREMIUM --- */
         header {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            padding: 15px 30px;
+            padding: 10px 30px;
             box-shadow: var(--shadow-md);
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 1000;
             flex-wrap: wrap; gap: 15px;
-            min-height: 110px;
+            min-height: 120px; /* Un poco más alto para el logo grande */
         }
 
         .header-left { flex: 1; min-width: 200px; display: flex; flex-direction: column; justify-content: center; }
@@ -60,7 +60,9 @@
         .header-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 5px; font-weight: 400; }
         
         .header-center { flex: 0 0 auto; display: flex; justify-content: center; align-items: center; }
-        .logo { height: 75px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); transition: transform 0.3s; }
+        
+        /* LOGO AUMENTADO UN 20% (De 75px a 95px aprox) */
+        .logo { height: 95px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); transition: transform 0.3s; }
         .logo:hover { transform: scale(1.05); }
         
         .header-right { 
@@ -68,9 +70,9 @@
             align-items: flex-end; justify-content: center; gap: 8px; min-width: 280px;
         }
 
-        /* CONTENEDOR DE ESTADÍSTICAS */
+        /* --- ESTADÍSTICAS --- */
         .stats-wrapper { 
-            display: flex; align-items: center; gap: 25px; 
+            display: flex; align-items: center; gap: 20px; 
             background: rgba(255,255,255,0.1); padding: 8px 15px; 
             border-radius: 12px; backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.2);
@@ -78,14 +80,12 @@
 
         .stat-box { display: flex; flex-direction: column; align-items: flex-end; position: relative; }
         .stat-box:first-child::after {
-            content: ''; position: absolute; right: -12px; top: 10%; height: 80%;
+            content: ''; position: absolute; right: -10px; top: 10%; height: 80%;
             width: 1px; background: rgba(255,255,255,0.3);
         }
         
-        .stat-number { color: white; font-size: 24px; font-weight: 900; line-height: 1; }
-        .stat-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.5px; }
-
-        /* Estilos para Variación (Positivo/Negativo) */
+        .stat-number { color: white; font-size: 22px; font-weight: 900; line-height: 1; }
+        .stat-label { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.5px; }
         .stat-var { color: var(--gad-gold); text-shadow: 0 0 10px rgba(241, 196, 15, 0.6); }
         .stat-var.negative { color: #ff6b6b; text-shadow: 0 0 10px rgba(220, 53, 69, 0.6); }
         .stat-var.neutral { color: #fff; opacity: 0.7; }
@@ -106,113 +106,106 @@
         }
         .btn-help-premium:hover { background: white; color: var(--primary-color); box-shadow: 0 0 15px rgba(255,255,255,0.4); }
 
-        /* ZONA DE CONTROLES */
+        /* --- CONTROLES Y BUSCADOR --- */
         .controls-container { 
-            background: white; padding: 25px 30px; 
+            background: white; padding: 20px 30px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
-            margin-bottom: 30px; position: relative; z-index: 10;
+            margin-bottom: 20px; position: relative; z-index: 10;
         }
         
-        .search-wrapper { max-width: 1000px; margin: 0 auto; display: flex; gap: 15px; align-items: center; }
+        .search-wrapper { max-width: 1100px; margin: 0 auto; display: flex; gap: 15px; align-items: center; }
         .search-input-container { position: relative; flex: 1; }
         
         .search-input {
-            width: 100%; padding: 16px 25px 16px 55px; font-size: 16px;
-            border: 2px solid #e0e0e0; border-radius: 50px; outline: none; height: 56px;
+            width: 100%; padding: 14px 25px 14px 50px; font-size: 16px;
+            border: 2px solid #e0e0e0; border-radius: 50px; outline: none; height: 50px;
             transition: border-color 0.3s, box-shadow 0.3s; background: #fafafa;
         }
         .search-input:focus { border-color: var(--primary-color); background: white; box-shadow: 0 0 0 4px rgba(4, 87, 201, 0.1); }
-        .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: #999; font-size: 20px; transition: color 0.3s; }
-        .search-input:focus + .search-icon { color: var(--primary-color); }
+        .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #999; font-size: 18px; }
 
         .btn-clear {
             background-color: var(--danger-color); color: white; border: none;
-            border-radius: 50px; padding: 0 35px; height: 56px; font-size: 15px; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            border-radius: 50px; padding: 0 30px; height: 50px; font-size: 14px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
         }
         .btn-clear:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4); }
-        .btn-clear:active { transform: translateY(0); }
 
         /* FILTROS */
-        .filters-chips { display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .filters-chips { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
         .chip {
-            padding: 10px 20px; background: #f1f3f5; border: 1px solid transparent; border-radius: 25px;
-            cursor: pointer; font-size: 14px; font-weight: 600; color: #666;
-            transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px; background: #f1f3f5; border: 1px solid transparent; border-radius: 25px;
+            cursor: pointer; font-size: 13px; font-weight: 600; color: #666;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px;
         }
         .chip:hover { background: #e9ecef; color: #333; }
         .chip.active { 
             background: var(--primary-color); color: white; 
             box-shadow: 0 4px 10px rgba(4, 87, 201, 0.3); border-color: var(--primary-color);
         }
-        .chip i { font-size: 14px; }
-        .divider { width: 1px; background: #ddd; margin: 0 10px; height: 32px; }
+        .divider { width: 1px; background: #ddd; margin: 0 8px; height: 28px; }
 
-        /* GRID RESULTADOS */
-        .results-container { flex: 1; max-width: 1500px; margin: 0 auto; width: 100%; padding: 0 30px 50px 30px; }
+        /* --- GRID RESULTADOS COMPACTO (4 Por Fila) --- */
+        .results-container { flex: 1; max-width: 1600px; margin: 0 auto; width: 100%; padding: 0 20px 40px 20px; }
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-            gap: 20px; 
+            /* MODIFICADO: minmax bajado a 260px para que quepan 4 en pantallas normales */
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
+            gap: 12px; /* Espacio reducido entre tarjetas */
         }
 
-        /* TARJETAS PREMIUM */
+        /* TARJETAS COMPRIMIDAS */
         .card {
-            background: white; border-radius: 12px; padding: 18px 20px;
+            background: white; border-radius: 10px; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
-            border: 1px solid #f0f0f0; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative; box-shadow: var(--shadow-sm); overflow: hidden;
-        }
-        .card::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-            background: var(--primary-color); opacity: 0; transition: opacity 0.3s;
+            border: 1px solid #f0f0f0; transition: all 0.2s;
+            position: relative; box-shadow: var(--shadow-sm);
         }
         .card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 15px 30px rgba(0,0,0,0.08); 
-            border-color: transparent;
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.08); 
+            border-color: var(--primary-color);
         }
-        .card:hover::before { opacity: 1; }
 
-        .card-content { flex: 1; overflow: hidden; padding-right: 15px; }
+        .card-content { flex: 1; overflow: hidden; padding-right: 10px; }
         
-        .card-badges { display: flex; gap: 8px; margin-bottom: 8px; }
+        .card-badges { display: flex; gap: 5px; margin-bottom: 4px; }
         .badge { 
-            font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; 
-            text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 10px; font-weight: 800; padding: 3px 6px; border-radius: 4px; 
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
         .badge-loc { background: #e3f2fd; color: #1565c0; }
         .badge-dpi { background: #f5f5f5; color: #616161; border: 1px solid #eee; }
         .badge-veh { background: #e8f5e9; color: #2e7d32; }
         
         .card-title { 
-            font-size: 15px; font-weight: 600; color: #333; 
+            font-size: 13px; /* Texto un pelín más pequeño para que quepa */
+            font-weight: 600; color: #333; 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .btn-view {
-            width: 45px; height: 45px; border-radius: 50%;
+            width: 38px; height: 38px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; 
             cursor: pointer; background: #f8f9fa; border: 1px solid #eee;
-            color: var(--eye-color); font-size: 20px;
+            color: var(--eye-color); font-size: 18px;
             transition: all 0.2s; flex-shrink: 0;
         }
         .btn-view:hover { 
             background: var(--eye-color); color: white; 
             border-color: var(--eye-color); transform: scale(1.1);
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
         }
 
         .loader-box { 
-            text-align: center; padding: 80px; 
-            font-size: 18px; color: var(--text-muted); width: 100%; 
+            text-align: center; padding: 60px; 
+            font-size: 16px; color: var(--text-muted); width: 100%; 
             background: white; border-radius: 12px; box-shadow: var(--shadow-sm);
         }
 
-        /* MODAL AYUDA (VERSION EXTENSA) */
+        /* --- MODAL AYUDA (PARA PRINCIPIANTES) --- */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: center;
@@ -220,70 +213,79 @@
         }
         .modal-content-help {
             background: white; padding: 0; border-radius: 16px;
-            max-width: 650px; width: 100%; position: relative;
+            max-width: 700px; width: 100%; position: relative;
             max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25); transform: translateY(0); animation: slideUp 0.3s;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: slideUp 0.3s;
         }
         .help-header {
-            background: var(--primary-color); color: white; padding: 20px 30px;
+            background: var(--primary-color); color: white; padding: 20px 25px;
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
-        .help-header h2 { margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+        .help-header h2 { margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .help-body { padding: 30px; color: #444; overflow-y: auto; flex: 1; line-height: 1.6; }
-        .btn-close-help { 
-            cursor: pointer; font-size: 24px; color: white; opacity: 0.8; 
-            background: none; border: none; transition: opacity 0.2s; 
-        }
-        .btn-close-help:hover { opacity: 1; }
+        .btn-close-help { cursor: pointer; font-size: 24px; color: white; background: none; border: none; }
         
-        .help-section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 25px; }
-        .help-section:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
-        .help-title { 
-            font-weight: 800; color: var(--primary-color); margin-bottom: 12px; 
-            display: flex; align-items: center; gap: 12px; font-size: 17px; 
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .help-text { font-size: 15px; color: #555; margin-bottom: 15px; }
+        .help-section { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .help-section:last-child { border: none; }
+        .help-title { font-weight: 800; color: var(--primary-color); margin-bottom: 10px; font-size: 16px; text-transform: uppercase; }
+        .help-text { font-size: 15px; color: #555; margin-bottom: 10px; }
+        .help-subtext { font-size: 14px; color: #777; margin-left: 15px; display: list-item; list-style-type: disc; }
         
         .help-tip { 
             background: #fff9db; border-left: 5px solid var(--gad-gold); 
-            padding: 15px 20px; margin: 15px 0; font-size: 14px; color: #555; 
+            padding: 15px; margin: 15px 0; font-size: 14px; color: #555; 
             border-radius: 0 8px 8px 0;
         }
         
         .btn-modal-ok { 
             background-color: var(--primary-color); color: white; border: none; 
-            padding: 20px 0; width: 100%; font-size: 16px; font-weight: 700; 
+            padding: 18px 0; width: 100%; font-size: 16px; font-weight: 700; 
             cursor: pointer; flex-shrink: 0; letter-spacing: 1px;
-            transition: background 0.2s;
         }
-        .btn-modal-ok:hover { background-color: var(--primary-dark); }
 
-        /* VISOR */
+        /* --- VISOR CON BOTÓN CARPETA --- */
         #modalVisor {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 5000; flex-direction: column;
         }
         #modalVisor.active { display: flex; animation: fadeIn 0.2s; }
+        
         .viewer-top {
             position: absolute; top: 0; left: 0; width: 100%; height: 60px;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-            display: flex; align-items: center; justify-content: flex-start;
-            padding: 0 20px; z-index: 5002; pointer-events: none; gap: 20px;
+            display: flex; align-items: center; justify-content: space-between; /* Espaciado entre titulo y botones */
+            padding: 0 20px; z-index: 5002; pointer-events: none;
         }
-        .btn-close-viewer { 
-            pointer-events: auto; background: var(--danger-color); color: white; 
-            border: none; width: 40px; height: 40px; border-radius: 50%; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); flex-shrink: 0; transition: transform 0.2s;
-        }
-        .btn-close-viewer:hover { transform: scale(1.1); }
+
         .viewer-title { 
-            color: white; font-size: 16px; font-weight: bold; text-shadow: 0 2px 4px #000; 
+            color: white; font-size: 15px; font-weight: bold; text-shadow: 0 2px 4px #000; 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-            text-align: left; max-width: 70%; opacity: 0.9; 
+            max-width: 60%; opacity: 0.9; 
             background: rgba(0,0,0,0.4); padding: 5px 15px; border-radius: 20px;
         }
+
+        .viewer-actions {
+            display: flex; gap: 10px; pointer-events: auto; align-items: center;
+        }
+
+        .btn-folder-drive {
+            background: var(--folder-color); color: white; border: none;
+            height: 36px; padding: 0 15px; border-radius: 20px;
+            cursor: pointer; font-size: 13px; font-weight: 700;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); text-transform: uppercase;
+            text-decoration: none; /* Es un link en realidad */
+        }
+        .btn-folder-drive:hover { background: #d35400; transform: scale(1.05); }
+
+        .btn-close-viewer { 
+            background: var(--danger-color); color: white; border: none; 
+            width: 36px; height: 36px; border-radius: 50%; 
+            cursor: pointer; display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); font-size: 18px;
+        }
+        .btn-close-viewer:hover { transform: scale(1.1); }
+
         .iframe-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
         #visor-iframe { width: 100%; height: 100%; border: none; display: block; }
         .nav-overlay { 
@@ -294,16 +296,16 @@
         .nav-btn { 
             pointer-events: auto; background: rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); 
-            color: white; width: 60px; height: 60px; border-radius: 50%; 
-            font-size: 28px; cursor: pointer; display: flex; align-items: center; 
+            color: white; width: 50px; height: 50px; border-radius: 50%; 
+            font-size: 24px; cursor: pointer; display: flex; align-items: center; 
             justify-content: center; transition: all 0.2s; 
         }
-        .nav-btn:hover { background: rgba(241, 196, 15, 0.9); color: black; transform: scale(1.1); border-color: transparent; }
+        .nav-btn:hover { background: rgba(241, 196, 15, 0.9); color: black; transform: scale(1.1); }
         #visor-loader { 
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            color: white; font-size: 18px; background: rgba(0,0,0,0.8); 
-            padding: 20px 40px; border-radius: 40px; z-index: 5000; 
-            display: flex; gap: 15px; align-items: center; font-weight: 500;
+            color: white; font-size: 16px; background: rgba(0,0,0,0.8); 
+            padding: 15px 30px; border-radius: 30px; z-index: 5000; 
+            display: flex; gap: 10px; align-items: center;
         }
 
         /* ANIMACIONES */
@@ -311,23 +313,22 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         @media screen and (max-width: 768px) {
-            header { padding: 15px 20px; flex-direction: column; align-items: stretch; gap: 15px; }
+            header { padding: 10px 15px; flex-direction: column; align-items: stretch; gap: 10px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; align-items: center; }
             .header-center { order: 1; }
-            .logo { height: 60px; }
+            .logo { height: 70px; } /* Ajuste móvil */
             .header-left { order: 2; }
-            .header-title { font-size: 22px; }
             .header-right { order: 3; align-items: center; }
             
-            .stats-wrapper { width: 100%; justify-content: space-around; padding: 12px; }
-            .stat-box { align-items: center; }
+            .stats-wrapper { width: 100%; justify-content: space-around; padding: 10px; }
             .stat-box:first-child::after { display: none; }
-            
             .btn-help-premium { width: 100%; justify-content: center; margin-top: 5px; }
             
-            .controls-container { padding: 20px; }
             .search-wrapper { flex-direction: column; }
             .search-input-container, .btn-clear { width: 100%; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); } /* En móvil 1 columna */
+            .viewer-top { padding: 0 10px; }
+            .btn-folder-drive span { display: none; } /* En móvil solo icono carpeta */
         }
     </style>
 </head>
@@ -358,7 +359,7 @@
             </div>
 
             <button class="btn-help-premium" onclick="toggleModalAyuda(true)">
-                <i class="fa-solid fa-book-open"></i> Manual de Operador
+                <i class="fa-solid fa-book-open"></i> AYUDA / MANUAL
             </button>
         </div>
     </header>
@@ -368,7 +369,7 @@
             <div class="search-input-container">
                 <i class="fa-solid fa-search search-icon"></i>
                 <input type="text" id="buscador" class="search-input" 
-                       placeholder="Escribe para buscar (Ej: Alemania, DNI, Pasaporte...)"
+                       placeholder="Escribe aquí para buscar (Ej: Alemania, DNI, Pasaporte...)"
                        onkeyup="aplicarFiltrosInteligentes()">
             </div>
             <button class="btn-clear" onclick="limpiarBusqueda()">
@@ -397,53 +398,54 @@
     <div id="modalAyuda" class="modal-overlay" onclick="if(event.target === this) toggleModalAyuda(false)">
         <div class="modal-content-help">
             <div class="help-header">
-                <h2><i class="fa-solid fa-circle-info"></i> Manual de Operador GAD</h2>
+                <h2><i class="fa-solid fa-circle-info"></i> Manual de Operador</h2>
                 <button class="btn-close-help" onclick="toggleModalAyuda(false)">✕</button>
             </div>
             
             <div class="help-body">
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 1. Estadísticas en Tiempo Real</div>
-                    <p class="help-text">En la cabecera encontrarás dos indicadores clave:</p>
-                    <ul>
-                        <li class="help-text"><b>Total Documentos:</b> Se actualiza dinámicamente según lo que busques o filtres.</li>
-                        <li class="help-text"><b>Actividad Reciente:</b> Muestra el resultado de la última sincronización automática.
-                            <ul>
-                                <li><span style="color:#f1c40f;font-weight:bold">+5</span> en color dorado: Se han añadido 5 documentos nuevos.</li>
-                                <li><span style="color:#dc3545;font-weight:bold">-1</span> en color rojo: Se ha eliminado 1 documento.</li>
-                                <li><span style="color:#999;font-weight:bold">0</span>: No hubo cambios en la última carga.</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 2. Motor de Búsqueda</div>
-                    <p class="help-text">El sistema utiliza búsqueda difusa inteligente. Puedes combinar términos.</p>
+                    <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. ¿Cómo busco un documento?</div>
+                    <p class="help-text">Es muy sencillo. Solo tienes que escribir en la barra blanca central.</p>
+                    <span class="help-subtext">Puedes escribir el <b>País</b> (Ej: "Rumania").</span>
+                    <span class="help-subtext">Puedes escribir el <b>Documento</b> (Ej: "DNI" o "Pasaporte").</span>
+                    <span class="help-subtext">O combinar ambos: <b>"Rumania DNI"</b>.</span>
                     <div class="help-tip">
-                        <b>Truco PRO:</b> No necesitas poner acentos ni respetar mayúsculas. <br>
-                        Si buscas <i>"belgica pnc"</i> el sistema encontrará "Bélgica - Permiso Nacional Conducción".
+                        <b>Truco:</b> No hace falta que pongas tildes ni mayúsculas. El sistema te entenderá igual.
                     </div>
                 </div>
 
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 3. Visor de Documentos</div>
-                    <p class="help-text">Al pulsar el icono del <b>ojo verde</b>, se abre el documento en pantalla completa sin salir de la web.</p>
-                    <ul>
-                        <li class="help-text"><b>Navegación:</b> Usa las flechas laterales para pasar al siguiente documento de tu búsqueda actual.</li>
-                        <li class="help-text"><b>Zoom:</b> Puedes hacer zoom pellizcando la pantalla en móviles.</li>
-                    </ul>
+                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. ¿Cómo veo el documento?</div>
+                    <p class="help-text">Cuando encuentres la ficha que buscas, pulsa el <b>icono del OJO VERDE</b> a la derecha de la ficha.</p>
+                    <p class="help-text">Se abrirá una pantalla negra (Visor) con la imagen en grande.</p>
+                    <span class="help-subtext">Usa las <b>flechas laterales</b> para ver el siguiente documento sin salir.</span>
+                    <span class="help-subtext">Pulsa el <b>botón naranja "VER EN CARPETA"</b> si quieres ir a Google Drive.</span>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 3. ¿Qué significan los números de arriba?</div>
+                    <p class="help-text"><b>TOTAL DOCUMENTOS:</b> Es la cantidad de archivos que estás viendo ahora mismo (cambia si usas el buscador).</p>
+                    <p class="help-text"><b>ACTIVIDAD RECIENTE:</b> Te dice qué pasó anoche en la actualización automática:</p>
+                    <span class="help-subtext"><span style="color:#f1c40f;font-weight:bold">+5</span> (Dorado) = Se añadieron 5 documentos nuevos.</span>
+                    <span class="help-subtext"><span style="color:#dc3545;font-weight:bold">-1</span> (Rojo) = Se eliminó 1 documento.</span>
                 </div>
             </div>
 
-            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">ENTENDIDO, CERRAR MANUAL</button>
+            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">¡ENTENDIDO! CERRAR MANUAL</button>
         </div>
     </div>
 
     <div id="modalVisor">
         <div class="viewer-top">
             <div class="viewer-title" id="visor-titulo">Cargando...</div>
-            <button class="btn-close-viewer" onclick="cerrarVisor()">✕</button>
+            
+            <div class="viewer-actions">
+                <a href="#" target="_blank" id="btn-drive-link" class="btn-folder-drive" title="Abrir ubicación en Drive">
+                    <i class="fa-solid fa-folder-open"></i> <span>Ver en Carpeta</span>
+                </a>
+                
+                <button class="btn-close-viewer" onclick="cerrarVisor()">✕</button>
+            </div>
         </div>
 
         <div id="visor-loader"><i class="fa-solid fa-spinner fa-spin"></i> Cargando Documento...</div>
@@ -459,9 +461,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. CONFIGURACIÓN FIREBASE
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBu5ALRVJ5aDzuU9YIAQD_9KMgR6ZwttpU",
             authDomain: "gad-alicante-v1.firebaseapp.com",
@@ -482,41 +481,23 @@
         let INDICE_ACTUAL = 0;
         let filtros = { cat: 'TODOS', cal: 'TODOS' };
 
-        // ==========================================
-        // 2. CONEXIÓN Y LECTURA DE DATOS
-        // ==========================================
         auth.onAuthStateChanged(user => {
-            // A. ESCUCHAR ESTADÍSTICAS DEL SCRIPT (Lo que pedías)
             db.ref('_ESTADISTICAS').on('value', snapshot => {
                 const stats = snapshot.val();
-                if (stats) {
-                    actualizarCabeceraEstadisticas(stats);
-                }
+                if (stats) actualizarCabeceraEstadisticas(stats);
             });
-
-            // B. ESCUCHAR DATOS DE DOCUMENTOS
             iniciarEscuchaDatos();
         });
 
         function actualizarCabeceraEstadisticas(stats) {
-            // Fecha
             document.querySelector('#fecha-actualizacion span').innerText = `Actualizado: ${stats.UltimaActualizacion || '--'}`;
-            
-            // Variación (El número clave)
             const varEl = document.getElementById('stat-var');
             const val = stats.Variacion || "0";
-            
             varEl.innerText = val;
-            
-            // Colores según si es positivo o negativo
-            varEl.className = 'stat-number stat-var'; // Reset
-            if (val.toString().includes('+')) {
-                varEl.classList.add('new'); // Dorado/Verde
-            } else if (val.toString().includes('-')) {
-                varEl.classList.add('negative'); // Rojo
-            } else {
-                varEl.classList.add('neutral'); // Blanco
-            }
+            varEl.className = 'stat-number stat-var'; 
+            if (val.toString().includes('+')) varEl.classList.add('new'); 
+            else if (val.toString().includes('-')) varEl.classList.add('negative'); 
+            else varEl.classList.add('neutral'); 
         }
 
         function iniciarEscuchaDatos() {
@@ -524,9 +505,7 @@
                 { id: 'BD_DOCUMENTOS 600 DPI', cat: 'PERSONAS', cal: '600' },
                 { id: 'BD_VEHICULOS 600 DPI', cat: 'VEHICULOS', cal: '600' }
             ];
-
             let datosTemporales = {};
-
             nodos.forEach(nodo => {
                 db.ref(nodo.id).on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -535,9 +514,7 @@
                         procesarDatos(datosTemporales);
                     }
                 }, (error) => {
-                    if (error.code === 'PERMISSION_DENIED') {
-                        document.getElementById('loader').innerText = "⛔ Sin permiso. Inicia sesión.";
-                    }
+                    if (error.code === 'PERMISSION_DENIED') document.getElementById('loader').innerText = "⛔ Sin permiso.";
                 });
             });
         }
@@ -549,14 +526,11 @@
         function procesarDatos(datosAgrupados) {
             let lista = [];
             let contadorId = 0;
-
             Object.values(datosAgrupados).forEach(grupo => {
                 Object.entries(grupo.raw).forEach(([key, doc]) => {
                     if (!doc || !doc.NombreDocumento) return;
-                    
                     const raw = `${doc.NombreDocumento} ${doc.Pais} ${doc.TipoDocumento} ${doc.SubtipoDocumento||''} ${doc.EstadoProvincia||''}`;
                     const words = normalizarTexto(raw).replace(/_/g,' ').replace(/-/g,' ').split(/\s+/).filter(w=>w.length>0);
-                    
                     lista.push({
                         ...doc,
                         _cat: grupo.meta.cat, 
@@ -568,49 +542,38 @@
                     });
                 });
             });
-
             BD_GLOBAL = lista.sort((a, b) => {
                 const paisA = (a.Pais||'ZZZ').toUpperCase();
                 const paisB = (b.Pais||'ZZZ').toUpperCase();
                 if(paisA!==paisB) return paisA<paisB ? -1:1;
                 return (a.NombreDocumento||'').localeCompare(b.NombreDocumento||'');
             });
-
             if (BD_GLOBAL.length > 0) {
                 document.getElementById('loader').style.display = 'none';
                 aplicarFiltrosInteligentes();
             }
         }
 
-        // ==========================================
-        // 3. LÓGICA DE FILTROS Y RENDERIZADO
-        // ==========================================
         function aplicarFiltrosInteligentes() {
             const txt = normalizarTexto(document.getElementById('buscador').value).trim();
             const terms = txt.split(/\s+/).filter(t=>t.length>0);
             const grid = document.getElementById('grid-resultados');
             grid.innerHTML = '';
-
             const res = BD_GLOBAL.filter(doc => {
                 if(filtros.cat !== 'TODOS' && doc._cat !== filtros.cat) return false;
                 if(filtros.cal !== 'TODOS' && doc._cal !== filtros.cal) return false;
-                if(terms.length > 0) {
-                    return terms.every(terminoBuscado => 
-                        doc._palabras.some(palabraDoc => palabraDoc.includes(terminoBuscado))
-                    );
-                }
+                if(terms.length > 0) return terms.every(terminoBuscado => doc._palabras.some(palabraDoc => palabraDoc.includes(terminoBuscado)));
                 return true;
             });
 
-            // Actualizar contador TOTAL (Dinámico)
             document.getElementById('stat-total').innerText = res.length.toLocaleString();
 
             if (res.length > 0) {
+                // RENDERIZADO OPTIMIZADO PARA 4 COLUMNAS (Estilo ajustado arriba en CSS)
                 res.slice(0, 100).forEach(doc => {
                     const isVeh = doc._cat === 'VEHICULOS';
                     const icon = isVeh ? '<i class="fa-solid fa-car"></i>' : '<i class="fa-solid fa-user"></i>';
                     const badge = isVeh ? 'badge-veh' : 'badge-loc';
-
                     const html = `
                         <div class="card">
                             <div class="card-content">
@@ -634,9 +597,6 @@
             }
         }
 
-        // ==========================================
-        // 4. INTERFAZ Y EVENTOS
-        // ==========================================
         function setFiltro(type, val, btn) {
             filtros[type] = val;
             btn.parentElement.querySelectorAll(`button[onclick*="'${type}'"]`).forEach(b => b.classList.remove('active'));
@@ -653,20 +613,20 @@
             document.getElementById('modalAyuda').style.display = s ? 'flex' : 'none'; 
         }
 
-        // ==========================================
-        // 5. VISOR (LÓGICA INTACTA)
-        // ==========================================
+        /* --- LÓGICA DEL VISOR Y BOTÓN CARPETA --- */
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
         const loaderVisor = document.getElementById('visor-loader');
+        const btnDrive = document.getElementById('btn-drive-link');
 
         function abrirVisor(idUnico) {
             const doc = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!doc) return;
-            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta); // Playlist de la misma carpeta
+            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta);
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
+            
             entrarFullscreen();
             modalVisor.classList.add('active');
             cargarDocumentoActual();
@@ -675,11 +635,20 @@
         function cargarDocumentoActual() {
             if (INDICE_ACTUAL < 0 || INDICE_ACTUAL >= LISTA_REPRODUCCION.length) return;
             const doc = LISTA_REPRODUCCION[INDICE_ACTUAL];
+            
             tituloEl.innerText = `${INDICE_ACTUAL + 1}/${LISTA_REPRODUCCION.length} - ${doc.Pais} - ${doc.NombreDocumento}`;
             loaderVisor.style.display = 'flex';
-            let url = doc.Enlace.includes('/view') ? doc.Enlace.replace(/\/view.*/, '/preview') : doc.Enlace + '/preview';
-            iframeEl.src = url;
+            
+            // 1. CARGA EL IFRAME (Modo Preview)
+            let urlPreview = doc.Enlace.includes('/view') ? doc.Enlace.replace(/\/view.*/, '/preview') : doc.Enlace + '/preview';
+            iframeEl.src = urlPreview;
             iframeEl.onload = () => loaderVisor.style.display = 'none';
+
+            // 2. CONFIGURA EL BOTÓN DE CARPETA
+            // Como no tenemos el link de la carpeta, mandamos a la vista normal del archivo en Drive.
+            // Desde ahí, Google muestra la ruta de la carpeta arriba.
+            let urlDrive = doc.Enlace; // Enlace normal de Drive
+            btnDrive.href = urlDrive;
         }
 
         function cambiarDoc(dir) {
@@ -694,7 +663,6 @@
         function entrarFullscreen() { const e = document.documentElement; if (e.requestFullscreen) e.requestFullscreen().catch(()=>{}); }
         function salirFullscreen() { if (document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }
         document.addEventListener('keydown', e => { if(modalVisor.classList.contains('active')) { if(e.key==="ArrowLeft")cambiarDoc(-1); if(e.key==="ArrowRight")cambiarDoc(1); if(e.key==="Escape")cerrarVisor(); } });
-
     </script>
 </body>
 </html>
