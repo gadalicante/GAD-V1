@@ -223,7 +223,7 @@
                 </div>
                 <div class="stat-box">
                     <span id="stat-new" class="stat-number new">--</span>
-                    <span class="stat-label">Nuevos (24h)</span>
+                    <span class="stat-label">Actualizados (24h)</span>
                 </div>
             </div>
             
@@ -286,7 +286,7 @@
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-filter"></i> 2. Uso de Filtros y Contadores</div>
                     <p class="help-text">Los botones grises te permiten filtrar la base de datos.</p>
-                    <p class="help-text"><b>¡IMPORTANTE!</b> Los contadores de arriba ("Total" y "Nuevos") cambian según el filtro que tengas activo. Si filtras por "Vehículos", el total mostrará solo la cantidad de vehículos.</p>
+                    <p class="help-text"><b>¡IMPORTANTE!</b> Los contadores de arriba ("Total" y "Actualizados") cambian según el filtro que tengas activo. Si filtras por "Vehículos", el total mostrará solo la cantidad de vehículos.</p>
                     <div class="help-tip">
                         Si seleccionas <b>"2400 DPI"</b> y el contador marca <b>0</b>, significa que aún no hay documentos de esa calidad en el sistema.
                     </div>
@@ -303,7 +303,7 @@
 
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-clock"></i> 4. Actualizaciones</div>
-                    <p class="help-text">El sistema se sincroniza automáticamente cada noche. El contador <b>"Nuevos (24h)"</b> te indica cuántos archivos se han añadido o modificado desde ayer.</p>
+                    <p class="help-text">El sistema se sincroniza automáticamente cada noche. El contador <b>"Actualizados (24h)"</b> te indica cuántos archivos se han añadido o modificado desde ayer.</p>
                 </div>
             </div>
 
@@ -415,18 +415,17 @@
 
             if (BD_GLOBAL.length > 0) {
                 document.getElementById('loader').style.display = 'none';
-                calcularFechaGlobal(); // Solo la fecha, los contadores van con el filtro
+                calcularFechaGlobal(); // Solo la fecha
                 aplicarFiltrosInteligentes();
             }
         }
 
-        // LÓGICA DE FECHA (Global, basada en el archivo más reciente de TODO el sistema)
+        // LÓGICA DE FECHA (Global)
         function calcularFechaGlobal() {
             const timestamps = BD_GLOBAL.map(d => d.Timestamp).filter(t => t > 0);
             if (timestamps.length > 0) {
                 const maxTs = Math.max(...timestamps);
                 const fecha = new Date(maxTs);
-                // Usamos toLocaleString para respetar la hora del PC del usuario
                 document.getElementById('fecha-actualizacion').innerText = `Actualizado: ${fecha.toLocaleString('es-ES', { 
                     day: '2-digit', month: '2-digit', year: 'numeric', 
                     hour: '2-digit', minute: '2-digit' 
@@ -453,7 +452,7 @@
                 return true;
             });
 
-            // 2. ACTUALIZAR ESTADÍSTICAS DINÁMICAS (Según lo que se ve en pantalla)
+            // 2. ACTUALIZAR CONTADORES (Con datos filtrados)
             actualizarContadoresDinamicamente(res);
 
             // 3. RENDERIZAR
@@ -483,12 +482,12 @@
             }
         }
 
-        // FUNCIÓN NUEVA: Calcula Total y Nuevos basándose en los resultados FILTRADOS
+        // FUNCIÓN: Calcula Total y Actualizados basándose en los resultados FILTRADOS
         function actualizarContadoresDinamicamente(datosFiltrados) {
             // 1. Total (Filtrado)
             document.getElementById('stat-total').innerText = datosFiltrados.length.toLocaleString();
 
-            // 2. Nuevos (Filtrado - Últimas 24h)
+            // 2. Actualizados (Filtrado - Últimas 24h)
             const ahora = new Date().getTime();
             const unDia = 24 * 60 * 60 * 1000;
             
@@ -513,7 +512,7 @@
             document.getElementById('modalAyuda').style.display = s ? 'flex' : 'none'; 
         }
 
-        // VISOR (Igual)
+        // VISOR
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
         const tituloEl = document.getElementById('visor-titulo');
@@ -522,7 +521,7 @@
         function abrirVisor(idUnico) {
             const doc = BD_GLOBAL.find(d => d._idUnico === idUnico);
             if (!doc) return;
-            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta); // Playlist de la misma carpeta
+            LISTA_REPRODUCCION = BD_GLOBAL.filter(d => d._carpeta === doc._carpeta);
             if (LISTA_REPRODUCCION.length === 0) LISTA_REPRODUCCION = BD_GLOBAL;
             INDICE_ACTUAL = LISTA_REPRODUCCION.findIndex(d => d._idUnico === idUnico);
             entrarFullscreen();
