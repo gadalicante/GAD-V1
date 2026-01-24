@@ -75,7 +75,7 @@
             z-index: 1000;
             flex-wrap: wrap; 
             gap: 15px;
-            min-height: 130px; /* Altura aumentada para acomodar logo grande */
+            min-height: 130px;
         }
 
         .header-left { 
@@ -109,7 +109,7 @@
             align-items: center; 
         }
         
-        /* LOGO AUMENTADO UN 20% (De 80px a 95-100px) */
+        /* LOGO AUMENTADO UN 20% */
         .logo { 
             height: 95px; 
             width: auto; 
@@ -153,7 +153,6 @@
             position: relative; 
         }
 
-        /* Línea divisoria entre estadísticas */
         .stat-box:first-child::after {
             content: ''; 
             position: absolute; 
@@ -180,7 +179,6 @@
             letter-spacing: 0.5px; 
         }
 
-        /* Colores dinámicos para la Variación */
         .stat-var { 
             color: var(--gad-gold); 
             text-shadow: 0 0 10px rgba(241, 196, 15, 0.6); 
@@ -313,7 +311,7 @@
             transform: translateY(0); 
         }
 
-        /* FILTROS (Chips) */
+        /* FILTROS */
         .filters-chips { 
             display: flex; 
             justify-content: center; 
@@ -365,12 +363,10 @@
         
         .grid { 
             display: grid; 
-            /* AQUÍ ESTÁ EL CAMBIO PARA 4 COLUMNAS: bajamos minmax a 260px */
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); 
             gap: 15px; 
         }
 
-        /* TARJETAS PREMIUM */
         .card {
             background: white; 
             border-radius: 12px; 
@@ -437,7 +433,6 @@
             line-height: 1.4;
         }
 
-        /* BOTÓN OJO VERDE */
         .btn-view {
             width: 42px; 
             height: 42px; 
@@ -474,7 +469,7 @@
         }
 
         /* ==========================================
-           MODAL AYUDA (DISEÑO EXTENDIDO)
+           MODAL AYUDA (PARA DUMMIES)
         ========================================== */
         .modal-overlay {
             display: none; 
@@ -604,7 +599,7 @@
         .btn-modal-ok:hover { background-color: var(--primary-dark); }
 
         /* ==========================================
-           VISOR CON BOTÓN CARPETA
+           VISOR (NUEVO DISEÑO DE BARRA SUPERIOR)
         ========================================== */
         #modalVisor {
             display: none; 
@@ -625,90 +620,31 @@
             position: absolute; 
             top: 0; left: 0; 
             width: 100%; 
-            height: 60px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            height: 70px; /* Un poco más alto para que respire */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            padding: 0 20px; 
+            padding: 0 25px; 
             z-index: 5002; 
             pointer-events: none;
         }
 
-        .viewer-title { 
-            color: white; 
-            font-size: 15px; 
-            font-weight: bold; 
-            text-shadow: 0 2px 4px #000; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            text-align: left; 
-            max-width: 50%; 
-            opacity: 0.9; 
-            background: rgba(0,0,0,0.4); 
-            padding: 5px 15px; 
-            border-radius: 20px;
-        }
-
-        /* Contenedor de Botones del Visor */
-        .viewer-actions {
-            display: flex; 
-            gap: 12px; 
-            pointer-events: auto; 
+        /* GRUPO IZQUIERDO: ASPA ROJA + TÍTULO */
+        .viewer-left-group {
+            display: flex;
             align-items: center;
+            gap: 15px;
+            pointer-events: auto; /* Para que el botón funcione */
+            max-width: 60%;
         }
 
-        /* BOTÓN NARANJA: VER EN CARPETA */
-        .btn-folder-drive {
-            background: var(--folder-color); 
-            color: white; 
-            border: none;
-            height: 38px; 
-            padding: 0 16px; 
-            border-radius: 20px;
-            cursor: pointer; 
-            font-size: 13px; 
-            font-weight: 700;
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
-            text-transform: uppercase;
-            text-decoration: none; 
-            transition: transform 0.2s;
-        }
-        .btn-folder-drive:hover { 
-            background: #d35400; 
-            transform: scale(1.05); 
-        }
-
-        /* BOTÓN VERDE: VER ARCHIVO (ORIGINAL) */
-        .btn-file-drive {
-            background: var(--drive-color); 
-            color: white; 
-            border: none;
-            width: 38px; height: 38px; 
-            border-radius: 50%;
-            cursor: pointer; 
-            font-size: 18px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .btn-file-drive:hover { 
-            transform: scale(1.1); 
-        }
-
-        /* BOTÓN ROJO: CERRAR */
+        /* BOTÓN ROJO: CERRAR (Ahora a la izquierda) */
         .btn-close-viewer { 
             background: var(--danger-color); 
             color: white; 
             border: none; 
-            width: 38px; height: 38px; 
+            width: 40px; height: 40px; 
             border-radius: 50%; 
             cursor: pointer; 
             display: flex; 
@@ -721,6 +657,81 @@
         }
         .btn-close-viewer:hover { 
             transform: scale(1.1); 
+        }
+
+        .viewer-title { 
+            color: white; 
+            font-size: 15px; 
+            font-weight: bold; 
+            text-shadow: 0 2px 4px #000; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            text-align: left; 
+            opacity: 0.95; 
+            background: rgba(0,0,0,0.3); 
+            padding: 6px 15px; 
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* GRUPO DERECHO: ACCIONES */
+        .viewer-actions {
+            display: flex; 
+            gap: 12px; 
+            pointer-events: auto; 
+            align-items: center;
+        }
+
+        /* BOTÓN NARANJA: VER EN CARPETA */
+        .btn-folder-drive {
+            background: var(--folder-color); 
+            color: white; 
+            border: none;
+            height: 40px; 
+            padding: 0 20px; 
+            border-radius: 25px;
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 700;
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            text-transform: uppercase;
+            text-decoration: none; 
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-folder-drive:hover { 
+            background: #d35400; 
+            transform: translateY(-2px); 
+        }
+
+        /* BOTÓN VERDE: VER ARCHIVO (Con Texto para claridad) */
+        .btn-file-drive {
+            background: var(--drive-color); 
+            color: white; 
+            border: none;
+            height: 40px; 
+            padding: 0 20px; 
+            border-radius: 25px;
+            cursor: pointer; 
+            font-size: 13px;
+            font-weight: 700;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            text-decoration: none;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-file-drive:hover { 
+            transform: translateY(-2px); 
+            background-color: #2d9246;
         }
 
         .iframe-container { 
@@ -744,14 +755,14 @@
             transform: translateY(-50%); 
             display: flex; 
             justify-content: space-between; 
-            padding: 0 20px; 
+            padding: 0 25px; 
             pointer-events: none; 
             z-index: 5001; 
         }
         
         .nav-btn { 
             pointer-events: auto; 
-            background: rgba(255, 255, 255, 0.15); 
+            background: rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(5px); 
             border: 1px solid rgba(255, 255, 255, 0.3); 
             color: white; 
@@ -797,7 +808,7 @@
             header { padding: 15px 20px; flex-direction: column; align-items: stretch; gap: 15px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; justify-content: center; align-items: center; }
             .header-center { order: 1; }
-            .logo { height: 75px; } /* Ajuste móvil */
+            .logo { height: 75px; } 
             .header-left { order: 2; }
             .header-title { font-size: 22px; }
             .header-right { order: 3; align-items: center; }
@@ -812,12 +823,20 @@
             .search-wrapper { flex-direction: column; }
             .search-input-container, .btn-clear { width: 100%; }
             
-            /* En móvil 1 columna, para que se vean grandes */
             .grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); } 
             
-            .viewer-top { padding: 0 10px; }
-            /* Ocultamos el texto de "Ver Carpeta" en móvil, dejamos solo icono */
-            .btn-folder-drive span { display: none; } 
+            /* Ajustes Visor Móvil */
+            .viewer-top { padding: 0 10px; height: 60px; }
+            .viewer-left-group { max-width: 50%; gap: 10px; }
+            .viewer-title { font-size: 13px; padding: 4px 10px; }
+            .btn-close-viewer { width: 36px; height: 36px; }
+            
+            /* En móvil, simplificamos los botones de acción para que quepan */
+            .btn-folder-drive, .btn-file-drive { 
+                padding: 0 12px; 
+                height: 36px;
+            }
+            .btn-folder-drive span, .btn-file-drive span { display: none; } /* Solo iconos */
         }
     </style>
 </head>
@@ -906,9 +925,13 @@
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. ¿Cómo veo el documento?</div>
                     <p class="help-text">Cuando encuentres la ficha que buscas, pulsa el <b>icono del OJO VERDE</b> a la derecha de la ficha.</p>
-                    <p class="help-text">Se abrirá una pantalla negra (Visor) con la imagen en grande. En ese visor tienes dos botones importantes:</p>
-                    <span class="help-subtext"><b>BOTÓN NARANJA (VER CARPETA):</b> Te lleva a Google Drive para ver la carpeta completa donde está guardado ese documento.</span>
-                    <span class="help-subtext"><b>BOTÓN VERDE (LOGO DRIVE):</b> Abre solo el archivo de imagen original.</span>
+                    <p class="help-text">Se abrirá una pantalla negra (Visor) con la imagen en grande. En ese visor verás:</p>
+                    <span class="help-subtext"><b>ARRIBA A LA IZQUIERDA:</b> Botón Rojo para CERRAR y el nombre del documento.</span>
+                    <span class="help-subtext"><b>ARRIBA A LA DERECHA:</b> Dos botones para ir a Drive:</span>
+                    <ul style="margin-left: 40px; color: #555; margin-bottom: 15px;">
+                        <li><span style="color:#f39c12; font-weight:bold;">NARANJA:</span> Ver la Carpeta completa.</li>
+                        <li><span style="color:#34a853; font-weight:bold;">VERDE:</span> Ver solo el Archivo.</li>
+                    </ul>
                 </div>
 
                 <div class="help-section">
@@ -926,7 +949,11 @@
 
     <div id="modalVisor">
         <div class="viewer-top">
-            <div class="viewer-title" id="visor-titulo">Cargando...</div>
+            
+            <div class="viewer-left-group">
+                <button class="btn-close-viewer" onclick="cerrarVisor()" title="Cerrar Visor">✕</button>
+                <div class="viewer-title" id="visor-titulo">Cargando...</div>
+            </div>
             
             <div class="viewer-actions">
                 <a href="#" target="_blank" id="btn-folder-link" class="btn-folder-drive" title="Ver Carpeta Contenedora">
@@ -934,10 +961,8 @@
                 </a>
                 
                 <a href="#" target="_blank" id="btn-file-link" class="btn-file-drive" title="Abrir Archivo Original">
-                    <i class="fa-brands fa-google-drive"></i>
+                    <i class="fa-brands fa-google-drive"></i> <span>Ver Archivo</span>
                 </a>
-
-                <button class="btn-close-viewer" onclick="cerrarVisor()">✕</button>
             </div>
         </div>
 
@@ -1149,7 +1174,7 @@
         }
 
         // ==========================================
-        // 5. VISOR (CON LÓGICA DE DOBLE BOTÓN)
+        // 5. VISOR (CON BARRA SUPERIOR DIVIDIDA)
         // ==========================================
         const modalVisor = document.getElementById('modalVisor');
         const iframeEl = document.getElementById('visor-iframe');
@@ -1188,12 +1213,11 @@
             btnFile.href = doc.Enlace;
 
             // C. CONFIGURA EL BOTÓN DE CARPETA (Naranja)
-            // Lógica: Solo mostramos el botón si el Script V2 ha guardado la URL de la carpeta
             if (doc.FolderURL && doc.FolderURL !== "") {
                 btnFolder.href = doc.FolderURL;
                 btnFolder.style.display = "flex"; // Lo mostramos
             } else {
-                btnFolder.style.display = "none"; // Lo ocultamos si es un archivo antiguo no re-escaneado
+                btnFolder.style.display = "none"; // Lo ocultamos
             }
         }
 
