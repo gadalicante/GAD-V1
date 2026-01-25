@@ -14,32 +14,39 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
         /* ==========================================
-           VARIABLES DE DISEÑO (CSS)
+           1. VARIABLES DE DISEÑO (CSS)
+           Colores maestros de la aplicación
         ========================================== */
         :root {
+            /* Colores Corporativos */
             --primary-color: #0457C9;       /* Azul GAD Principal */
             --primary-dark: #023e94;        /* Azul Oscuro para degradados */
+            
+            /* Fondos y Textos */
             --bg-color: #f4f6f9;            /* Fondo gris muy claro */
             --text-color: #333;             /* Color de texto principal */
             --card-bg: #fff;                /* Fondo de tarjetas */
+            --text-muted: #6c757d;          /* Texto secundario */
             
+            /* Botones de Acción */
             --eye-color: #28a745;           /* Verde para botón Ver */
             --folder-color: #f39c12;        /* Naranja para botón Carpeta */
             --drive-color: #34a853;         /* Verde oficial Drive */
             --danger-color: #dc3545;        /* Rojo para borrar/cerrar */
-            --gad-gold: #f1c40f;            /* Dorado para destacados */
-            --info-blue: #0dcaf0;           /* Azul para modificados */
             
-            --text-muted: #6c757d;          /* Texto secundario */
+            /* Indicadores de Estado */
+            --gad-gold: #f1c40f;            /* Dorado (Nuevos) */
+            --info-blue: #0dcaf0;           /* Azul (Modificados) */
             
-            /* Sombras para efecto de profundidad */
+            /* Sombras (Efecto 3D) */
             --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
         }
 
         /* Reset básico */
@@ -61,7 +68,7 @@
         }
 
         /* ==========================================
-           CABECERA (HEADER)
+           2. CABECERA (HEADER PREMIUM)
         ========================================== */
         header {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
@@ -109,7 +116,7 @@
             align-items: center; 
         }
         
-        /* LOGO */
+        /* LOGO CON EFECTO ZOOM */
         .logo { 
             height: 95px; 
             width: auto; 
@@ -133,7 +140,7 @@
         }
 
         /* ==========================================
-           PANEL DE ESTADÍSTICAS (MEJORADO)
+           3. PANEL DE ESTADÍSTICAS (NUEVO DISEÑO)
         ========================================== */
         .stats-wrapper { 
             display: flex; 
@@ -154,7 +161,7 @@
             justify-content: center;
         }
 
-        /* Línea separadora */
+        /* Línea separadora blanca */
         .stat-box.divider-right::after {
             content: ''; 
             position: absolute; 
@@ -182,30 +189,32 @@
             text-align: right;
         }
 
-        /* NUEVO: ESTILOS PARA EL DESGLOSE DE ACTIVIDAD */
+        /* NUEVO: REJILLA DE ACTIVIDAD (ICONOS) */
         .activity-grid {
             display: flex;
-            gap: 12px;
+            gap: 15px; /* Espacio entre los contadores */
             align-items: center;
         }
 
         .act-item {
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 700;
+            gap: 5px;
+            font-size: 15px;
+            font-weight: 800;
             color: white;
-            opacity: 0.9;
+            opacity: 1;
         }
 
-        .act-item i { font-size: 12px; }
-        .act-item.new { color: var(--gad-gold); text-shadow: 0 0 5px rgba(241, 196, 15, 0.4); }
-        .act-item.mod { color: var(--info-blue); text-shadow: 0 0 5px rgba(13, 202, 240, 0.4); }
-        .act-item.del { color: #ff6b6b; text-shadow: 0 0 5px rgba(255, 107, 107, 0.4); }
-        .act-item.none { color: rgba(255,255,255,0.6); font-weight: 400; font-size: 12px;}
+        .act-item i { font-size: 13px; }
+        
+        /* Colores específicos para cada acción */
+        .act-item.new { color: var(--gad-gold); text-shadow: 0 0 10px rgba(241, 196, 15, 0.4); }
+        .act-item.mod { color: var(--info-blue); text-shadow: 0 0 10px rgba(13, 202, 240, 0.4); }
+        .act-item.del { color: #ff6b6b; text-shadow: 0 0 10px rgba(255, 107, 107, 0.4); }
+        .act-item.none { color: rgba(255,255,255,0.7); font-weight: 400; font-size: 12px; }
 
-        /* Badges y Botones Header */
+        /* Badge de Fecha */
         .last-update-badge {
             display: inline-flex; 
             align-items: center; 
@@ -218,6 +227,7 @@
             font-weight: 400;
         }
 
+        /* Botón Manual Ayuda */
         .btn-help-premium {
             background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
             border: 1px solid rgba(255, 255, 255, 0.6);
@@ -242,7 +252,7 @@
         }
 
         /* ==========================================
-           CONTROLES Y BUSCADOR
+           4. CONTROLES Y BUSCADOR
         ========================================== */
         .controls-container { 
             background: white; 
@@ -298,6 +308,7 @@
             color: var(--primary-color); 
         }
 
+        /* Botón Limpiar */
         .btn-clear {
             background-color: var(--danger-color); 
             color: white; 
@@ -325,7 +336,7 @@
             transform: translateY(0); 
         }
 
-        /* FILTROS */
+        /* Chips de Filtros */
         .filters-chips { 
             display: flex; 
             justify-content: center; 
@@ -365,7 +376,7 @@
         .divider { width: 1px; background: #ddd; margin: 0 10px; height: 32px; }
 
         /* ==========================================
-           GRID RESULTADOS (4 Columnas)
+           5. GRID RESULTADOS (4 Columnas)
         ========================================== */
         .results-container { 
             flex: 1; 
@@ -483,7 +494,8 @@
         }
 
         /* ==========================================
-           MODAL AYUDA
+           6. MODAL AYUDA EXTENSA (PARA DUMMIES)
+           Recuperada y Mejorada
         ========================================== */
         .modal-overlay {
             display: none; 
@@ -504,7 +516,7 @@
             background: white; 
             padding: 0; 
             border-radius: 16px;
-            max-width: 650px; 
+            max-width: 750px; /* Un poco más ancho para leer mejor */
             width: 100%; 
             position: relative;
             max-height: 85vh; 
@@ -534,40 +546,221 @@
             gap: 12px; 
         }
         
-        .help-body { padding: 30px; color: #444; overflow-y: auto; flex: 1; line-height: 1.6; }
-        .btn-close-help { cursor: pointer; font-size: 24px; color: white; opacity: 0.8; background: none; border: none; }
-        .help-section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 25px; }
-        .help-section:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
-        .help-title { font-weight: 800; color: var(--primary-color); margin-bottom: 12px; display: flex; align-items: center; gap: 12px; font-size: 17px; text-transform: uppercase; }
+        .help-body { 
+            padding: 30px; 
+            color: #444; 
+            overflow-y: auto; 
+            flex: 1; 
+            line-height: 1.6; 
+        }
+        
+        .btn-close-help { 
+            cursor: pointer; 
+            font-size: 24px; 
+            color: white; 
+            opacity: 0.8; 
+            background: none; 
+            border: none; 
+            transition: opacity 0.2s; 
+        }
+        .btn-close-help:hover { opacity: 1; }
+        
+        .help-section { 
+            margin-bottom: 30px; 
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 25px; 
+        }
+        .help-section:last-child { 
+            border: none; 
+            margin-bottom: 0; 
+            padding-bottom: 0; 
+        }
+        
+        .help-title { 
+            font-weight: 800; 
+            color: var(--primary-color); 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-size: 17px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        
         .help-text { font-size: 15px; color: #555; margin-bottom: 15px; }
-        .help-subtext { font-size: 14px; color: #777; margin-left: 20px; margin-bottom: 8px; display: list-item; list-style-type: disc; }
-        .help-tip { background: #fff9db; border-left: 5px solid var(--gad-gold); padding: 15px 20px; margin: 15px 0; font-size: 14px; color: #555; border-radius: 0 8px 8px 0; }
-        .btn-modal-ok { background-color: var(--primary-color); color: white; border: none; padding: 20px 0; width: 100%; font-size: 16px; font-weight: 700; cursor: pointer; flex-shrink: 0; letter-spacing: 1px; }
+        
+        .help-subtext { 
+            font-size: 14px; 
+            color: #777; 
+            margin-left: 20px; 
+            margin-bottom: 8px; 
+            display: list-item; 
+            list-style-type: disc; 
+        }
+        
+        .help-tip { 
+            background: #fff9db; 
+            border-left: 5px solid var(--gad-gold); 
+            padding: 15px 20px; 
+            margin: 15px 0; 
+            font-size: 14px; 
+            color: #555; 
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .btn-modal-ok { 
+            background-color: var(--primary-color); 
+            color: white; 
+            border: none; 
+            padding: 20px 0; 
+            width: 100%; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            flex-shrink: 0; 
+            letter-spacing: 1px;
+            transition: background 0.2s;
+        }
+        .btn-modal-ok:hover { background-color: var(--primary-dark); }
 
         /* ==========================================
-           VISOR
+           7. VISOR (DISEÑO DOBLE BOTÓN)
         ========================================== */
-        #modalVisor { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 5000; flex-direction: column; }
-        #modalVisor.active { display: flex; animation: fadeIn 0.2s; }
-        .viewer-top { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; z-index: 5002; pointer-events: none; }
-        .viewer-left-group { display: flex; align-items: center; gap: 15px; pointer-events: auto; max-width: 60%; }
-        .btn-close-viewer { background: var(--danger-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); flex-shrink: 0; transition: transform 0.2s; font-size: 20px; }
-        .btn-close-viewer:hover { transform: scale(1.1); }
-        .viewer-title { color: white; font-size: 15px; font-weight: bold; text-shadow: 0 2px 4px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.3); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .viewer-actions { display: flex; gap: 12px; pointer-events: auto; align-items: center; }
-        .btn-folder-drive { background: var(--folder-color); color: white; border: none; height: 40px; padding: 0 20px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-transform: uppercase; text-decoration: none; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-folder-drive:hover { background: #d35400; transform: translateY(-2px); }
-        .btn-file-drive { background: var(--drive-color); color: white; border: none; height: 40px; padding: 0 20px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-decoration: none; transition: transform 0.2s; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2); }
-        .btn-file-drive:hover { transform: translateY(-2px); background-color: #2d9246; }
+        #modalVisor {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; height: 100vh;
+            background: #000; 
+            z-index: 5000; 
+            flex-direction: column;
+        }
+        
+        #modalVisor.active { 
+            display: flex; 
+            animation: fadeIn 0.2s; 
+        }
+        
+        .viewer-top {
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; 
+            height: 70px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 25px; 
+            z-index: 5002; 
+            pointer-events: none;
+        }
+
+        /* GRUPO IZQUIERDO: CERRAR + TÍTULO */
+        .viewer-left-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            pointer-events: auto;
+            max-width: 60%;
+        }
+
+        .btn-close-viewer { 
+            background: var(--danger-color); 
+            color: white; 
+            border: none; 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            flex-shrink: 0; 
+            transition: transform 0.2s;
+            font-size: 20px;
+        }
+        .btn-close-viewer:hover { 
+            transform: scale(1.1); 
+        }
+
+        .viewer-title { 
+            color: white; 
+            font-size: 15px; 
+            font-weight: bold; 
+            text-shadow: 0 2px 4px #000; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            background: rgba(0,0,0,0.3); 
+            padding: 6px 15px; 
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* GRUPO DERECHO: ACCIONES */
+        .viewer-actions {
+            display: flex; 
+            gap: 12px; 
+            pointer-events: auto; 
+            align-items: center;
+        }
+
+        .btn-folder-drive {
+            background: var(--folder-color); 
+            color: white; 
+            border: none;
+            height: 40px; 
+            padding: 0 20px; 
+            border-radius: 25px;
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 700;
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            text-transform: uppercase;
+            text-decoration: none; 
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-folder-drive:hover { 
+            background: #d35400; 
+            transform: translateY(-2px); 
+        }
+
+        .btn-file-drive {
+            background: var(--drive-color); 
+            color: white; 
+            border: none;
+            height: 40px; 
+            padding: 0 20px; 
+            border-radius: 25px;
+            cursor: pointer; 
+            font-size: 13px;
+            font-weight: 700;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            text-decoration: none;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-file-drive:hover { 
+            transform: translateY(-2px); 
+            background-color: #2d9246;
+        }
+
         .iframe-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
         #visor-iframe { width: 100%; height: 100%; border: none; display: block; }
         .nav-overlay { position: absolute; top: 50%; width: 100%; transform: translateY(-50%); display: flex; justify-content: space-between; padding: 0 25px; pointer-events: none; z-index: 5001; }
         .nav-btn { pointer-events: auto; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); color: white; width: 60px; height: 60px; border-radius: 50%; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .nav-btn:hover { background: rgba(241, 196, 15, 0.9); color: black; transform: scale(1.1); }
         #visor-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 18px; background: rgba(0,0,0,0.8); padding: 20px 40px; border-radius: 40px; z-index: 5000; display: flex; gap: 15px; align-items: center; font-weight: 500; }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         @media screen and (max-width: 768px) {
             header { padding: 15px 20px; flex-direction: column; align-items: stretch; gap: 15px; }
@@ -645,20 +838,44 @@
                 <h2><i class="fa-solid fa-circle-info"></i> Manual de Operador GAD</h2>
                 <button class="btn-close-help" onclick="toggleModalAyuda(false)">✕</button>
             </div>
+            
             <div class="help-body">
                 <div class="help-section">
                     <div class="help-title"><i class="fa-solid fa-magnifying-glass"></i> 1. ¿Cómo busco un documento?</div>
-                    <p class="help-text">Escribe en la barra blanca. Puedes buscar por país, tipo de documento o nombre.</p>
+                    <p class="help-text">El buscador inteligente te permite encontrar cualquier archivo en segundos. Solo tienes que escribir en la barra blanca central.</p>
+                    <span class="help-subtext">Puedes escribir el <b>País</b> (Ej: "Rumania" o "Marruecos").</span>
+                    <span class="help-subtext">Puedes escribir el <b>Tipo de Documento</b> (Ej: "DNI", "Pasaporte", "Permiso").</span>
+                    <span class="help-subtext">O combinar ambos para mayor precisión: <b>"Rumania DNI"</b>.</span>
+                    <div class="help-tip">
+                        <b>Truco Pro:</b> No hace falta que pongas tildes ni mayúsculas. El sistema te entenderá igual si escribes "belgica" o "Bélgica".
+                    </div>
                 </div>
+
                 <div class="help-section">
-                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 2. Estadísticas</div>
-                    <p class="help-text">Ahora puedes ver el detalle exacto de lo ocurrido en las últimas 24h:</p>
-                    <span class="help-subtext"><b style="color:#f1c40f"><i class="fa-solid fa-circle-plus"></i> Nuevos:</b> Documentos añadidos hoy.</span>
-                    <span class="help-subtext"><b style="color:#0dcaf0"><i class="fa-solid fa-pen"></i> Modificados:</b> Archivos editados.</span>
-                    <span class="help-subtext"><b style="color:#ff6b6b"><i class="fa-solid fa-trash"></i> Eliminados:</b> Documentos borrados.</span>
+                    <div class="help-title"><i class="fa-solid fa-eye" style="color:var(--eye-color)"></i> 2. ¿Cómo veo el documento?</div>
+                    <p class="help-text">Cuando encuentres la ficha que buscas en la lista, pulsa el <b>icono del OJO VERDE</b> situado a la derecha de la tarjeta.</p>
+                    <p class="help-text">Se abrirá el Visor en pantalla completa. Aquí tienes dos opciones importantes arriba a la derecha:</p>
+                    <ul style="margin-left: 20px; color: #555; margin-bottom: 15px; list-style: none;">
+                        <li style="margin-bottom: 8px;"><span style="color:#f39c12; font-weight:bold; background:#fff3cd; padding:2px 8px; border-radius:4px;">BOTÓN NARANJA</span> <b>Ver Carpeta:</b> Te lleva directamente a la carpeta de Google Drive donde está guardado este archivo y sus compañeros.</li>
+                        <li><span style="color:#34a853; font-weight:bold; background:#d1e7dd; padding:2px 8px; border-radius:4px;">BOTÓN VERDE</span> <b>Ver Archivo:</b> Abre la imagen original en alta calidad en una pestaña nueva.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-solid fa-chart-line"></i> 3. ¿Qué significan los iconos de arriba?</div>
+                    <p class="help-text">En la cabecera verás un panel de actividad que te informa de lo que ha pasado en las últimas 24 horas:</p>
+                    <span class="help-subtext"><b style="color:#f1c40f"><i class="fa-solid fa-circle-plus"></i> NUEVOS (Dorado):</b> Indica cuántos documentos se han añadido al sistema hoy.</span>
+                    <span class="help-subtext"><b style="color:#0dcaf0"><i class="fa-solid fa-pen"></i> MODIFICADOS (Azul):</b> Indica cuántos documentos han cambiado de nombre o se han actualizado.</span>
+                    <span class="help-subtext"><b style="color:#ff6b6b"><i class="fa-solid fa-trash"></i> ELIMINADOS (Rojo):</b> Indica cuántos documentos se han borrado de la base de datos.</span>
+                </div>
+
+                <div class="help-section">
+                    <div class="help-title"><i class="fa-regular fa-clock"></i> 4. Actualización Automática</div>
+                    <p class="help-text">El sistema se sincroniza automáticamente cada noche a las 02:00 AM. La fecha de la última actualización aparece siempre arriba a la derecha.</p>
                 </div>
             </div>
-            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">¡ENTENDIDO!</button>
+
+            <button class="btn-modal-ok" onclick="toggleModalAyuda(false)">¡ENTENDIDO! CERRAR MANUAL</button>
         </div>
     </div>
 
@@ -714,45 +931,36 @@
             // FECHA ACTUALIZACIÓN
             document.querySelector('#fecha-actualizacion span').innerText = `Actualizado: ${stats.UltimaActualizacion || '--'}`;
             
-            // ACTIVIDAD DETALLADA (NUEVA LÓGICA)
+            // ACTIVIDAD DETALLADA
             const boxDetalle = document.getElementById('activity-details');
-            boxDetalle.innerHTML = ''; // Limpiar previo
+            boxDetalle.innerHTML = ''; 
 
-            // Leemos los valores del Script V8 (Si no existen, asumimos 0)
-            const nuevos = stats.NuevosDetectados || 0; // El script usa 'NuevosDetectados' en el JSON payload (revisado) o 'Variacion'
-            
-            // NOTA: Para que esto funcione al 100%, el script debe enviar las claves: Nuevos, Modificados, Borrados.
-            // Como el script actual manda 'Variacion' y 'NuevosDetectados', adaptamos la lógica para mostrar lo que hay
-            // y preparamos el HTML para cuando el script mande el desglose completo.
-            
-            // Simulamos lectura inteligente:
-            // Si el script manda el desglose completo (ideal):
             let html = '';
             let huboCambios = false;
 
             // 1. NUEVOS
-            if(stats.Nuevos && stats.Nuevos > 0) {
-                html += `<span class="act-item new"><i class="fa-solid fa-circle-plus"></i> ${stats.Nuevos}</span>`;
-                huboCambios = true;
-            } else if (stats.NuevosDetectados && stats.NuevosDetectados > 0) {
-                // Soporte retrocompatible con versiones anteriores del script
-                html += `<span class="act-item new"><i class="fa-solid fa-circle-plus"></i> ${stats.NuevosDetectados}</span>`;
+            // Soporte para ambos nombres de variable por si acaso
+            let numNuevos = stats.Nuevos || stats.NuevosDetectados || 0;
+            if(numNuevos > 0) {
+                html += `<span class="act-item new"><i class="fa-solid fa-circle-plus"></i> ${numNuevos}</span>`;
                 huboCambios = true;
             }
 
             // 2. MODIFICADOS
-            if(stats.Modificados && stats.Modificados > 0) {
-                html += `<span class="act-item mod"><i class="fa-solid fa-pen"></i> ${stats.Modificados}</span>`;
+            let numMod = stats.Modificados || stats.Actualizados || 0;
+            if(numMod > 0) {
+                html += `<span class="act-item mod"><i class="fa-solid fa-pen"></i> ${numMod}</span>`;
                 huboCambios = true;
             }
 
             // 3. ELIMINADOS
-            if(stats.Eliminados && stats.Eliminados > 0) {
-                html += `<span class="act-item del"><i class="fa-solid fa-trash"></i> ${stats.Eliminados}</span>`;
+            let numDel = stats.Eliminados || stats.Borrados || 0;
+            if(numDel > 0) {
+                html += `<span class="act-item del"><i class="fa-solid fa-trash"></i> ${numDel}</span>`;
                 huboCambios = true;
             }
 
-            // Si no hay nada, mostramos "Sin Cambios"
+            // Si no hay nada
             if(!huboCambios) {
                 html = `<span class="act-item none"><i class="fa-solid fa-check"></i> Sin cambios</span>`;
             }
@@ -888,16 +1096,6 @@
         function entrarFullscreen() { const e = document.documentElement; if (e.requestFullscreen) e.requestFullscreen().catch(()=>{}); }
         function salirFullscreen() { if (document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }
         document.addEventListener('keydown', e => { if(modalVisor.classList.contains('active')) { if(e.key==="ArrowLeft")cambiarDoc(-1); if(e.key==="ArrowRight")cambiarDoc(1); if(e.key==="Escape")cerrarVisor(); } });
-    </script>
-    
-    <script>
-        // PEQUEÑA ADAPTACIÓN PARA QUE EL HTML LEA EL FORMATO EXACTO QUE MANDA TU SCRIPT
-        // Tu script V8 manda un JSON que seguro tiene Variacion o NuevosDetectados.
-        // Si quieres que el desglose sea perfecto, asegúrate de que el Script V8 (función subirInformeEstadisticas)
-        // mande este payload: 
-        // payload: { TotalDocumentos: X, Nuevos: X, Modificados: Y, Eliminados: Z, ... }
-        // Si no lo manda así, el HTML mostrará "Sin Cambios" o solo los nuevos si usa el campo antiguo.
-        // Pero el HTML YA ESTÁ LISTO para recibirlo cuando quieras.
     </script>
 </body>
 </html>
