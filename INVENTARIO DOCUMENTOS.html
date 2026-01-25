@@ -189,7 +189,7 @@
             text-align: right;
         }
 
-        /* NUEVO: REJILLA DE ACTIVIDAD (ICONOS) */
+        /* NUEVO: REJILLA DE ACTIVIDAD (ICONOS DETALLADOS) */
         .activity-grid {
             display: flex;
             gap: 15px; /* Espacio entre los contadores */
@@ -494,8 +494,7 @@
         }
 
         /* ==========================================
-           6. MODAL AYUDA EXTENSA (PARA DUMMIES)
-           Recuperada y Mejorada
+           6. MODAL AYUDA EXTENSA (COMPLETA)
         ========================================== */
         .modal-overlay {
             display: none; 
@@ -738,7 +737,7 @@
             padding: 0 20px; 
             border-radius: 25px;
             cursor: pointer; 
-            font-size: 13px;
+            font-size: 13px; 
             font-weight: 700;
             display: flex; 
             align-items: center; 
@@ -762,13 +761,32 @@
         .nav-btn:hover { background: rgba(241, 196, 15, 0.9); color: black; transform: scale(1.1); }
         #visor-loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 18px; background: rgba(0,0,0,0.8); padding: 20px 40px; border-radius: 40px; z-index: 5000; display: flex; gap: 15px; align-items: center; font-weight: 500; }
 
+        /* MÓVIL (RESPONSIVE) - CORRECCIÓN DE BÚSQUEDA AÑADIDA AQUÍ */
         @media screen and (max-width: 768px) {
             header { padding: 15px 20px; flex-direction: column; align-items: stretch; gap: 15px; }
             .header-left, .header-center, .header-right { width: 100%; text-align: center; }
             .header-center { order: 1; } .logo { height: 75px; } .header-left { order: 2; } .header-right { order: 3; align-items: center; }
+            
             .stats-wrapper { width: 100%; justify-content: space-around; padding: 12px; }
             .stat-box.divider-right::after { display: none; }
+            
+            /* --- CORRECCIÓN DE BÚSQUEDA MÓVIL (Nueva Lógica) --- */
+            .controls-container { padding: 20px; }
+            .search-wrapper { 
+                flex-direction: column; /* Apilar elementos verticalmente */
+                gap: 15px; 
+            }
+            .search-input-container { width: 100%; } /* Barra ocupa todo */
+            .btn-clear { width: 100%; } /* Botón ocupa todo */
+            /* ---------------------------------------------------- */
+            
             .btn-folder-drive span, .btn-file-drive span { display: none; } 
+            .grid { grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); } 
+            .viewer-top { padding: 0 10px; height: 60px; }
+            .viewer-left-group { max-width: 50%; gap: 10px; }
+            .viewer-title { font-size: 13px; padding: 4px 10px; }
+            .btn-close-viewer { width: 36px; height: 36px; }
+            .btn-folder-drive, .btn-file-drive { padding: 0 12px; height: 36px; }
         }
     </style>
 </head>
@@ -939,7 +957,6 @@
             let huboCambios = false;
 
             // 1. NUEVOS
-            // Soporte para ambos nombres de variable por si acaso
             let numNuevos = stats.Nuevos || stats.NuevosDetectados || 0;
             if(numNuevos > 0) {
                 html += `<span class="act-item new"><i class="fa-solid fa-circle-plus"></i> ${numNuevos}</span>`;
